@@ -697,17 +697,10 @@ window.renderFrame = (f) => {
   }
 
   // --- caption band ---
-  const cap = captionAt(f);
-  capBand.visible = cap.alpha > 0.01;
-  if (capBand.visible) {
-    drawCaption(cap.lines);
-    capBand.material.opacity = cap.alpha;
-    _v.set(...cam.look).sub(camera.position).normalize();
-    capBand.position.copy(camera.position).addScaledVector(_v, 17); capBand.position.y += -5.6;
-    capBand.lookAt(camera.position);
-    const bw = 2 * 17 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2) * (1080 / 1920) * 0.98;
-    capBand.scale.set(bw / 10.4, bw / 10.4, 1);
-  }
+  // CAPTIONS OFF (user request 2026-11-11 "Caption htao video se"): bottom Devanagari
+  // caption band disabled. Caption data (CAPTIONS in story.js) and drawCaption()
+  // are kept intact for reference; only the rendering is switched off.
+  capBand.visible = false;
 
   // --- FX updates ---
   clouds.update(t, dt);
