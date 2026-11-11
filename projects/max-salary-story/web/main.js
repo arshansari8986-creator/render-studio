@@ -684,17 +684,10 @@ window.renderFrame = (f) => {
   maxCard.mesh.material.color.setRGB(cardTint, cardTint * 0.985, cardTint * 0.96);
 
   // --- hero board ---
-  const hb = heroAt(f);
-  hero.visible = !!hb && hb.alpha > 0.01;
-  if (hero.visible) {
-    drawHero(hb.lines);
-    hero.material.opacity = hb.alpha;
-    _v.set(...cam.look).sub(camera.position).normalize();
-    hero.position.copy(camera.position).addScaledVector(_v, 17); hero.position.y += 4.0;
-    hero.lookAt(camera.position);
-    const bw = 2 * 17 * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2) * (1080 / 1920) * 0.94;
-    hero.scale.set(bw / 11, bw / 11, 1);
-  }
+  // HERO BOARDS OFF (user request 2026-11-11 "Upper wala caption bhi hatao"): big
+  // top hero boards disabled. Hero data (heroAt in story.js) and drawHero()
+  // are kept intact for reference; only the rendering is switched off.
+  hero.visible = false;
 
   // --- caption band ---
   // CAPTIONS OFF (user request 2026-11-11 "Caption htao video se"): bottom Devanagari
