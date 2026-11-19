@@ -70,7 +70,7 @@ jobs:
           WEB: ${{ github.workspace }}/projects/${{ needs.plan.outputs.project }}/web
         run: |
           mkdir -p frames_out
-          time node engine/render.mjs frames_out "${{ matrix.start }}-${{ matrix.end }}"
+          time node engine/render.mjs frames_out "${{ matrix.start }}-${{ matrix.end }}" 1 1.0
           echo "frames rendered: $(ls frames_out | wc -l)"
       - uses: actions/upload-artifact@v4
         with:
