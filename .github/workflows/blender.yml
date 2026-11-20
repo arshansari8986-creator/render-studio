@@ -1,0 +1,96 @@
+name: Blender Render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'blender.json'
+      - '.github/workflows/blender.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: city1, script: scene_city.py, args: "anim_eevee 1 28"}
+          - {name: city2, script: scene_city.py, args: "anim_eevee 29 56"}
+          - {name: city3, script: scene_city.py, args: "anim_eevee 57 84"}
+          - {name: shop1, script: scenes23.py, args: "shop anim 1 23"}
+          - {name: shop2, script: scenes23.py, args: "shop anim 24 46"}
+          - {name: shop3, script: scenes23.py, args: "shop anim 47 69"}
+          - {name: shop4, script: scenes23.py, args: "shop anim 70 91"}
+          - {name: phone1, script: scenes23.py, args: "phone anim 1 22"}
+          - {name: phone2, script: scenes23.py, args: "phone anim 23 44"}
+          - {name: phone3, script: scenes23.py, args: "phone anim 45 65"}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libegl1 libgl1 libglx0 libxi6 libxkbcommon0 libxrender1 libxrandr2 fonts-dejavu-core > /dev/null
+      - name: Download Blender 4.2
+        run: |
+          curl -sL -o blender.tar.xz https://download.blender.org/release/Blender4.2/blender-4.2.0-linux-x64.tar.xz
+          tar -xf blender.tar.xz
+          ls blender-4.2.0-linux-x64/blender
+      - name: Render chunk ${{ matrix.name }}
+        working-directory: projects/gta6-blender-test2/blender
+        run: |
+          mkdir -p frames
+          xvfb-run -a $GITHUB_WORKSPACE/blender-4.2.0-linux-x64/blender -b -P ${{ matrix.script }} -- ${{ matrix.args }}
+          ls frames/ | wc -l
+      - name: Upload frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: frames-${{ matrix.name }}
+          path: projects/gta6-blender-test2/blender/frames/*.png
+          if-no-files-found: error
+
+  finish:
+    needs: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Assemble sequence and encode
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+          python3 - <<'PYEOF'
+          import os, shutil, glob, base64
+          os.makedirs('seq', exist_ok=True)
+          def find(pat):
+              hits = glob.glob(f'artifacts/**/{pat}', recursive=True)
+              assert hits, pat
+              return hits[0]
+          for i in range(1, 85):
+              shutil.copy(find(f'f_{i:04d}.png'), f'seq/{i:04d}.png')
+          for i in range(1, 92):
+              shutil.copy(find(f'shop_{i:04d}.png'), f'seq/{84 + i:04d}.png')
+          for i in range(1, 66):
+              shutil.copy(find(f'phone_{i:04d}.png'), f'seq/{175 + i:04d}.png')
+          assert len(os.listdir('seq')) == 240, len(os.listdir('seq'))
+          raw = open('projects/gta6-blender-test2/blender/voice_10s.wav.b64').read()
+          open('voice_10s.wav', 'wb').write(base64.b64decode(raw))
+          print('assembled 240 frames + voice')
+          PYEOF
+          ffmpeg -y -v error -framerate 24 -i seq/%04d.png -i voice_10s.wav -c:v libx264 -pix_fmt yuv420p -crf 17 -preset medium -c:a aac -b:a 160k -shortest GTA6-Blender-GitHub-Test.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 GTA6-Blender-GitHub-Test.mp4
+      - name: Publish release with the video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="blender-gta6-blender-test2-${{ github.run_number }}"
+          gh release create "$TAG" GTA6-Blender-GitHub-Test.mp4 \
+            --title "Blender render gta6-blender-test2 run ${{ github.run_number }}" \
+            --notes "Blender 4.2 Eevee render on GitHub Actions (10 parallel chunks, 240 frames)"
