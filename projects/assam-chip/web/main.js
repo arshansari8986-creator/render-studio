@@ -647,7 +647,8 @@ shot(1425, 1486, 0.26, { cx: 1080, cy: 1560, s: 0.7 }, { cx: 1080, cy: 1520, s: 
   });
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(255,170,60,0.07)'; ctx.fillRect(0, 0, W, H);
 }, []);
-// ===== A12c (1360–1425) S12c — hero close-up: muskurahat ke saath aakhri baat =====Promise.all([fontReady, document.fonts.ready]).then(() => { window.ready = true; });
+// ===== A12c (1360–1425) S12c — hero close-up: muskurahat ke saath aakhri baat =====
+Promise.all([fontReady, document.fonts.ready]).then(() => { window.ready = true; });
 
 // ---------------- render harness ----------------
 function renderFrame(f) {
