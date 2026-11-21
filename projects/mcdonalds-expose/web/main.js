@@ -5,7 +5,7 @@ import { DEVANAGARI_BOLD_B64 } from './fonts.js';
 import * as D from './draw.js';
 import { ENV } from './envelope.js';
 
-const W = 1080, H = 1920, TOTAL = 1487, FPS = 30;
+const W = 1080, H = 1920, TOTAL = 1532, FPS = 30;
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const DEV_FONT = '"Noto Sans Devanagari"';
@@ -653,7 +653,7 @@ function hisaabBg(gy) {
    ===================================================================== */
 
 // ===== M1a (0–50) S1 — dukaan kholne gaya: chamakta storefront, hero khush =====
-shot(0, 49, 0.26, { cx: 1080, cy: 1580, s: 0.66 }, { cx: 1080, cy: 1520, s: 0.75 }, (f, u) => {
+shot(0, 47, 0.26, { cx: 1080, cy: 1580, s: 0.66 }, { cx: 1080, cy: 1520, s: 0.75 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(0.8, () => mcdStore(1160, GY, 1180, false, 0.7));
   layer(1, () => {
@@ -662,7 +662,7 @@ shot(0, 49, 0.26, { cx: 1080, cy: 1580, s: 0.66 }, { cx: 1080, cy: 1520, s: 0.75
   });
 }, [14]);
 // ===== M1b (50–91) S1b — "wo mana kar denge?" hero puzzled, sawal ka nishan =====
-shot(49, 89, 0.28, { cx: 1120, cy: 1700, s: 1.02 }, { cx: 1120, cy: 1660, s: 1.14 }, (f, u) => {
+shot(47, 86, 0.28, { cx: 1120, cy: 1700, s: 1.02 }, { cx: 1120, cy: 1660, s: 1.14 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(0.8, () => mcdStore(1330, GY, 1050, false, 0.4));
   layer(1, () => {
@@ -671,22 +671,22 @@ shot(49, 89, 0.28, { cx: 1120, cy: 1700, s: 1.02 }, { cx: 1120, cy: 1660, s: 1.1
   });
 }, []);
 // ===== M2 (91–128) S2 — close-up: "Nahi, khushi se denge" =====
-shot(89, 134, 0.26, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.58 }, (f, u) => {
+shot(86, 131, 0.26, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.58 }, (f, u) => {
   layer(0.5, () => { streetBg(GY); mcdStore(1250, GY, 1150, false, 0.5); });
   layer(1, () => {
     heroFig(1080, GY, 2.35, { expr: 'happy', seed: 5, speak: true, armR: 'up' }, f);
   });
 }, []);
 // ===== M3a (128–183) S3 — dukaanon ki lambi line, board 45,000 =====
-shot(134, 191, 0.28, { cx: 1080, cy: 1520, s: 0.56 }, { cx: 1080, cy: 1490, s: 0.64 }, (f, u) => {
+shot(131, 193, 0.28, { cx: 1080, cy: 1520, s: 0.56 }, { cx: 1080, cy: 1490, s: 0.64 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(1, () => {
     for (let i = 0; i < 7; i++) miniMcd(-60 + i * 385, GY, 0.98, i === 5);
-    if (f > 146) { const p = spring((f - 146) / 11); boardSign(1080, 1020, 660, 142, [['45,000 DUKAAN', 66, '#7a4d12']], p); }
+    if (f > 144) { const p = spring((f - 144) / 11); boardSign(1080, 1020, 660, 142, [['45,000 DUKAAN', 66, '#7a4d12']], p); }
   });
-}, [146]);
+}, [144]);
 // ===== M3b (183–238) S3b — dukaanon ke saamne chalta hero (track shot) =====
-shot(191, 248, 0.28, { cx: 920, cy: 1620, s: 0.85 }, { cx: 1240, cy: 1600, s: 0.9 }, (f, u) => {
+shot(193, 256, 0.28, { cx: 920, cy: 1620, s: 0.85 }, { cx: 1240, cy: 1600, s: 0.9 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(0.85, () => { miniMcd(420, GY, 1.5); miniMcd(1080, GY, 1.5); miniMcd(1740, GY, 1.5); });
   layer(1, () => {
@@ -694,8 +694,8 @@ shot(191, 248, 0.28, { cx: 920, cy: 1620, s: 0.85 }, { cx: 1240, cy: 1600, s: 0.
   });
 }, []);
 // ===== M3c (238–274) S3c/S4-beat — board pop "95% UNKI NAHI HAIN" + shocked morph =====
-shot(248, 285, 0.3, { cx: 1080, cy: 1680, s: 1.0 }, { cx: 1080, cy: 1640, s: 1.15 }, (f, u) => {
-  const lf = f - 248;
+shot(256, 296, 0.3, { cx: 1080, cy: 1680, s: 1.0 }, { cx: 1080, cy: 1640, s: 1.15 }, (f, u) => {
+  const lf = f - 256;
   layer(0.5, () => streetBg(GY));
   layer(0.85, () => mcdStore(1300, GY, 1000, false, 0.3));
   layer(1, () => {
@@ -703,9 +703,9 @@ shot(248, 285, 0.3, { cx: 1080, cy: 1680, s: 1.0 }, { cx: 1080, cy: 1640, s: 1.1
     heroFig(820, GY, 1.95, { expr: 'calm', seed: 5, speak: mu < 0.6, mix: { e2: 'shocked', u: mu }, sweat: mu > 0.5 }, f);
     if (lf > 6) { const p = spring((lf - 6) / 11); boardSign(1330, 1230, 600, 176, [['95% UNKI', 62, '#8a1f1f'], ['NAHI HAIN!', 62, '#8a1f1f']], p); }
   });
-}, [254]);
+}, [262]);
 // ===== M5a (274–330) S4 — close-up sawal: "Phir sawal ye hai..." =====
-shot(285, 344, 0.28, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.56 }, (f, u) => {
+shot(296, 355, 0.28, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.56 }, (f, u) => {
   layer(0.5, () => { streetBg(GY); });
   layer(1, () => {
     heroFig(1080, GY, 2.4, { expr: 'puzzled', seed: 5, speak: true, armR: 'scratch' }, f);
@@ -713,7 +713,7 @@ shot(285, 344, 0.28, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1
   });
 }, []);
 // ===== M5b (330–385) S4b — haath me burger: "khud burger beche bina..." =====
-shot(344, 401, 0.28, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1660, s: 1.16 }, (f, u) => {
+shot(355, 411, 0.28, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1660, s: 1.16 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(0.85, () => mcdStore(1300, GY, 1000, false, 0.35));
   layer(1, () => {
@@ -722,8 +722,8 @@ shot(344, 401, 0.28, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1660, s: 1
   });
 }, []);
 // ===== M5c (385–429) S4c — "sabse ameer khana company kaise bani?" sikke + hairani =====
-shot(401, 447, 0.3, { cx: 1080, cy: 1660, s: 1.0 }, { cx: 1080, cy: 1620, s: 1.12 }, (f, u) => {
-  const lf = f - 401;
+shot(411, 457, 0.3, { cx: 1080, cy: 1660, s: 1.0 }, { cx: 1080, cy: 1620, s: 1.12 }, (f, u) => {
+  const lf = f - 411;
   layer(0.5, () => streetBg(GY));
   layer(1, () => {
     const mu = lf < 18 ? 0 : Math.min(1, (lf - 18) / 12);
@@ -734,28 +734,28 @@ shot(401, 447, 0.3, { cx: 1080, cy: 1660, s: 1.0 }, { cx: 1080, cy: 1620, s: 1.1
   });
 }, []);
 // ===== M6a (429–484) S5 — log kehte hain: "ROYALTY!" =====
-shot(447, 511, 0.28, { cx: 1080, cy: 1600, s: 0.9 }, { cx: 1080, cy: 1570, s: 0.98 }, (f, u) => {
+shot(457, 526, 0.28, { cx: 1080, cy: 1600, s: 0.9 }, { cx: 1080, cy: 1570, s: 0.98 }, (f, u) => {
   layer(0.5, () => bazaarBg(GY));
   layer(1, () => {
     crowd(1080, GY, 6, 980, f, 3, false);
     heroFig(1080, GY + 30, 1.4, { expr: 'calm', seed: 5, armR: 'up' }, f);
-    const lf = f - 447;
+    const lf = f - 457;
     if (lf > 10) { const p = spring((lf - 10) / 11); boardSign(1080, 1060, 580, 132, [['"ROYALTY!"', 58, '#31517a']], p); }
   });
 }, []);
 // ===== M6b (484–548) S6 — board: ROYALTY ₹50,000 CRORE =====
-shot(511, 580, 0.3, { cx: 1080, cy: 1600, s: 0.95 }, { cx: 1080, cy: 1560, s: 1.06 }, (f, u) => {
-  const lf = f - 511;
+shot(526, 592, 0.3, { cx: 1080, cy: 1600, s: 0.95 }, { cx: 1080, cy: 1560, s: 1.06 }, (f, u) => {
+  const lf = f - 526;
   layer(0.5, () => hisaabBg(GY));
   layer(1, () => {
     coinStack(735, GY, 4); coinStack(1445, GY, 4);
     heroFig(1080, GY, 1.65, { expr: 'calm', seed: 5, speak: true, prop: 'notes' }, f);
     if (lf > 12) { const p = spring((lf - 12) / 11); boardSign(1080, 1120, 800, 178, [['ROYALTY', 56, '#31517a'], ['₹50,000 CRORE', 68, '#8a1f1f']], p); }
   });
-}, [524]);
+}, [538]);
 // ===== M7 (548–603) S7 — haath rok kar: "Lekin ye asli number nahi hai" (serious morph) =====
-shot(580, 620, 0.3, { cx: 1080, cy: 1780, s: 1.24 }, { cx: 1080, cy: 1740, s: 1.4 }, (f, u) => {
-  const lf = f - 580;
+shot(592, 640, 0.3, { cx: 1080, cy: 1780, s: 1.24 }, { cx: 1080, cy: 1740, s: 1.4 }, (f, u) => {
+  const lf = f - 592;
   layer(0.5, () => streetBg(GY));
   layer(1, () => {
     const mu = lf < 6 ? 0 : Math.min(1, (lf - 6) / 13);
@@ -763,18 +763,27 @@ shot(580, 620, 0.3, { cx: 1080, cy: 1780, s: 1.24 }, { cx: 1080, cy: 1740, s: 1.
   });
 }, []);
 // ===== M8a (603–668) S8 — BADA REVEAL: KIRAYA ₹88,000 CRORE (gold-on-dark, push-in + hit) =====
-shot(620, 707, 0.34, { cx: 1080, cy: 1560, s: 0.92 }, { cx: 1080, cy: 1460, s: 1.32 }, (f, u) => {
-  const lf = f - 620;
+shot(640, 700, 0.34, { cx: 1080, cy: 1560, s: 0.92 }, { cx: 1080, cy: 1500, s: 1.12 }, (f, u) => {
+  const lf = f - 640;
   layer(0.5, () => streetBg(GY, 'dark'));
   layer(1, () => {
     const mu = lf < 15 ? 0 : Math.min(1, (lf - 15) / 12);
     heroFig(1080, GY, 1.75, { expr: 'calm', seed: 5, speak: lf < 16, mix: { e2: 'shocked', u: mu }, sweat: mu > 0.4 }, f);
     if (lf > 15) { const p = spring((lf - 15) / 12); darkBoard(1080, 1140, 920, 264, [['KIRAYA', 74, '#ffd94d'], ['₹88,000 CRORE', 98, '#ffc72c']], p); }
   });
-}, [640]);
+}, [662]);
+shot(700, 735, 0.34, { cx: 1080, cy: 1500, s: 1.12 }, { cx: 1080, cy: 1460, s: 1.32 }, (f, u) => {
+  const lf = f - 640;
+  layer(0.5, () => streetBg(GY, 'dark'));
+  layer(1, () => {
+    const mu = lf < 15 ? 0 : Math.min(1, (lf - 15) / 12);
+    heroFig(1080, GY, 1.75, { expr: 'calm', seed: 5, speak: lf < 16, mix: { e2: 'shocked', u: mu }, sweat: mu > 0.4 }, f);
+    if (lf > 15) { const p = spring((lf - 15) / 12); darkBoard(1080, 1140, 920, 264, [['KIRAYA', 74, '#ffd94d'], ['₹88,000 CRORE', 98, '#ffc72c']], p); }
+  });
+}, []);
 // ===== M8b (668–713) S9 — "Royalty se bhi zyada!" chhota royalty vs bada kiraya =====
-shot(707, 780, 0.3, { cx: 1080, cy: 1620, s: 0.95 }, { cx: 1080, cy: 1590, s: 1.05 }, (f, u) => {
-  const lf = f - 707;
+shot(735, 789, 0.3, { cx: 1080, cy: 1620, s: 0.95 }, { cx: 1080, cy: 1590, s: 1.05 }, (f, u) => {
+  const lf = f - 735;
   layer(0.5, () => streetBg(GY, 'dark'));
   layer(1, () => {
     const mu = lf < 16 ? 0 : Math.min(1, (lf - 16) / 13);
@@ -784,8 +793,8 @@ shot(707, 780, 0.3, { cx: 1080, cy: 1620, s: 0.95 }, { cx: 1080, cy: 1590, s: 1.
   });
 }, []);
 // ===== M9a (713–758) S10 — FLASHBACK 1956: purani dukaan, faded mahaul =====
-shot(780, 831, 0.32, { cx: 1080, cy: 1580, s: 0.7 }, { cx: 1080, cy: 1540, s: 0.8 }, (f, u) => {
-  const lf = f - 780;
+shot(789, 841, 0.32, { cx: 1080, cy: 1580, s: 0.7 }, { cx: 1080, cy: 1540, s: 0.8 }, (f, u) => {
+  const lf = f - 789;
   layer(0.5, () => streetBg(GY, 'old'));
   layer(0.85, () => mcdStore(1180, GY, 980, true, 0));
   layer(1, () => {
@@ -795,8 +804,8 @@ shot(780, 831, 0.32, { cx: 1080, cy: 1580, s: 0.7 }, { cx: 1080, cy: 1540, s: 0.
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(196,150,80,0.15)'; ctx.fillRect(0, 0, W, H);
 }, []);
 // ===== M9b (758–795) S10b — "company doob rahi thi": udaas hero + girta graph =====
-shot(831, 873, 0.32, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1670, s: 1.15 }, (f, u) => {
-  const lf = f - 831;
+shot(841, 884, 0.32, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1670, s: 1.15 }, (f, u) => {
+  const lf = f - 841;
   layer(0.5, () => streetBg(GY, 'old'));
   layer(0.85, () => mcdStore(1330, GY, 900, true, 0));
   layer(1, () => {
@@ -809,8 +818,8 @@ shot(831, 873, 0.32, { cx: 1080, cy: 1700, s: 1.05 }, { cx: 1080, cy: 1670, s: 1
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(196,150,80,0.15)'; ctx.fillRect(0, 0, W, H);
 }, []);
 // ===== M10 (795–859) S11 — Sonneborn: "Burger chhodo, zameen kharido" + plot par board =====
-shot(873, 947, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1600, s: 1.08 }, (f, u) => {
-  const lf = f - 873;
+shot(884, 963, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1600, s: 1.08 }, (f, u) => {
+  const lf = f - 884;
   layer(0.5, () => streetBg(GY, 'old'));
   layer(1, () => {
     plotDraw(1330, GY, 640);
@@ -821,21 +830,21 @@ shot(873, 947, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1600, s: 1.
     if (lf > 31) { const p = spring((lf - 31) / 11); boardSign(1330, GY - 430, 440, 112, [["McDONALD'S", 46, '#8a1f1f']], p); }
   });
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(196,150,80,0.10)'; ctx.fillRect(0, 0, W, H);
-}, [909]);
+}, [922]);
 // ===== M11a (859–925) S12a — niyam: neeche zameen McD ki, upar dukaan tumhari (build-up) =====
-shot(947, 1017, 0.28, { cx: 1080, cy: 1560, s: 0.78 }, { cx: 1080, cy: 1520, s: 0.88 }, (f, u) => {
+shot(963, 1038, 0.28, { cx: 1080, cy: 1560, s: 0.78 }, { cx: 1080, cy: 1520, s: 0.88 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(1, () => {
     plotDraw(1150, GY, 1020);
     ctx.save(); ctx.beginPath(); ctx.rect(560, GY - 800 * spring(u * 1.15), 1180, 820); ctx.clip();
     mcdStore(1150, GY, 1020, false, 0.4); ctx.restore();
-    boardSign(735, 1120, 520, 122, [['ZAMEEN McD KI', 50, '#7a4d12']], spring(Math.max(0, (f - 954) / 11)));
-    if (f > 980) { const p = spring((f - 980) / 11); boardSign(1470, 1120, 520, 122, [['DUKAAN TUMHARI', 50, '#0c831f']], p); }
+    boardSign(735, 1120, 520, 122, [['ZAMEEN McD KI', 50, '#7a4d12']], spring(Math.max(0, (f - 970) / 11)));
+    if (f > 998) { const p = spring((f - 998) / 11); boardSign(1470, 1120, 520, 122, [['DUKAAN TUMHARI', 50, '#0c831f']], p); }
     heroFig(700, GY, 1.3, { expr: 'calm', seed: 5, speak: true, armR: 'catch' }, f);
   });
 }, []);
 // ===== M11b (925–985) S12b — "kharcha tumhara": dukaanwala counter par pareshan =====
-shot(1017, 1081, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1610, s: 1.05 }, (f, u) => {
+shot(1038, 1106, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1610, s: 1.05 }, (f, u) => {
   layer(0.5, () => dukaanSet(GY));
   layer(1, () => {
     shopCounter();
@@ -846,8 +855,8 @@ shot(1017, 1081, 0.3, { cx: 1080, cy: 1640, s: 0.95 }, { cx: 1080, cy: 1610, s: 
   });
 }, []);
 // ===== M12 (985–1042) S12c — baarish + band dukaan, phir bhi kiraya note girta hai =====
-shot(1081, 1141, 0.32, { cx: 1080, cy: 1560, s: 0.8 }, { cx: 1080, cy: 1520, s: 0.9 }, (f, u) => {
-  const lf = f - 1081;
+shot(1106, 1170, 0.32, { cx: 1080, cy: 1560, s: 0.8 }, { cx: 1080, cy: 1520, s: 0.9 }, (f, u) => {
+  const lf = f - 1106;
   layer(0.5, () => streetBg(GY));
   layer(0.85, () => {
     mcdStore(1080, GY, 1050, false, 0.15);
@@ -866,16 +875,16 @@ shot(1081, 1141, 0.32, { cx: 1080, cy: 1560, s: 0.8 }, { cx: 1080, cy: 1520, s: 
     if (lf > 18) noteDraw(1080, ny, 1.35, Math.sin(f * 0.2) * 0.16 * (1 - fall), fall >= 1 ? 0.7 : 0.2);
     if (lf > 27) { const p = spring((lf - 27) / 11); boardSign(1080, 1040, 860, 176, [['KIRAYA PAKKA', 64, '#8a1f1f'], ['BIKRI HO YA NA HO', 54, '#7a4d12']], p); }
   });
-}, [1109]);
+}, [1136]);
 // ===== M13a (1042–1095) S13 — close-up: "Aur ye raha wo hisaab jo koi nahi batata" =====
-shot(1141, 1203, 0.28, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.58 }, (f, u) => {
+shot(1170, 1237, 0.28, { cx: 1080, cy: 1920, s: 1.42 }, { cx: 1080, cy: 1880, s: 1.58 }, (f, u) => {
   layer(0.5, () => hisaabBg(GY));
   layer(1, () => {
     heroFig(1080, GY, 2.35, { expr: 'smug', seed: 5, speak: true, armL: 'rub', armR: 'rub' }, f);
   });
 }, []);
 // ===== M13b (1095–1158) S14 — hisaab board LEFT: KHUD KI DUKAAN ₹100 → ₹16 (dull) =====
-shot(1203, 1279, 0.3, { cx: 1020, cy: 1620, s: 0.92 }, { cx: 1020, cy: 1590, s: 1.0 }, (f, u) => {
+shot(1237, 1320, 0.3, { cx: 1020, cy: 1620, s: 0.92 }, { cx: 1020, cy: 1590, s: 1.0 }, (f, u) => {
   layer(0.5, () => hisaabBg(GY));
   layer(1, () => {
     ctx.fillStyle = '#2a2f36'; D.rr(ctx, 880, 1080, 470, 600, 14); ctx.fill(); ctx.strokeStyle = '#596270'; ctx.lineWidth = 6; ctx.stroke();
@@ -888,13 +897,13 @@ shot(1203, 1279, 0.3, { cx: 1020, cy: 1620, s: 0.92 }, { cx: 1020, cy: 1590, s: 
   });
 }, []);
 // ===== M13c (1158–1215) S15a — hisaab board RIGHT: TUMHARI DUKAAN ₹100 → ₹82 (bada, gold, pop+hit) =====
-shot(1279, 1329, 0.3, { cx: 1140, cy: 1600, s: 0.95 }, { cx: 1140, cy: 1560, s: 1.06 }, (f, u) => {
-  const lf = f - 1279;
+shot(1320, 1380, 0.3, { cx: 1140, cy: 1600, s: 0.95 }, { cx: 1140, cy: 1560, s: 1.06 }, (f, u) => {
+  const lf = f - 1320;
   layer(0.5, () => hisaabBg(GY));
   layer(1, () => {
     ctx.fillStyle = '#22262d'; D.rr(ctx, 690, 1180, 300, 420, 12); ctx.fill(); ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 5; ctx.stroke();
     text('KHUD KI', 840, 1245, 40, '#9aa0a8'); text('₹16', 840, 1360, 62, '#a5571f');
-    const p = lf < 10 ? 0.001 : spring((lf - 10) / 12);
+    const p = lf < 23 ? 0.001 : spring((lf - 23) / 12);
     ctx.save(); ctx.translate(1330, 1400); ctx.scale(p, p);
     lampPool(0, 0, 560, 0.3);
     ctx.fillStyle = '#1c1503'; D.rr(ctx, -290, -330, 580, 660, 16); ctx.fill(); ctx.strokeStyle = MCD_GOLD; ctx.lineWidth = 9; ctx.stroke();
@@ -903,12 +912,12 @@ shot(1279, 1329, 0.3, { cx: 1140, cy: 1600, s: 0.95 }, { cx: 1140, cy: 1560, s: 
     text('↓', 0, 30, 80, '#ffc72c');
     text('₹82', 0, 180, 138, '#ffc72c');
     ctx.restore();
-    const mu = lf < 12 ? 0 : Math.min(1, (lf - 12) / 12);
+    const mu = lf < 25 ? 0 : Math.min(1, (lf - 25) / 12);
     heroFig(830, GY, 1.5, { expr: 'calm', seed: 5, speak: true, mix: { e2: 'shocked', u: mu }, sweat: mu > 0.5 }, f);
   });
-}, [1298]);
+}, [1353]);
 // ===== M13d (1215–1243) S15b — dono hisaab saath: hero dono taraf ishara =====
-shot(1329, 1365, 0.3, { cx: 1080, cy: 1620, s: 0.9 }, { cx: 1080, cy: 1600, s: 0.96 }, (f, u) => {
+shot(1380, 1439, 0.3, { cx: 1080, cy: 1620, s: 0.9 }, { cx: 1080, cy: 1600, s: 0.96 }, (f, u) => {
   layer(0.5, () => hisaabBg(GY));
   layer(1, () => {
     ctx.fillStyle = '#22262d'; D.rr(ctx, 580, 1170, 330, 440, 12); ctx.fill(); ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 5; ctx.stroke();
@@ -919,8 +928,8 @@ shot(1329, 1365, 0.3, { cx: 1080, cy: 1620, s: 0.9 }, { cx: 1080, cy: 1600, s: 0
   });
 }, []);
 // ===== M14a (1243–1288) S16 — "Isiliye wo burger nahi bechte dost" — burger par X =====
-shot(1365, 1408, 0.28, { cx: 1080, cy: 1740, s: 1.18 }, { cx: 1080, cy: 1700, s: 1.3 }, (f, u) => {
-  const lf = f - 1365;
+shot(1439, 1470, 0.28, { cx: 1080, cy: 1740, s: 1.18 }, { cx: 1080, cy: 1700, s: 1.3 }, (f, u) => {
+  const lf = f - 1439;
   layer(0.5, () => streetBg(GY));
   layer(1, () => {
     heroFig(920, GY, 2.05, { expr: 'calm', seed: 5, speak: true, armR: 'up' }, f);
@@ -935,8 +944,8 @@ shot(1365, 1408, 0.28, { cx: 1080, cy: 1740, s: 1.18 }, { cx: 1080, cy: 1700, s:
   });
 }, []);
 // ===== M14b (1288–1345) S17 — PUNCHLINE close-up: "Burger to sirf bahana hai..." (smug → calm morph) =====
-shot(1408, 1458, 0.28, { cx: 1080, cy: 1920, s: 1.44 }, { cx: 1080, cy: 1870, s: 1.62 }, (f, u) => {
-  const lf = f - 1408;
+shot(1470, 1510, 0.28, { cx: 1080, cy: 1920, s: 1.44 }, { cx: 1080, cy: 1870, s: 1.62 }, (f, u) => {
+  const lf = f - 1470;
   layer(0.5, () => { streetBg(GY); mcdStore(1250, GY, 1150, false, 0.55); });
   layer(1, () => {
     const mu = lf < 28 ? 0 : Math.min(1, (lf - 28) / 14);
@@ -944,7 +953,7 @@ shot(1408, 1458, 0.28, { cx: 1080, cy: 1920, s: 1.44 }, { cx: 1080, cy: 1870, s:
   });
 }, []);
 // ===== M14c (1345–1380) S17b — ant: storefront wide, arches glow, hero saamne =====
-shot(1458, 1487, 0.26, { cx: 1080, cy: 1560, s: 0.66 }, { cx: 1080, cy: 1520, s: 0.74 }, (f, u) => {
+shot(1510, 1532, 0.26, { cx: 1080, cy: 1560, s: 0.66 }, { cx: 1080, cy: 1520, s: 0.74 }, (f, u) => {
   layer(0.5, () => streetBg(GY));
   layer(0.85, () => mcdStore(1120, GY, 1200, false, 0.75 + 0.25 * Math.sin(f * 0.16)));
   layer(1, () => {
