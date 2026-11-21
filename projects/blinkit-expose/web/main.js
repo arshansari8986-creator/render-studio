@@ -166,6 +166,35 @@ function roadBand(gy, f, speed = 0) {
   ctx.fillStyle = 'rgba(255,214,120,0.06)'; ctx.fillRect(-400, gy + 20, 2960, 90);
 }
 
+// ===== V2: Baal-style character (original rig) =====
+const HERO_P = { shirt: '#f2b705', shirtD: '#cf9604', pants: '#6e5136', skin: '#c98a54', hairC: '#20242c' };
+const WORKER_P = { shirt: '#2e7d46', shirtD: '#226636', pants: '#33415c', skin: '#a06a38', hairC: '#14161a' };
+const SHOP_P = { shirt: '#8a3324', shirtD: '#6e271c', pants: '#3c3630', skin: '#b57e46', hairC: '#1c1712' };
+function heroFig(x, y, sc, o = {}, f = 0) {
+  const P = o.preset || HERO_P;
+  D.drawHero(ctx, { x, y, s: sc, _t: f,
+    shirt: P.shirt, shirtD: P.shirtD, pants: P.pants, noTie: true, skin: P.skin, hairC: P.hairC,
+    expr: o.expr || 'calm', blink: D.blinkAt(f, o.seed || 5), wink: !!o.wink,
+    armL: o.armL || 'down', armR: o.armR || 'down', face: o.face || 0,
+    sweat: !!o.sweat, headDip: o.headDip || 0, walk: o.walk !== undefined ? o.walk : null,
+    prop: o.prop || null, phoneMode: o.phoneMode || 'credit' });
+}
+function seatedFig(x, y, sc, o = {}, f = 0) {
+  const P = o.preset || HERO_P;
+  D.drawHeroSitting(ctx, { x, y, s: sc, _t: f,
+    expr: o.expr || 'calm', blink: D.blinkAt(f, o.seed || 8),
+    shirt: P.shirt, shirtD: P.shirtD, pants: P.pants, skin: P.skin, hairC: P.hairC,
+    slump: o.slump || 0, armMode: o.armMode || 'knees', tear: !!o.tear, face: o.face || 0, headDip: o.headDip || 0 });
+}
+function boardSign(x, y, w, h, lines, sc = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+  ctx.strokeStyle = '#3a2a16'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(-w / 2 + 40, -h / 2 - 54); ctx.lineTo(0, -h / 2 - 6); ctx.moveTo(w / 2 - 40, -h / 2 - 54); ctx.lineTo(0, -h / 2 - 6); ctx.stroke();
+  ctx.fillStyle = '#f5edd8'; D.rr(ctx, -w / 2, -h / 2, w, h, 12); ctx.fill(); ctx.strokeStyle = D.OUT; ctx.lineWidth = 6; ctx.stroke();
+  lines.forEach((ln, i) => text(ln[0], 0, (i - (lines.length - 1) / 2) * (h * 0.52), ln[1], ln[2]));
+  ctx.restore();
+}
+
 // ===== SHOT A (0-143) — raat, dark store, riders nikal rahe hain =====
 shot(0, 144, 0.34, { cx: 1080, cy: 1330, s: 0.52 }, { cx: 1000, cy: 1240, s: 0.80 }, (f) => {
   layer(0.3, () => {
@@ -194,6 +223,10 @@ shot(0, 144, 0.34, { cx: 1080, cy: 1330, s: 0.52 }, { cx: 1000, cy: 1240, s: 0.8
       scooter(x, y, 1.02, -1, f * 1.6 + d0);
     }
     scooter(880, gy + 138, 1.02, -1, f * 0.25, { streaks: false });
+    // HERO (tum) — phone par order, nazar store par
+    heroFig(470, gy + 130, 1.5, { expr: f < 60 ? 'calm' : 'surprise', armR: 'phone', face: 0.4, seed: 5 }, f);
+    // store ke upar nilami-board — hook ka number
+    if (f > 16) boardSign(1080, 560, 900, 190, [['₹20,940 CRORE', 92, '#8a1f1f'], ['SIRF 3 MAHINE ME!', 54, '#4a4234']], spring((f - 16) / 10));
   });
 }, [144]);
 
@@ -245,6 +278,8 @@ shot(144, 252, 0.3, { cx: 1075, cy: 1600, s: 0.92 }, { cx: 1100, cy: 1645, s: 1.
     ctx.fillStyle = '#5a4026'; ctx.fillRect(430, 2180, 1300, 44);
     ctx.fillStyle = '#3d2b18'; ctx.fillRect(470, 2224, 60, 300); ctx.fillRect(1630, 2224, 60, 300);
     ctx.fillStyle = 'rgba(255,205,120,0.10)'; ctx.fillRect(430, 2180, 1300, 12);
+    // WORKER — table ke peeche khada packing wala
+    heroFig(1470, 2500, 1.5, { preset: WORKER_P, expr: 'calm', seed: 7 }, f);
     // delivery bag (grows a touch with each item)
     const drops = [10, 36, 62, 86]; // local frames when items land
     const landed = drops.filter((d) => lf >= d + 12).length;
@@ -316,6 +351,8 @@ shot(252, 300, 0.36, { cx: 960, cy: 1760, s: 1.02 }, { cx: 1230, cy: 1720, s: 1.
     scooter(rx, ry, 1.12, 1, lf > 26 ? f * 1.7 : f * 0.2, { streaks: lf > 26 });
     // second rider already gone in the distance (small, right side)
     if (lf < 30) scooter(1980 - lf * 6, gy + 90, 0.6, -1, f * 1.4, { boxCol: '#e8b93a' });
+    // HERO — bag mil gaya
+    heroFig(560, gy + 170, 1.25, { expr: lf > 20 ? 'happy' : 'calm', armR: lf > 14 ? 'hold' : 'down', seed: 5 }, f);
   });
   // foreground parallax: a dark scooter shape sweeps past close to camera
   layer(1.6, () => {
@@ -524,8 +561,10 @@ shot(578, 702, 0.3, { cx: 760, cy: 1560, s: 0.72 }, { cx: 2560, cy: 1560, s: 0.7
     const dep = sstep(D.clamp((f - 52) / 26, 0, 1));
     if (f > 46) {
       const rx = 1420 - dep * 1250, bob = Math.sin(f * 0.55) * 5 * (0.4 + dep);
-      scooter(rx, 2160 + bob, { s: 0.92, dir: -1, col: '#2e7d46', box: true, light: dep > 0.04, spin: f * (0.3 + dep * 1.3) });
+      scooter(rx, 2160 + bob, 0.92, -1, f * (0.3 + dep * 1.3), { streaks: dep > 0.08 });
     }
+    // HERO — gali me chalta, har mod par ek aur godown
+    heroFig(CAM.cx + 300, 2400, 1.15, { expr: 'puzzled', armR: 'phone', walk: (f * 0.06) % 1, face: 0.3, seed: 5 }, f + 578);
   });
 }, []);
 
@@ -536,6 +575,7 @@ shot(702, 792, 0.3, { cx: 1080, cy: 1560, s: 0.66 }, { cx: 1080, cy: 1500, s: 0.
     const g = vgrad(300, 3000, [[0, '#0a1120'], [1, '#05080f']]);
     ctx.fillStyle = g; ctx.fillRect(-700, 0, 3560, 3100);
     ctx.fillStyle = '#171310'; ctx.fillRect(-700, 2180, 3560, 900);
+    if (f > 10) boardSign(1080, 760, 860, 160, [['2,751 GODOWN!', 88, '#8a1f1f']], spring((f - 10) / 10));
     const rows = [[1420, 260, 7], [1760, 350, 6], [2180, 470, 5]];
     rows.forEach((row, ri) => {
       const [gy, w, n] = row;
@@ -577,6 +617,8 @@ shot(792, 863, 0.36, { cx: 1080, cy: 1660, s: 0.66 }, { cx: 1080, cy: 1660, s: 0
       D.circ(ctx, 1080, 1620 + 330, 40 + rp * 150); ctx.stroke();
     }
     lampPool(1080, 1620, 800, 0.16 + 0.1 * sstep(D.clamp((f - 4) / 12, 0, 1)));
+    // HERO — phone ki taraf ishara: dukaan phone ke andar!
+    heroFig(430, 2380, 1.25, { expr: f > 18 ? 'surprise' : 'calm', armR: 'point', face: 0.5, seed: 5 }, f + 792);
   });
 }, []);
 
@@ -612,6 +654,7 @@ shot(863, 975, 0.32, { cx: 1080, cy: 1600, s: 0.64 }, { cx: 1080, cy: 1640, s: 0
       coinAt(cx, Math.min(cy, jb - 42 - (k > 2 ? 34 : 0)), 34, drop >= 1 ? 0.12 : 0);
       if (drop >= 1 && f - df - 13 < 7) { ctx.strokeStyle = 'rgba(255,220,120,0.6)'; ctx.lineWidth = 4; D.circ(ctx, cx, jb - 46, 44 + (f - df - 13) * 9); ctx.stroke(); }
     }
+    heroFig(1080, 2260, 1.05, { expr: f > 60 ? 'puzzled' : 'calm', face: Math.sin(f * 0.03) * 0.5, seed: 5 }, f + 863);
     text('HAR ORDER: ₹5 SE KAM', 1540, 2330, 38, '#e8dcc0');
   });
 }, []);
@@ -641,6 +684,8 @@ shot(975, 1068, 0.32, { cx: 1080, cy: 1500, s: 0.7 }, { cx: 1080, cy: 1500, s: 0
     text('KUL BIKRI: ₹20,940 CRORE', 1080, 2270, 50, '#33302a');
     if (f > 52) stampText('MUNAFA SIRF ₹184 CRORE', 1080, 2420, 54, '#b3311f', -0.04, spring(D.clamp((f - 52) / 8, 0, 1)));
     ctx.restore();
+    // HERO — lamba bill dekh ke hairaan
+    heroFig(430, 2380, 1.15, { expr: f > 52 ? 'shocked' : 'worried', armR: 'up', seed: 5 }, f + 975);
   });
 }, [1027]);
 
@@ -685,6 +730,8 @@ shot(1068, 1203, 0.3, { cx: 1080, cy: 1420, s: 0.6 }, { cx: 1080, cy: 1560, s: 0
     ctx.save(); ctx.translate(1640, 1030); ctx.rotate(0.06 + Math.sin(f * 0.03 + 2) * 0.02);
     ctx.fillStyle = '#d8c9a3'; D.rr(ctx, -190, -52, 380, 104, 10); ctx.fill(); ctx.strokeStyle = D.OUT; ctx.lineWidth = 4; ctx.stroke();
     text('MUNAFA <1%', 0, 0, 44, '#b3311f'); ctx.restore();
+    // HERO — tarazu ke saamne khada
+    heroFig(1080, 2380, 1.1, { expr: f > 96 ? 'shocked' : 'worried', face: -0.3, seed: 5 }, f + 1068);
   });
 }, []);
 
@@ -716,6 +763,8 @@ shot(1203, 1327, 0.42, { cx: 1080, cy: 1620, s: 0.68 }, { cx: 1080, cy: 1620, s:
     ctx.fillStyle = 'rgba(255,255,255,0.75)';
     text('Pichla order: 10 min me aaya tha', scr.sx + scr.sw / 2, by + 208, 36, '#cfe0c0');
     ctx.restore();
+    // HERO — andhere me baitha, phone ki aadat
+    seatedFig(570, 2200, 1.22, { expr: f > 94 ? 'worried' : 'calm', slump: 0.4, seed: 5 }, f + 1203);
     // ghadi — har tap par 10 minute aage
     const clk = { x: 1080, y: 560, r: 120 };
     D.circ(ctx, clk.x, clk.y, clk.r); D.fillStroke(ctx, '#e8e2d2', 7);
@@ -730,7 +779,6 @@ shot(1203, 1327, 0.42, { cx: 1080, cy: 1620, s: 0.68 }, { cx: 1080, cy: 1620, s:
       if (u < 0 || u > 1) continue;
       const reach = Math.sin(D.clamp(u, 0, 1) * Math.PI);
       const hx = 660 + reach * 380, hy = 1640 + reach * 150;
-      handArm(hx, hy, reach);
       if (u > 0.42 && u < 0.62) {
         ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 5;
         D.circ(ctx, 1080, by + 64, 30 + (u - 0.42) * 260); ctx.stroke();
@@ -773,26 +821,15 @@ shot(1327, 1440, 0.34, { cx: 1080, cy: 1580, s: 0.66 }, { cx: 1120, cy: 1580, s:
         ctx.fillRect(690 + i * 132, 1246 + r * 210, 84, 84);
       }
     }
-    // dukaan-daar silhouette — intezaar
-    const br = Math.sin(f * 0.05) * 4;
-    ctx.fillStyle = 'rgba(16,12,8,0.92)';
-    D.circ(ctx, 830, 1690 + br, 46); ctx.fill();
-    D.poly(ctx, [[786, 1736 + br], [874, 1736 + br], [890, 1960], [770, 1960]]); ctx.fill();
-    ctx.fillRect(760, 1940, 200, 52);
+    // dukaan-daar — baitha intezaar kar raha hai
+    seatedFig(830, 2010, 1.0, { preset: SHOP_P, expr: 'sad', slump: 0.5, seed: 9 }, f + 1327);
     lampPool(1080, 1250, 700, 0.14 + (hash(Math.floor(f / 47)) > 0.92 ? -0.07 : 0));
     // raahgir — phone dekh ke guzar gaya
     const wu = D.clamp((f - 26) / 74, 0, 1);
     if (wu > 0 && wu < 1) {
-      const wx = D.lerp(1960, 240, wu), wy = 2300, swy = Math.abs(Math.sin(f * 0.32)) * 10;
-      ctx.fillStyle = 'rgba(10,10,14,0.95)';
-      D.circ(ctx, wx, wy - 430 - swy, 36); ctx.fill();
-      D.poly(ctx, [[wx - 34, wy - 392 - swy], [wx + 34, wy - 392 - swy], [wx + 44, wy - 190 - swy], [wx - 44, wy - 190 - swy]]); ctx.fill();
-      D.limb(ctx, wx - 16, wy - 200 - swy, wx - 42, wy - 6, 24, 'rgba(10,10,14,0.95)');
-      D.limb(ctx, wx + 18, wy - 200 - swy, wx + 54, wy - 6 - Math.sin(f * 0.32) * 16, 24, 'rgba(10,10,14,0.95)');
-      D.limb(ctx, wx + 24, wy - 360 - swy, wx + 62, wy - 292 - swy, 20, 'rgba(10,10,14,0.95)');
-      ctx.fillStyle = '#0a0a0c'; D.rr(ctx, wx + 54, wy - 330 - swy, 46, 76, 7); ctx.fill();
-      ctx.fillStyle = 'rgba(160,200,255,0.85)'; ctx.fillRect(wx + 59, wy - 324 - swy, 36, 62);
-      lampPool(wx + 76, wy - 292 - swy, 76, 0.35);
+      const wx = D.lerp(1960, 240, wu);
+      heroFig(wx, 2300, 1.02, { expr: 'calm', armR: 'phone', walk: (f * 0.06) % 1, face: -0.4, seed: 5 }, f + 1327);
+      lampPool(wx + 60, 2010, 80, 0.3);
     }
   });
 }, []);
@@ -849,11 +886,10 @@ shot(1485, 1572, 0.22, { cx: 1080, cy: 1620, s: 0.6 }, { cx: 1080, cy: 1580, s: 
       for (let i = 0; i < 6; i++) { D.circ(ctx, cx - 100 + i * 42 + hash(c * 7 + i) * 12, cy + 44 - (i % 3) * 20, 26); ctx.fillStyle = veg[(c + i) % 8]; ctx.fill(); ctx.strokeStyle = D.OUT; ctx.lineWidth = 3; ctx.stroke(); }
       for (let i = 0; i < 3; i++) { D.ell(ctx, cx - 60 + i * 56, cy - 6, 30, 15); ctx.fillStyle = '#3f9e4d'; ctx.fill(); }
     }
-    // haath — sabzi ki taraf badha, phir ruk gaya
-    const hu = D.clamp((f - 34) / 30, 0, 1), reach = Math.sin(D.clamp(hu, 0, 1) * Math.PI * 0.5);
-    const back = sstep(D.clamp((f - 74) / 16, 0, 1));
-    const hx = 300 + reach * 330 - back * 200, hy = 1560 + reach * 260 - back * 120;
-    if (f > 30) handArm(hx, hy, 0.4);
+    // HERO — mandi me: haath sabzi ki taraf badha... phir phone yaad aaya
+    const hu2 = D.clamp((f - 34) / 30, 0, 1), reach2 = Math.sin(D.clamp(hu2, 0, 1) * Math.PI * 0.5);
+    const back2 = sstep(D.clamp((f - 74) / 16, 0, 1));
+    heroFig(1080, 2260, 1.3, { expr: back2 > 0.5 ? 'puzzled' : 'calm', armR: back2 > 0.5 ? 'phone' : (reach2 > 0.6 ? 'offer' : 'down'), face: 0.2, seed: 5 }, f + 1485);
     lampPool(1080, 1500, 1100, 0.16);
   });
 }, []);
