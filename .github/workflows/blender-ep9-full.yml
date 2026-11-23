@@ -1,0 +1,94 @@
+name: Blender EP9 Full
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'blender-ep9-full.json'
+      - '.github/workflows/blender-ep9-full.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: fc1, args: "anim 1 158"}
+          - {name: fc2, args: "anim 159 316"}
+          - {name: fc3, args: "anim 317 474"}
+          - {name: fc4, args: "anim 475 632"}
+          - {name: fc5, args: "anim 633 790"}
+          - {name: fc6, args: "anim 791 948"}
+          - {name: fc7, args: "anim 949 1106"}
+          - {name: fc8, args: "anim 1107 1264"}
+          - {name: fc9, args: "anim 1265 1422"}
+          - {name: fc10, args: "anim 1423 1580"}
+          - {name: fc11, args: "anim 1581 1738"}
+          - {name: fc12, args: "anim 1739 1888"}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libegl1 libgl1 libglx0 libxi6 libxkbcommon0 libxrender1 libxrandr2 fonts-dejavu-core > /dev/null
+      - name: Download Blender 4.2 (retry x3)
+        run: |
+          for i in 1 2 3; do
+            curl -sL -o blender.tar.xz https://download.blender.org/release/Blender4.2/blender-4.2.0-linux-x64.tar.xz
+            if tar -tf blender.tar.xz > /dev/null 2>&1; then echo "download OK (try $i)"; break; fi
+            echo "download corrupt, retry $i"; sleep 5
+          done
+          tar -xf blender.tar.xz
+          ls blender-4.2.0-linux-x64/blender
+      - name: Render chunk ${{ matrix.name }}
+        working-directory: projects/insurance-blender-sample/blender
+        run: |
+          mkdir -p frames
+          xvfb-run -a $GITHUB_WORKSPACE/blender-4.2.0-linux-x64/blender -b -P scene_ep9_full.py -- ${{ matrix.args }}
+          ls frames/ | wc -l
+      - name: Upload frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: frames-${{ matrix.name }}
+          path: projects/insurance-blender-sample/blender/frames/*.png
+          if-no-files-found: error
+
+  finish:
+    needs: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Assemble sequence and encode
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+          python3 - <<'PYEOF'
+          import os, shutil, glob
+          os.makedirs('seq', exist_ok=True)
+          for i in range(1, 1889):
+              hits = glob.glob(f'artifacts/**/f_{i:04d}.png', recursive=True)
+              assert hits, i
+              shutil.copy(hits[0], f'seq/{i:04d}.png')
+          assert len(os.listdir('seq')) == 1888
+          print('assembled 1888 frames')
+          PYEOF
+          ffmpeg -y -v error -framerate 30 -i seq/%04d.png -i projects/insurance-cinematic/audio/final_audio.wav -c:v libx264 -pix_fmt yuv420p -crf 18 -preset veryfast -c:a aac -b:a 160k -shortest EP9-Blender-FINAL.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 EP9-Blender-FINAL.mp4
+      - name: Publish release with the video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="blender-ep9-full-${{ github.run_number }}"
+          gh release create "$TAG" EP9-Blender-FINAL.mp4 \
+            --title "Blender EP9 FULL run ${{ github.run_number }}" \
+            --notes "Blender 4.2 Eevee full EP-9 (12 parallel chunks, 1888 frames, 1080x1920)"
