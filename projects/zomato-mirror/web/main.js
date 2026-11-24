@@ -33,10 +33,14 @@ const sun = new THREE.DirectionalLight(0xffd9a0, 1.8);
 sun.position.set(-6, 8, 5); scene.add(sun); scene.add(sun.target);
 sun.castShadow = true;                                  // LOOK-V2
 sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -11; sun.shadow.camera.right = 11;
-sun.shadow.camera.top = 11; sun.shadow.camera.bottom = -11;
-sun.shadow.camera.near = 1; sun.shadow.camera.far = 45;
+sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
+sun.shadow.camera.top = 20; sun.shadow.camera.bottom = -20;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 95;
 sun.shadow.bias = -0.0022; sun.shadow.normalBias = 0.02;
+// WORLD: aasmaan/camera-side bounce fill (parchaai nahi deta) — applyEnv se control hota hai
+const bounce = new THREE.DirectionalLight(0xffe2b8, 0.2);
+bounce.position.set(6, 8, 14); bounce.castShadow = false;
+scene.add(bounce); scene.add(bounce.target);
 
 // ---------- helpers ----------
 function textBoard(w, h, draw) {
@@ -126,23 +130,30 @@ const CUST2 = { tunic: '#2e7a7a', shirt: '#efe6d0', skin: '#e8b98d', hair: '#241
 // =====================================================================
 // ENVS — professional colour grading (samay ke saath rang badalta hai)
 // =====================================================================
+// WORLD globals (sab set builders se pehle declare — dhaba builder inhe use karta hai)
+let cloudMatW = null, streetLampFx = null, eveGlowFx = null; const cloudSpritesW = [];
+const dhabaGlowMatW = new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), color: 0xffc37a, transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending });
 const ENVS = {
-  dhabaDay: { bg: 0xffd9a3, fogFar: 34, hemi: 1.0, sun: 1.25, sunC: 0xffd9a0, sunPos: [-6, 8, 5] },
-  dhabaEve: { bg: 0x8a5636, fogFar: 30, hemi: 0.6, sun: 0.75, sunC: 0xff9a4d, sunPos: [-5, 6, 5] },
-  streetDay: { bg: 0x8ec9e8, fogFar: 60, hemi: 1.0, sun: 1.3, sunC: 0xffe9b0, sunPos: [-7, 10, 5] },
-  streetEve: { bg: 0x51486e, fogFar: 55, hemi: 0.62, sun: 0.7, sunC: 0xff9a4d, sunPos: [-8, 5, 4] },
-  deskEve: { bg: 0x4a3220, fogFar: 30, hemi: 0.52, sun: 0.65, sunC: 0xffb36b, sunPos: [3, 6, 4] },
-  phoneDay: { bg: 0x6b4a35, fogFar: 30, hemi: 0.72, sun: 0.9, sunC: 0xffd9a0, sunPos: [-5, 7, 5] },
-  phoneEve: { bg: 0x2e2438, fogFar: 28, hemi: 0.46, sun: 0.5, sunC: 0xbfd4ff, sunPos: [4, 7, 4] },
-  sunset: { bg: 0xef8f52, fogFar: 60, hemi: 0.85, sun: 1.6, sunC: 0xffb36b, sunPos: [-12, 6, -8] },
+  dhabaDay: { bg: 0xffd9a3, fogC: 0xffd9a3, fogNear: 12, fogFar: 34, hemi: 1.0, hemiC: 0xffe7c4, hemiG: 0x5a4632, sun: 1.25, sunC: 0xffd9a0, sunPos: [-6, 8, 5], bounce: 0.22, bounceC: 0xffe2b8, expo: 1.16, sky: null, lamp: 0 },
+  dhabaEve: { bg: 0x8a5636, fogC: 0x8a5636, fogNear: 11, fogFar: 30, hemi: 0.6, hemiC: 0xffc9a0, hemiG: 0x4a3220, sun: 0.75, sunC: 0xff9a4d, sunPos: [-5, 6, 5], bounce: 0.1, bounceC: 0xffb36b, expo: 1.13, sky: null, lamp: 0 },
+  streetDay: { bg: 0x9fd0ee, fogC: 0xa9cfe6, fogNear: 14, fogFar: 72, hemi: 1.0, hemiC: 0xcfe4ff, hemiG: 0x8a7a5a, sun: 1.35, sunC: 0xffe9b0, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.14, sky: 'day', lamp: 0 },
+  streetEve: { bg: 0x39324e, fogC: 0x55496e, fogNear: 10, fogFar: 55, hemi: 0.64, hemiC: 0x7a68a0, hemiG: 0x3a2c22, sun: 0.62, sunC: 0xff8f4d, sunPos: [-9, 3.2, 4], bounce: 0.07, bounceC: 0x8a76b8, expo: 1.1, sky: 'eve', lamp: 1 },
+  deskEve: { bg: 0x4a3220, fogC: 0x4a3220, fogNear: 11, fogFar: 30, hemi: 0.52, hemiC: 0xffd2a0, hemiG: 0x3a2818, sun: 0.65, sunC: 0xffb36b, sunPos: [3, 6, 4], bounce: 0.06, bounceC: 0xffc98a, expo: 1.13, sky: null, lamp: 0 },
+  phoneDay: { bg: 0x6b4a35, fogC: 0x6b4a35, fogNear: 12, fogFar: 30, hemi: 0.72, hemiC: 0xffe7c4, hemiG: 0x4a3828, sun: 0.9, sunC: 0xffd9a0, sunPos: [-5, 7, 5], bounce: 0.15, bounceC: 0xffe2b8, expo: 1.15, sky: null, lamp: 0 },
+  phoneEve: { bg: 0x2e2438, fogC: 0x2e2438, fogNear: 11, fogFar: 28, hemi: 0.46, hemiC: 0x9fb4e0, hemiG: 0x241e2c, sun: 0.5, sunC: 0xbfd4ff, sunPos: [4, 7, 4], bounce: 0.08, bounceC: 0x8aa4d8, expo: 1.12, sky: null, lamp: 0 },
+  sunset: { bg: 0xcf6a44, fogC: 0xcf6a44, fogNear: 15, fogFar: 62, hemi: 0.88, hemiC: 0x8a76c2, hemiG: 0xa06838, sun: 2.7, sunC: 0xff8f3f, sunPos: [-13, 5.0, 9], bounce: 0.85, bounceC: 0xff9a50, expo: 1.18, sky: 'sunset', lamp: 0 },
 };
 const ENV_DEFAULT = { dhaba: 'dhabaDay', street: 'streetDay', desk: 'deskEve', phone: 'phoneDay' };
 const applyEnv = (name) => {
   const e = ENVS[name] || ENVS.dhabaDay;
   scene.background = new THREE.Color(e.bg);
-  scene.fog = new THREE.Fog(e.bg, 12, e.fogFar);
-  hemi.intensity = e.hemi; sun.intensity = e.sun;
+  scene.fog = new THREE.Fog(e.fogC, e.fogNear, e.fogFar);
+  hemi.intensity = e.hemi; hemi.color.set(e.hemiC); hemi.groundColor.set(e.hemiG);
+  sun.intensity = e.sun;
   sun.color.set(e.sunC); sun.position.set(...e.sunPos);
+  sun.target.position.set(0, 0, 0); sun.target.updateMatrixWorld();
+  bounce.intensity = e.bounce; bounce.color.set(e.bounceC);
+  renderer.toneMappingExposure = e.expo;
 };
 // canvas redraw cache (har frame dobara draw nahi)
 const K = {};
@@ -366,6 +377,7 @@ let laddooMeshes = [];
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), bas({ color: 0xffdf9e }));
     bulb.position.set(bx, 3.45, -1.4); S.add(bulb);
     const gl = FX.glint(0.85); gl.position.set(bx, 3.45, -1.35); S.add(gl);
+    const halo = new THREE.Sprite(dhabaGlowMatW); halo.position.set(bx, 3.45, -1.32); halo.scale.setScalar(1.15); S.add(halo);
   }
   // ---- chhota phone prop (counter par) ----
   const PD2 = dynCanvas(256, 460);
@@ -870,7 +882,7 @@ let phoneRedraw = null;
 // Camera / story / timing bilkul nahi badla. Naap: Gullak frame = 25-40
 // dikhne wali cheezein, gradient aasmaan, pattern wale kapde, har kone me prop.
 // =====================================================================
-const skyDayM = { mesh: null }, skySunM = { mesh: null };
+const skyDayM = { mesh: null }, skySunM = { mesh: null }, skyEveM = { mesh: null };
 let dhabaLight = null, deskLight = null;
 const wireBetween = (a, b, r, mat) => {
   const d = new THREE.Vector3().subVectors(b, a), len = d.length();
@@ -1051,34 +1063,80 @@ const posterChai = () => textBoard(512, 704, (g, w, h) => {
 }
 { // ---------- STREET V2 dressing ----------
   const S = streetG;
-  const skyC = (stops, cloudCol, sunXY) => {
+  // WORLD: painterly aasmaan — zyada, chhote, soft-stroke baadal (blobby baadal khatm)
+  const skyC = (stops, mode, sunXY) => {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 512;
     const g = c.getContext('2d');
     const gr = g.createLinearGradient(0, 0, 0, 512);
     stops.forEach(([o, col]) => gr.addColorStop(o, col));
     g.fillStyle = gr; g.fillRect(0, 0, 1024, 512);
-    if (sunXY) {
-      const rg = g.createRadialGradient(sunXY[0], sunXY[1], 8, sunXY[0], sunXY[1], 150);
-      rg.addColorStop(0, 'rgba(255,246,200,0.95)'); rg.addColorStop(0.25, 'rgba(255,220,150,0.55)'); rg.addColorStop(1, 'rgba(255,220,150,0)');
-      g.fillStyle = rg; g.fillRect(0, 0, 1024, 512);
-      g.fillStyle = '#fff3c4'; g.beginPath(); g.arc(sunXY[0], sunXY[1], 30, 0, 7); g.fill();
-    }
     let sd = 31; const sr = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
-    for (let i = 0; i < 15; i++) {
-      const cx = sr() * 1024, cy = 30 + sr() * 190, s = 0.6 + sr() * 1.1;
-      g.fillStyle = cloudCol;
-      for (const [ox, oy, r] of [[0, 0, 46], [-38, 8, 32], [38, 8, 34], [-16, -12, 28], [20, -10, 26]]) {
-        g.beginPath(); g.ellipse(cx + ox * s, cy + oy * s, r * s, r * 0.52 * s, 0, 0, 7); g.fill();
+    if (mode === 'eve') { // shaam ke aasmaan me upar taare
+      for (let i = 0; i < 300; i++) {
+        const y = Math.pow(sr(), 1.4) * 300;
+        g.fillStyle = `rgba(255,255,255,${(0.25 + sr() * 0.65) * Math.max(0, 1 - y / 340)})`;
+        g.beginPath(); g.arc(sr() * 1024, y, 0.7 + sr() * 1.3, 0, 7); g.fill();
       }
+    }
+    if (sunXY) {
+      const R = mode === 'day' ? 150 : 215;
+      const rg = g.createRadialGradient(sunXY[0], sunXY[1], 8, sunXY[0], sunXY[1], R);
+      rg.addColorStop(0, 'rgba(255,246,200,0.95)'); rg.addColorStop(0.25, 'rgba(255,220,150,0.5)'); rg.addColorStop(1, 'rgba(255,220,150,0)');
+      g.fillStyle = rg; g.fillRect(0, 0, 1024, 512);
+      g.fillStyle = '#fff3c4'; g.beginPath(); g.arc(sunXY[0], sunXY[1], mode === 'day' ? 28 : 24, 0, 7); g.fill();
+    }
+    // baadal: har cluster = kai chhote soft puffs, do parat (halki dhund + gehra core) + patli strokes
+    const clusters = mode === 'day' ? 26 : 17;
+    const pal = mode === 'day'
+      ? { soft: '255,255,255', core: '255,255,255', shade: '148,172,205', aS: 0.13, aC: 0.30 }
+      : mode === 'eve'
+        ? { soft: '206,164,216', core: '232,190,220', shade: '52,44,96', aS: 0.10, aC: 0.20 }
+        : { soft: '255,190,150', core: '255,214,178', shade: '112,82,132', aS: 0.13, aC: 0.26 };
+    for (let i = 0; i < clusters; i++) {
+      const cx = sr() * 1024, cy = 24 + Math.pow(sr(), 1.2) * (mode === 'day' ? 215 : 235), s = 0.45 + sr() * 0.85;
+      const puffs = 7 + (sr() * 5 | 0), P = [];
+      for (let k = 0; k < puffs; k++) P.push([(sr() - 0.5) * 165 * s, (sr() - 0.5) * 34 * s, (13 + sr() * 23) * s]);
+      for (const pass of [0, 1]) {
+        for (const [ox, oy, r] of P) {
+          const r2 = pass ? r * 0.62 : r, yy = oy + (pass ? -2 : 5);
+          g.fillStyle = `rgba(${pass ? pal.core : pal.soft},${(pass ? pal.aC : pal.aS) * (0.7 + sr() * 0.6)})`;
+          g.beginPath(); g.ellipse(cx + ox, cy + yy, r2 * 1.75, r2 * 0.6, 0, 0, 7); g.fill();
+        }
+      }
+      g.fillStyle = `rgba(${pal.shade},0.10)`;
+      g.beginPath(); g.ellipse(cx, cy + 15 * s, 95 * s, 11 * s, 0, 0, 7); g.fill();
+      g.fillStyle = `rgba(${pal.core},0.20)`;
+      g.beginPath(); g.ellipse(cx - 12 * s, cy - 13 * s, 52 * s, 4.5 * s, -0.04, 0, 7); g.fill();
+      if (mode === 'sunset') { g.fillStyle = 'rgba(255,170,90,0.15)'; g.beginPath(); g.ellipse(cx, cy + 21 * s, 105 * s, 9 * s, 0, 0, 7); g.fill(); }
     }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     return t;
   };
   const skyGeo = new THREE.PlaneGeometry(95, 36);
-  skyDayM.mesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: skyC([[0, '#2f7fe0'], [0.55, '#8ec9ee'], [1, '#ffe9c4']], 'rgba(255,255,255,0.92)', [800, 90]), fog: false }));
+  skyDayM.mesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: skyC([[0, '#2f7fe0'], [0.55, '#8ec9ee'], [1, '#ffe9c4']], 'day', [800, 90]), fog: false }));
   skyDayM.mesh.position.set(0, 10.5, -26); scene.add(skyDayM.mesh);
-  skySunM.mesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: skyC([[0, '#2c2a55'], [0.45, '#b84a6e'], [0.75, '#ff8c42'], [1, '#ffd76a']], 'rgba(255,190,150,0.75)', [512, 330]), fog: false }));
+  skyEveM.mesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: skyC([[0, '#191738'], [0.42, '#463268'], [0.7, '#a34a68'], [1, '#ff9a5c']], 'eve', [470, 415]), fog: false }));
+  skyEveM.mesh.position.set(0, 10.5, -26); scene.add(skyEveM.mesh);
+  skySunM.mesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: skyC([[0, '#2c2a55'], [0.45, '#b84a6e'], [0.75, '#ff8c42'], [1, '#ffd76a']], 'sunset', [512, 330]), fog: false }));
   skySunM.mesh.position.set(0, 10.5, -26); scene.add(skySunM.mesh);
+  // WORLD: 3D baadal billboards (parallax ke liye) — multi-puff soft texture, blobby nahi
+  const cloudTexW = (() => {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 128;
+    const g = c.getContext('2d');
+    let sd = 57; const sr = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
+    for (let i = 0; i < 11; i++) {
+      const x = 40 + sr() * 176, y = 48 + sr() * 34, r = 17 + sr() * 24;
+      const rg = g.createRadialGradient(x, y, 2, x, y, r);
+      rg.addColorStop(0, 'rgba(255,255,255,0.55)'); rg.addColorStop(0.7, 'rgba(255,255,255,0.22)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+    }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  cloudMatW = new THREE.SpriteMaterial({ map: cloudTexW, color: 0xffffff, transparent: true, opacity: 0.5, depthWrite: false });
+  [[-16, 16.5, -33, 23], [-3, 19.5, -37, 29], [11, 15, -30, 18], [20, 20.5, -39, 26], [-25, 13.5, -28, 15]].forEach(([x, y, z, s]) => {
+    const sp = new THREE.Sprite(cloudMatW); sp.position.set(x, y, z); sp.scale.set(s, s * 0.42, 1);
+    sp.visible = false; scene.add(sp); cloudSpritesW.push(sp);
+  });
   // buildings par khidkiyon ki jaali (kuch jalti hui)
   const winTex = (tint) => textBoard(256, 384, (g, w, h) => {
     g.fillStyle = tint; g.fillRect(0, 0, w, h);
@@ -1224,6 +1282,88 @@ const posterChai = () => textBoard(512, 704, (g, w, h) => {
     tw.position.set(-9 + grand() * 18, 0.02, 4.6 + grand() * 8.4);
     S.add(tw);
   }
+  // ---------- WORLD: door tak depth — far ground + skyline silhouettes + beech ki ped-pankti ----------
+  const farGround = new THREE.Mesh(new THREE.PlaneGeometry(170, 30), lam({ map: tex(dirt(29), 20, 4), color: 0xcdbb98 }));
+  farGround.rotation.x = -Math.PI / 2; farGround.position.set(0, -0.035, -25); S.add(farGround);
+  [[-21, 6, 9], [-13.5, 4.5, 12], [2, 6.5, 8], [15.5, 5, 11], [25, 6, 9]].forEach(([bx, bw, bh]) => {
+    const sil = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 3), bas({ color: 0x55506e })); sil.position.set(bx, bh / 2, -25.5); S.add(sil);
+  });
+  [[-11.5, -8.6], [-5.5, -9.6], [8.5, -9.2], [14.5, -8.6], [-18.5, -9.2], [21.5, -9.6]].forEach(([tx2, tz2], ti) => {
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.15, 2.1, 7), lam({ color: 0x4a3823 }));
+    tr.position.set(tx2, 1.05, tz2); S.add(tr);
+    const cn2 = new THREE.Mesh(new THREE.SphereGeometry(1.2 + (ti % 3) * 0.22, 10, 8), lam({ color: ti % 2 ? 0x2c6030 : 0x357a35 }));
+    cn2.scale.y = 0.8; cn2.position.set(tx2, 2.85, tz2); S.add(cn2);
+  });
+  // sadak ke dono kinare ki rekhaayein (lambi nazar = depth)
+  for (const lz of [-0.52, 3.72]) {
+    const line = box(34, 0.012, 0.13, lam({ color: 0xd9d2be })); line.position.set(0, 0.015, lz); S.add(line);
+  }
+  // ---------- WORLD: Seth dhaba par TIN ki chaadar (corrugation + band shutter + tin chhat) ----------
+  const wTinC = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const g = c.getContext('2d');
+    let sd = 777; const r = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const base = g.createLinearGradient(0, 0, 0, 512);
+    base.addColorStop(0, '#71828f'); base.addColorStop(0.5, '#5d6f7e'); base.addColorStop(1, '#46545f');
+    g.fillStyle = base; g.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 26; i++) { g.fillStyle = `rgba(${r() < 0.5 ? '215,224,232' : '28,38,48'},${0.05 + r() * 0.07})`; g.beginPath(); g.ellipse(r() * 512, r() * 512, 30 + r() * 80, 20 + r() * 50, 0, 0, 7); g.fill(); }
+    for (let x = 0; x < 512; x += 32) {
+      const gr2 = g.createLinearGradient(x, 0, x + 32, 0);
+      gr2.addColorStop(0, 'rgba(16,24,32,0.55)'); gr2.addColorStop(0.28, 'rgba(255,255,255,0.15)');
+      gr2.addColorStop(0.55, 'rgba(255,255,255,0.32)'); gr2.addColorStop(0.8, 'rgba(10,16,22,0.28)'); gr2.addColorStop(1, 'rgba(16,24,32,0.55)');
+      g.fillStyle = gr2; g.fillRect(x, 0, 32, 512);
+    }
+    for (const y of [170, 342]) {
+      g.fillStyle = 'rgba(12,18,24,0.6)'; g.fillRect(0, y, 512, 4);
+      g.fillStyle = 'rgba(255,255,255,0.20)'; g.fillRect(0, y + 4, 512, 2);
+      for (let x = 16; x < 512; x += 32) { g.fillStyle = '#2c3844'; g.beginPath(); g.arc(x, y + 12, 3.4, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.arc(x - 1, y + 11, 1.2, 0, 7); g.fill(); }
+    }
+    const rg2 = g.createLinearGradient(0, 380, 0, 512); rg2.addColorStop(0, 'rgba(150,80,30,0)'); rg2.addColorStop(1, 'rgba(140,72,26,0.5)');
+    g.fillStyle = rg2; g.fillRect(0, 380, 512, 132);
+    for (let i = 0; i < 22; i++) {
+      const x = r() * 512, y0 = r() * 300, len = 40 + r() * 160, w = 2 + r() * 6;
+      const sg = g.createLinearGradient(0, y0, 0, y0 + len); sg.addColorStop(0, `rgba(150,84,32,${0.16 + r() * 0.2})`); sg.addColorStop(1, 'rgba(150,84,32,0)');
+      g.fillStyle = sg; g.fillRect(x, y0, w, len);
+    }
+    for (let i = 0; i < 700; i++) { g.fillStyle = r() < 0.5 ? 'rgba(20,28,36,0.10)' : 'rgba(230,238,244,0.08)'; g.fillRect(r() * 512, r() * 512, 1.6, 1.6); }
+    return c;
+  })();
+  const wTinMat = (rx, ry) => lam({ map: tex(wTinC, rx, ry), bumpMap: tex(wTinC, rx, ry), bumpScale: 0.4 });
+  const sethTin = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 3.3), wTinMat(3.2, 1.4));
+  sethTin.position.set(2.3, 1.68, -4.27); S.add(sethTin);
+  const sethShutter = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2.6), wTinMat(1.2, 1.1));
+  sethShutter.position.set(1.02, 1.32, -4.19); S.add(sethShutter);
+  const shBarW = box(1.5, 0.08, 0.04, lam({ color: 0x39434c })); shBarW.position.set(1.02, 0.6, -4.16); S.add(shBarW);
+  const sethRoofTin = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 2.1), wTinMat(3.4, 1.0));
+  sethRoofTin.position.set(2.3, 3.3, -3.55); sethRoofTin.rotation.x = -0.42; S.add(sethRoofTin);
+  // ---------- WORLD: street lamp FX (shaam ko cone + pool + spot — proof wali craft) ----------
+  streetLampFx = new THREE.Group(); S.add(streetLampFx);
+  const lampConeW = new THREE.Mesh(new THREE.ConeGeometry(1.55, 3.3, 24, 1, true), new THREE.MeshBasicMaterial({ color: 0xffc37a, transparent: true, opacity: 0.085, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  lampConeW.position.set(-5.6, 1.78, 0.2); streetLampFx.add(lampConeW);
+  const lampPoolTexW = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(128, 128, 6, 128, 128, 126);
+    rg.addColorStop(0, 'rgba(255,205,130,0.55)'); rg.addColorStop(1, 'rgba(255,205,130,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    return new THREE.CanvasTexture(c);
+  })();
+  const lampPoolW = new THREE.Mesh(new THREE.CircleGeometry(1.75, 24), new THREE.MeshBasicMaterial({ map: lampPoolTexW, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  lampPoolW.rotation.x = -Math.PI / 2; lampPoolW.position.set(-5.6, 0.022, 0.2); streetLampFx.add(lampPoolW);
+  const lampSpotW = new THREE.SpotLight(0xffbe78, 260, 15, 0.62, 0.65, 1.5);
+  lampSpotW.position.set(-5.6, 3.42, 0.2); lampSpotW.target.position.set(-5.6, 0, 0.4);
+  streetLampFx.add(lampSpotW); streetLampFx.add(lampSpotW.target);
+  const lampGlowW = new THREE.Sprite(new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), color: 0xffc37a, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending }));
+  lampGlowW.position.set(-5.6, 3.45, 0.2); lampGlowW.scale.setScalar(1.5); streetLampFx.add(lampGlowW);
+  streetLampFx.visible = false;
+  // WORLD: shaam ko dono dhabon ke bulb ki garam roshni (eve shots ke frame ke andar wali practical light)
+  eveGlowFx = new THREE.Group(); S.add(eveGlowFx);
+  for (const cx of [-2.3, 2.3]) {
+    const eg = new THREE.Sprite(new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), color: 0xffc37a, transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending }));
+    eg.position.set(cx, 2.6, -3.42); eg.scale.setScalar(1.35); eveGlowFx.add(eg);
+    const pl = new THREE.PointLight(0xffb36b, 6.5, 6.5, 1.6); pl.position.set(cx, 2.45, -2.3); eveGlowFx.add(pl);
+  }
+  eveGlowFx.visible = false;
 }
 { // ---------- DESK V2 dressing ----------
   const S = deskG, WZ = -3.2;
@@ -1283,6 +1423,15 @@ const posterChai = () => textBoard(512, 704, (g, w, h) => {
     const jr = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.24, 10), lam({ color: [0xc23b2e, 0x57a773][i] }));
     jr.position.set(-0.05 + i * 0.42, 2.28, WZ + 0.18); S.add(jr);
   }
+  // WORLD: desk lamp ka roshni-cone + bulb halo (shaam me kagaz par girti roshni dikhe)
+  const lampDirW = new THREE.Vector3(0.15 - 1.02, 0.79 - 1.36, -0.45 + 1.15);
+  const lampLenW = lampDirW.length();
+  const lampConeDesk = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.62, lampLenW, 18, 1, true), new THREE.MeshBasicMaterial({ color: 0xffc37a, transparent: true, opacity: 0.10, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  lampConeDesk.position.set((1.02 + 0.15) / 2, (1.36 + 0.79) / 2, (-1.15 - 0.45) / 2);
+  lampConeDesk.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), lampDirW.clone().normalize().negate());
+  S.add(lampConeDesk);
+  const lampHaloDesk = new THREE.Sprite(new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), color: 0xffd9a0, transparent: true, opacity: 0.6, depthWrite: false, blending: THREE.AdditiveBlending }));
+  lampHaloDesk.position.set(1.02, 1.36, -1.12); lampHaloDesk.scale.setScalar(0.85); S.add(lampHaloDesk);
 }
 // ---------- shadows ON (cards ke blob ke saath asli parchaai bhi) ----------
 [dhabaG, streetG, deskG, phoneG, plateG, packG, stampG, cutPiece, coinG, bikeG, bike2G, noteG, phoneProp].forEach((gr) => {
@@ -1293,12 +1442,42 @@ const posterChai = () => textBoard(512, 704, (g, w, h) => {
     }
   });
 });
-function lookV2Frame(set, shot) {
-  const isSunset = shot.env === 'sunset';
-  if (skyDayM.mesh) skyDayM.mesh.visible = set === 'street' && !isSunset;
-  if (skySunM.mesh) skySunM.mesh.visible = set === 'street' && isSunset;
-  if (dhabaLight) dhabaLight.visible = set === 'dhaba';
+// ---------- WORLD: character shadow proxies (cards billboard hain, asli parchaai nahi deti —
+// isliye har card ke peeche ek invisible proxy; sirf street par, jahan lambi parchaai chahiye) ----------
+const proxyMatW = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+const proxiesW = ALL_CARDS.map(() => {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.22, 1.5, 10), proxyMatW); body.position.y = 0.75; body.castShadow = true; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), proxyMatW); head.position.y = 1.82; head.castShadow = true; g.add(head);
+  g.visible = false; scene.add(g); return g;
+});
+const updateProxiesW = (set) => {
+  ALL_CARDS.forEach((c, i) => {
+    const p = proxiesW[i];
+    if (set === 'street' && c.mesh.visible) {
+      p.visible = true;
+      p.position.set(c.mesh.position.x, 0, c.mesh.position.z);
+      p.scale.setScalar(c.mesh.scale.x || 1);
+    } else p.visible = false;
+  });
+};
+function worldFrame(set, shot) {
+  const envName = shot.env || ENV_DEFAULT[set];
+  const e = ENVS[envName] || ENVS.dhabaDay;
+  const skyKey = set === 'street' ? e.sky : null;
+  if (skyDayM.mesh) skyDayM.mesh.visible = skyKey === 'day';
+  if (skyEveM.mesh) skyEveM.mesh.visible = skyKey === 'eve';
+  if (skySunM.mesh) skySunM.mesh.visible = skyKey === 'sunset';
+  cloudSpritesW.forEach((sp) => { sp.visible = set === 'street'; });
+  if (cloudMatW) {
+    cloudMatW.color.set(skyKey === 'sunset' ? 0xe89a70 : skyKey === 'eve' ? 0x9a7ab0 : 0xffffff);
+    cloudMatW.opacity = skyKey === 'eve' ? 0.36 : 0.5;
+  }
+  if (streetLampFx) streetLampFx.visible = set === 'street' && e.lamp === 1;
+  if (eveGlowFx) eveGlowFx.visible = set === 'street' && e.lamp === 1;
+  if (dhabaLight) { dhabaLight.visible = set === 'dhaba'; dhabaLight.intensity = (envName === 'dhabaEve' || envName === 'sunset') ? 38 : 26; }
   if (deskLight) deskLight.visible = set === 'desk';
+  dhabaGlowMatW.opacity = envName === 'dhabaDay' ? 0.22 : 0.55;
 }
 const SETVIS = { dhaba: dhabaG, street: streetG, desk: deskG, phone: phoneG };
 window.renderFrame = (f) => {
@@ -1308,7 +1487,7 @@ window.renderFrame = (f) => {
   camera.fov = cam.fov; camera.updateProjectionMatrix();
   if (cam.roll) camera.rotateZ(cam.roll * Math.PI / 180);
   applyEnv(shot.env || ENV_DEFAULT[set]);
-  lookV2Frame(set, shot);
+  worldFrame(set, shot);
   for (const k in SETVIS) SETVIS[k].visible = (k === set);
   ALL_CARDS.forEach((c) => c.hide());
   plateG.visible = false; phoneProp.visible = false; packG.visible = false;
@@ -1528,6 +1707,7 @@ window.renderFrame = (f) => {
       drawChar(sethCard, 62, SETH, 'neutral', 'hang', 'hang', f, cp, 2.3, 0, -2.55, 0.96);
       break;
   }
+  updateProxiesW(set);
   renderer.render(scene, camera);
 };
 window.TOTAL = TOTAL;
