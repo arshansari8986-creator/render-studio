@@ -810,6 +810,12 @@ const faceFront = (p, cx, cy, W, expr, facing, look, lid, brim, skin, moustache,
             by + dO * u
         ], 5 * u, 2.5 * u);
     }
+    // naak ki halki rekha (moustache ho to chhoti si)
+    p.stroke([
+        [fx + 0.5 * u, cy + 5.5 * u],
+        [fx + 3.4 * u, cy + (moustache ? 9 : 11.5) * u],
+        [fx + 0.4 * u, cy + (moustache ? 10.5 : 14) * u]
+    ], 2 * u, "rgba(36,23,38,0.42)");
     const mx = cx + 8 * u * facing, my = cy + 20 * u;
     mouth(p, F.mouth, mx, my, u);
     if (moustache) for (const s of [
@@ -963,7 +969,7 @@ const hatOn = (p, o, hp, H, cx, hc, light, seed, facing, side)=>{
             p.ell(tx, ty, 7 * u, 7 * u, "#2b7a4b", 2.5 * u);
         }
     } else if (o.hat === "cap" || o.hat === "hair") {
-        const cut = crown + (o.hat === "cap" ? 0.3 : 0.42) * HH;
+        const cut = crown + (o.hat === "cap" ? 0.3 : (o.hairLine != null ? o.hairLine : 0.42)) * HH;
         const keep = (x, y)=>y < cut || side && o.hat === "hair" && x < cx - 6 * u && y < hc + 0.42 * H.b;
         const n = hp.length, startIdx = Math.max(0, hp.findIndex(([x, y], i)=>keep(x, y) && !keep(hp[(i + n - 1) % n][0], hp[(i + n - 1) % n][1])));
         const arc = [
@@ -2531,6 +2537,24 @@ const cobweb = (p, cx, cy, r, u) => {
 };
 
 /** front-facing Roman-era character. opts: expr, blink, look, facing, seed, L/R arm poses, tilt, headTilt, bob, nohelmet, light */
+// KAPDE KA PRINT — blob path ke andar clip karke: dhari (stripe) / chaukor (check) / bindu (polka)
+const clothPrint = (p, pts, cx, cy, rx, ry, pr, u) => {
+  if (!pr || !pr.type) return;
+  const col = pr.col || "#000000", step = (pr.step || 12) * u;
+  p.g.save(); p.g.globalAlpha = pr.a != null ? pr.a : 0.4;
+  p.clip(pts, () => {
+    if (pr.type === "stripe" || pr.type === "check")
+      for (let x = cx - rx; x <= cx + rx + 1; x += step) p.stroke([[x, cy - ry - 4], [x, cy + ry + 4]], (pr.lw || 1.7) * u, col);
+    if (pr.type === "check")
+      for (let y = cy - ry; y <= cy + ry + 1; y += step) p.stroke([[cx - rx - 4, y], [cx + rx + 4, y]], (pr.lw || 1.7) * u, col);
+    if (pr.type === "polka") {
+      const r = (pr.r || 1.9) * u; let row = 0;
+      for (let y = cy - ry; y <= cy + ry + 1; y += step, row++)
+        for (let x = cx - rx + (row % 2 ? step / 2 : 0); x <= cx + rx + 1; x += step) p.dot(x, y, r, col);
+    }
+  });
+  p.g.restore();
+};
 export const romanFront = (p, key, opts = {}) => {
   const O = typeof key === "string" ? OUTFITS[key] : key;
   const { expr = "neutral", blink = 0, look = 0, facing = 0, seed = 3, L = "hang", R = O.spear ? "spear" : "hang", tilt = 0, headTilt = 0,
@@ -2618,10 +2642,11 @@ export const romanFront = (p, key, opts = {}) => {
   // skirt / pteruges below the torso
   if (!dress) {
     const sk = [[tcx - 0.92 * T.a, torsoBot - 0.2 * HH], [tcx + 0.92 * T.a, torsoBot - 0.2 * HH], [tcx + 1.0 * T.a, torsoBot + 0.3 * HH], [tcx - 1.0 * T.a, torsoBot + 0.3 * HH]];
-    p.gradFill(sk, O.tunic, mul(O.tunic, SH_CLOTH), light); p.poly(sk, null, ow * 0.8);
+    p.gradFill(sk, O.tunic, mul(O.tunic, SH_CLOTH), light); clothPrint(p, sk, tcx, torsoBot + 0.05 * HH, T.a, 0.27 * HH, O.print, u); p.poly(sk, null, ow * 0.8);
     if (O.armor) for (let i = -3; i <= 3; i++) { const x = tcx + i * 0.27 * T.a, st = [[x - 9 * u, torsoBot - 0.05 * HH], [x + 9 * u, torsoBot - 0.05 * HH], [x + 9 * u, torsoBot + 0.22 * HH], [x - 9 * u, torsoBot + 0.22 * HH]]; p.poly(st, old ? "#5e4632" : LEATHER, 1.6 * u); }
   }
   p.gradFill(tp, O.tunic, mul(O.tunic, SH_CLOTH), light);
+  clothPrint(p, tp, tcx, tcy, T.a * 1.02, T.b * 1.02, O.print, u);
   p.clip(tp, () => {
     if (O.armor) {
       const top = chin - 0.1 * HH, bot = torsoBot - 0.25 * HH, n = 5;
@@ -2645,6 +2670,18 @@ export const romanFront = (p, key, opts = {}) => {
         for (const dx of [-0.62, -0.2, 0.24, 0.66]) p.dot(tcx + dx * T.a, chin + 0.05 * HH, 1.7 * u, "#3a3230");
       }
       if (O.toga) p.band([[tcx - 1.0 * T.a, chin - 0.1 * HH], [tcx + 1.1 * T.a, torsoBot - 0.1 * HH]], O.toga, 0.16 * HH, 1.6 * u);
+      if (O.toga && O.togaPrint) { // gamchha par safed chaukor (check) print — Gullak wali pehchan
+        const A = [tcx - 1.0 * T.a, chin - 0.1 * HH], B = [tcx + 1.1 * T.a, torsoBot - 0.1 * HH];
+        const dx = B[0] - A[0], dy = B[1] - A[1], ln = Math.hypot(dx, dy), px = -dy / ln, py = dx / ln, hw = 0.072 * HH;
+        const sashP = [[A[0] + px * hw, A[1] + py * hw], [B[0] + px * hw, B[1] + py * hw], [B[0] - px * hw, B[1] - py * hw], [A[0] - px * hw, A[1] - py * hw]];
+        p.clip(sashP, () => {
+          p.g.globalAlpha = 0.55;
+          for (const off of [-0.048, -0.024, 0, 0.024, 0.048]) p.stroke([[A[0] + px * off * HH, A[1] + py * off * HH], [B[0] + px * off * HH, B[1] + py * off * HH]], 1.3 * u, "#fff3da");
+          const n = Math.floor(ln / (9 * u));
+          for (let i = 1; i < n; i++) { const t = i / n, qx = A[0] + dx * t, qy = A[1] + dy * t; p.stroke([[qx - px * hw, qy - py * hw], [qx + px * hw, qy + py * hw]], 1.3 * u, "#fff3da"); }
+          p.g.globalAlpha = 1;
+        });
+      }
       if (O.apron) p.poly([[tcx - 0.55 * T.a, torsoBot - 0.2 * HH], [tcx + 0.55 * T.a, torsoBot - 0.2 * HH], [tcx + 0.6 * T.a, torsoBot + 0.2 * HH], [tcx - 0.6 * T.a, torsoBot + 0.2 * HH]], O.apron, 1.6 * u);
       if (O.shirt) p.poly([[tcx - 0.17 * T.a, chin - 0.04 * HH], [tcx + 0.17 * T.a, chin - 0.04 * HH], [tcx, chin + 0.36 * HH]], O.shirt, 1.4 * u);
       if (O.pack) { // astronaut chest unit
@@ -2682,9 +2719,22 @@ export const romanFront = (p, key, opts = {}) => {
   p.rot = Ah ? [rad(Ah), cx, chin, cpx - cx, cpy - chin] : null;
   if (helmet && O.helmet !== "ww2") galea(p, H, cx, hc, light, thick, ow, old, u);
   const hp = blobPts(cx, hc, H);
-  if (O.hair && !helmet) { const hb = blobPts(cx, hc - 0.03 * HH, { ...H, a: H.a * 1.04, b: H.b * 1.05 }); p.poly(hb, O.hair, 0); }
+  if (O.hair && !helmet) { const hb = blobPts(cx, hc - 0.03 * HH, { ...H, a: H.a * (O.hairStyle === "thick" ? 1.09 : 1.04), b: H.b * (O.hairStyle === "thick" ? 1.11 : 1.05) }); p.poly(hb, O.hair, 0); }
+  if (!helmet) for (const es of [-1, 1]) { // kaan — aadha sar ke peeche chhupa, aadha bahar
+    p.ell(cx + es * 1.0 * H.a, hc + 0.10 * H.b, 0.135 * H.a, 0.20 * H.b, skin, ow * 0.7);
+    p.ell(cx + es * 1.01 * H.a, hc + 0.10 * H.b, 0.06 * H.a, 0.11 * H.b, shade(skin, 0.86), 0);
+  }
   p.shadedFill(hp, skin, mul(skin, SH_SKIN), light, H.a);
   p.inkRing(hp, ow, thick);
+  p.clip(hp, () => { // chehre ki shading — oopar ujla, neeche garam gehraai, gaalon par gulabi rangat
+    p.ell(cx - 0.22 * H.a, hc - 0.55 * H.b, 0.78 * H.a, 0.5 * H.b, "rgba(255,248,228,0.20)", 0);
+    p.ell(cx, hc + 1.0 * H.b, 1.02 * H.a, 0.55 * H.b, "rgba(150,72,26,0.17)", 0);
+    p.ell(cx - 1.03 * H.a, hc + 0.15 * H.b, 0.42 * H.a, 0.85 * H.b, "rgba(120,58,24,0.10)", 0);
+    p.ell(cx + 1.03 * H.a, hc + 0.15 * H.b, 0.42 * H.a, 0.85 * H.b, "rgba(120,58,24,0.10)", 0);
+    const bl = O.stout ? 0.3 : 0.24;
+    p.ell(cx + 7 * u * facing - 0.5 * H.a, hc + 0.3 * H.b, 0.17 * H.a, 0.115 * H.b, `rgba(232,104,66,${bl})`, 0);
+    p.ell(cx + 7 * u * facing + 0.5 * H.a, hc + 0.3 * H.b, 0.17 * H.a, 0.115 * H.b, `rgba(232,104,66,${bl})`, 0);
+  });
   if (O.helmet === "ww2") { // WWII steel helmet: wide dome + brim, khaki steel
     const dome = ellPts(cx, hc - H.b * 0.18, H.a * 1.14, H.b * 0.8, 180, 360, 0, 44);
     p.shadedFill(dome, "#5e5c46", mul("#5e5c46", [0.66, 0.66, 0.7]), light, H.a, 0.4);
@@ -2703,7 +2753,11 @@ export const romanFront = (p, key, opts = {}) => {
     p.poly(rrect(cx - 4 * u, bandY - 0.55 * H.b, cx + 4 * u, bandY - 3 * u, 2 * u), old ? "#a88a4a" : BRASS, 1.5 * u);
     cheeks(p, H, cx, hc, light, ow, old, u);
   } else if (O.cap) hatOn(p, { hat: "cap", cap: O.cap, jacket: O.tunic }, hp, H, cx, hc, light, seed, facing, false);
-  else if (O.hair) hatOn(p, { hat: "hair", hair: O.hair, jacket: O.tunic }, hp, H, cx, hc, light, seed, facing, false);
+  else if (O.hair) hatOn(p, { hat: "hair", hair: O.hair, jacket: O.tunic, hairLine: O.hairLine }, hp, H, cx, hc, light, seed, facing, false);
+  if (O.hair && O.hairStyle === "side" && !helmet) { // side-part: maang aur jhuki hui lattein
+    p.stroke(curve([cx - 0.5 * H.a, hc - 0.68 * H.b], [cx - 0.05 * H.a, hc - 0.92 * H.b], [cx + 0.52 * H.a, hc - 0.74 * H.b], 8), 1.6 * u, shade(O.hair, 1.6));
+    p.stroke(curve([cx - 0.54 * H.a, hc - 0.56 * H.b], [cx - 0.02 * H.a, hc - 0.78 * H.b], [cx + 0.44 * H.a, hc - 0.6 * H.b], 8), 1.4 * u, shade(O.hair, 1.45));
+  }
   else if (O.helmet && nohelmet) { // bald old head with white side tufts
     for (const s of [-1, 1]) p.ell(cx + s * 0.9 * H.a, hc - 0.1 * H.b, 0.22 * H.a, 0.3 * H.b, "#f4f1ea", 3 * u);
   }
@@ -2715,6 +2769,22 @@ export const romanFront = (p, key, opts = {}) => {
     p.inkRing(bd, ow * 0.8, thick);
   }
   faceFront(p, cx, hc, W, expr, facing, look, lid, helmet, skin, O.beard ? O.beard : O.moustache, !!O.stout);
+  if (O.tilak && !helmet) { // maathe par tilak — safed kinara, laal beech
+    const tx = cx + 7 * u * facing;
+    p.stroke([[tx, hc - 23.5 * u], [tx, hc - 11 * u]], 5.4 * u, "#fff6e8");
+    p.stroke([[tx, hc - 23.5 * u], [tx, hc - 11 * u]], 3.1 * u, O.tilak);
+  }
+  if (O.sideHair) for (const s of [-1, 1]) // topi ke neeche se jhaankte kinare ke safed-hote baal
+    p.ell(cx + s * 1.01 * H.a, hc - 0.04 * H.b, 0.07 * H.a, 0.22 * H.b, O.sideHair, 1.6 * u);
+  if (O.glasses) { // gol chashma — frame, bridge, kaan tak dandiyaan, lens par halki chamak
+    const fx2 = cx + 7 * u * facing, ex2 = (expr === "shock" ? 12 : 13) * u;
+    for (const s of [-1, 1]) {
+      p.ell(fx2 + s * ex2, hc, 16 * u, 15 * u, null, 2.6 * u);
+      p.dot(fx2 + s * ex2 - 5 * u, hc - 6 * u, 1.5 * u, "rgba(255,255,255,0.85)");
+      p.stroke([[fx2 + s * (ex2 + 15 * u), hc - 3 * u], [cx + s * 1.0 * H.a, hc - 5 * u]], 2.4 * u);
+    }
+    p.stroke([[fx2 - 4 * u, hc - 3 * u], [fx2 + 4 * u, hc - 3 * u]], 2.6 * u);
+  }
   if (O.crown) { // the Sea King's crown: five gold points + jewelled band, seated on the head top
     const gold = "#e8b64c", goldDk = "#a87c26";
     const arc = (ry, a0, a1, n = 26) => { const pts = []; for (let i = 0; i <= n; i++) { const a = rad(a0 + (a1 - a0) * i / n); pts.push([cx + Math.cos(a) * H.a * 1.04, hc + Math.sin(a) * ry]); } return pts; };
