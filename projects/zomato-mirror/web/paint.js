@@ -15,7 +15,7 @@ export function planks(seed = 1, rot = 0) {
   for (let i = 0; i < n; i++) {
     const L = 52 + r() * 10, H = 30 + r() * 6;
     g.fillStyle = hsl(H, 42, L); g.fillRect(i * w, 0, w, 512);
-    for (let k = 0; k < 14; k++) { g.strokeStyle = hsl(H - 4, 40, L - 10 - r() * 8, 0.5); g.lineWidth = 1 + r() * 2; g.beginPath(); const x = i * w + 4 + r() * (w - 8); g.moveTo(x, 0); g.bezierCurveTo(x + r() * 6 - 3, 170, x + r() * 6 - 3, 340, x + r() * 4 - 2, 512); g.stroke(); }
+    for (let k = 0; k < 19; k++) { g.strokeStyle = hsl(H - 4, 40, L - 10 - r() * 8, 0.62); g.lineWidth = 1 + r() * 2; g.beginPath(); const x = i * w + 4 + r() * (w - 8); g.moveTo(x, 0); g.bezierCurveTo(x + r() * 6 - 3, 170, x + r() * 6 - 3, 340, x + r() * 4 - 2, 512); g.stroke(); }
     const cut = r() * 512; g.fillStyle = 'rgba(40,24,14,.9)'; g.fillRect(i * w, cut, w, 4);
     for (const y of [cut - 18, cut + 18]) { g.fillStyle = '#2b2620'; g.beginPath(); g.arc(i * w + w * 0.3, y, 2.6, 0, 7); g.arc(i * w + w * 0.7, y, 2.6, 0, 7); g.fill(); }
     g.fillStyle = 'rgba(30,18,10,.95)'; g.fillRect(i * w, 0, 3, 512);
@@ -84,13 +84,36 @@ export function dirt(seed = 7) {
   const [c, g] = cv(512, 512), r = rng(seed);
   g.fillStyle = '#a88a62'; g.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 300; i++) { g.fillStyle = hsl(30 + r() * 10, 25, 40 + r() * 25, .6); g.beginPath(); g.ellipse(r() * 512, r() * 512, 3 + r() * 14, 2 + r() * 8, r() * 3, 0, 7); g.fill(); }
+  // bade rang ke hisse (geeli/sookhi mitti)
+  for (let i = 0; i < 22; i++) { g.fillStyle = hsl(32 + r() * 14, 28 + r() * 14, 42 + r() * 16, .35); g.beginPath(); g.ellipse(r() * 512, r() * 512, 22 + r() * 56, 12 + r() * 30, r() * 3, 0, 7); g.fill(); }
+  // ret-kankar speckle
+  for (let i = 0; i < 2400; i++) { const v = r(); g.fillStyle = v < 0.45 ? 'rgba(70,52,30,0.20)' : v < 0.8 ? 'rgba(226,204,160,0.20)' : 'rgba(140,120,95,0.25)'; g.fillRect(r() * 512, r() * 512, 1 + r() * 2.4, 1 + r() * 2); }
+  // chhote pathar — neeche parchaai, oopar safed kinara
+  for (let i = 0; i < 26; i++) { const x = r() * 512, y = r() * 512, rad = 2.5 + r() * 4.5; g.fillStyle = 'rgba(60,45,28,0.35)'; g.beginPath(); g.ellipse(x + rad * 0.25, y + rad * 0.3, rad, rad * 0.62, 0, 0, 7); g.fill(); g.fillStyle = hsl(36, 12 + r() * 10, 52 + r() * 16); g.beginPath(); g.ellipse(x, y, rad, rad * 0.62, r(), 0, 7); g.fill(); g.fillStyle = 'rgba(255,250,235,0.5)'; g.beginPath(); g.ellipse(x - rad * 0.3, y - rad * 0.25, rad * 0.4, rad * 0.2, -0.5, 0, 7); g.fill(); }
+  // sookhi tehniyaan
+  for (let i = 0; i < 10; i++) { g.strokeStyle = `rgba(96,72,36,${0.3 + r() * 0.25})`; g.lineWidth = 1.4; const x = r() * 512, y = r() * 512, a = r() * 6.3, l = 8 + r() * 16; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
   return c;
 }
 export function plaster(seed = 8, hue = 40) {
   const [c, g] = cv(256, 256), r = rng(seed);
   g.fillStyle = hsl(hue, 40, 86); g.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 40; i++) { g.fillStyle = hsl(hue, 30, 76 + r() * 8, .5); g.beginPath(); g.ellipse(r() * 256, r() * 256, 10 + r() * 30, 6 + r() * 16, 0, 0, 7); g.fill(); }
-  g.fillStyle = hsl(hue, 20, 60, .5); g.fillRect(0, 236, 256, 20);
+  // bade halke patches (purani marammat wale hisse)
+  for (let i = 0; i < 40; i++) { g.fillStyle = hsl(hue, 30, 71 + r() * 13, .68); g.beginPath(); g.ellipse(r() * 256, r() * 256, 12 + r() * 34, 7 + r() * 18, 0, 0, 7); g.fill(); }
+  // karni (trowel) ki halki aadi rekhaayein
+  for (let i = 0; i < 6; i++) { g.strokeStyle = hsl(hue, 26, 68, .20); g.lineWidth = 4 + r() * 7; const y = r() * 256; g.beginPath(); g.moveTo(-8, y); g.bezierCurveTo(80, y + r() * 10 - 5, 176, y + r() * 10 - 5, 264, y + r() * 8 - 4); g.stroke(); }
+  // baarish/paani ke lambe daag — oopar se neeche
+  for (let i = 0; i < 7; i++) { const x = r() * 256, w = 3 + r() * 8, y0 = r() * 90, len = 70 + r() * 130; const gr = g.createLinearGradient(0, y0, 0, y0 + len); gr.addColorStop(0, 'rgba(110,84,50,0.27)'); gr.addColorStop(1, 'rgba(110,84,50,0)'); g.fillStyle = gr; g.fillRect(x, y0, w, len); }
+  // bareek dararein (hairline cracks)
+  g.strokeStyle = 'rgba(90,64,38,0.38)'; g.lineWidth = 1.1;
+  for (let i = 0; i < 4; i++) { let x = r() * 256, y = r() * 120; g.beginPath(); g.moveTo(x, y); const n = 4 + (r() * 4 | 0); for (let k = 0; k < n; k++) { x += (r() - 0.5) * 12; y += 9 + r() * 14; g.lineTo(x, y); } g.stroke(); }
+  // ret-speckle — haath ke plaster ka daanedaar rookhapan
+  for (let i = 0; i < 1200; i++) { g.fillStyle = r() < 0.5 ? 'rgba(120,90,55,0.10)' : 'rgba(255,252,240,0.10)'; g.fillRect(r() * 256, r() * 256, 1.5, 1.5); }
+  // neeche ki gandagi — zameen se uthti nami + daag (canvas bottom = deewaar ka neeche)
+  const gr = g.createLinearGradient(0, 168, 0, 256);
+  gr.addColorStop(0, 'rgba(96,70,40,0)'); gr.addColorStop(1, 'rgba(96,70,40,0.46)');
+  g.fillStyle = gr; g.fillRect(0, 168, 256, 88);
+  for (let i = 0; i < 11; i++) { g.fillStyle = `rgba(90,64,36,${0.10 + r() * 0.12})`; g.beginPath(); g.ellipse(r() * 256, 256 - r() * 26, 7 + r() * 22, 4 + r() * 8, 0, 0, 7); g.fill(); }
+  g.fillStyle = hsl(hue, 20, 58, .55); g.fillRect(0, 240, 256, 16);
   return c;
 }
 export function roof(seed = 9) {
