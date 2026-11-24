@@ -299,10 +299,16 @@ export function woodTexture(base = '#8a6844', dark = '#6d5136') {
   for (let r = 0; r < 4; r++) {
     g.fillStyle = r % 2 ? base : '#93744e'; g.fillRect(0, r * 64, 256, 64);
     g.fillStyle = dark; g.fillRect(0, r * 64, 256, 5);
-    for (let i = 0; i < 26; i++) { // grain streaks
-      g.strokeStyle = `rgba(70,50,28,${rnd(0.05, 0.16)})`; g.lineWidth = rnd(1, 2.4);
+    for (let i = 0; i < 30; i++) { // grain streaks
+      g.strokeStyle = `rgba(70,50,28,${rnd(0.10, 0.27)})`; g.lineWidth = rnd(1, 2.4);
       const y = r * 64 + rnd(8, 58); g.beginPath(); g.moveTo(0, y);
       g.bezierCurveTo(80, y + rnd(-4, 4), 170, y + rnd(-4, 4), 256, y); g.stroke();
+    }
+    if (r % 2 === 0) { // lakdi ki gaanth (knot)
+      const kx = rnd(24, 232), ky = r * 64 + rnd(18, 46);
+      g.strokeStyle = 'rgba(52,34,16,0.5)'; g.lineWidth = 2;
+      g.beginPath(); g.ellipse(kx, ky, rnd(4, 7), rnd(2.5, 4), 0, 0, 7); g.stroke();
+      g.fillStyle = 'rgba(40,24,10,0.55)'; g.beginPath(); g.ellipse(kx, ky, 1.6, 1.1, 0, 0, 7); g.fill();
     }
   }
   _woodTex = new THREE.CanvasTexture(c); _woodTex.colorSpace = THREE.SRGBColorSpace; return _woodTex;
