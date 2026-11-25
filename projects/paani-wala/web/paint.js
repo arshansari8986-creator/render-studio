@@ -224,7 +224,47 @@ export function radial(col = '0,0,0', a = 0.55) {
   gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(0.55, `rgba(${col},${a * 0.6})`); gr.addColorStop(1, `rgba(${col},0)`);
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return c;
 }
-/** harbour rule sign: must read correctly (planar UV, front face) */
+/** PAANI v2 — geeli concrete (gali/depot floor): slate base, geele daag, puddle sheen streaks */
+export function wetConcrete(seed = 51) {
+  const [c, g] = cv(512, 512), r = rng(seed);
+  g.fillStyle = '#64748b'; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 60; i++) { g.fillStyle = hsl(210 + r() * 20, 12 + r() * 10, 38 + r() * 14, .5); g.beginPath(); g.ellipse(r() * 512, r() * 512, 14 + r() * 44, 9 + r() * 26, r() * 3, 0, 7); g.fill(); }
+  // geele gehare daag
+  for (let i = 0; i < 26; i++) { g.fillStyle = `rgba(15,23,42,${0.18 + r() * 0.22})`; g.beginPath(); g.ellipse(r() * 512, r() * 512, 18 + r() * 60, 10 + r() * 30, r() * 3, 0, 7); g.fill(); }
+  // puddle sheen — halki neeli chamakili lakeerein
+  for (let i = 0; i < 18; i++) { g.strokeStyle = `rgba(186,230,253,${0.25 + r() * 0.3})`; g.lineWidth = 1.5 + r() * 3; g.beginPath(); const x = r() * 512, y = r() * 512; g.moveTo(x, y); g.bezierCurveTo(x + 30, y + 6, x + 60, y - 4, x + 90 + r() * 40, y + 4); g.stroke(); }
+  // ret-speckle + hairline cracks
+  for (let i = 0; i < 1600; i++) { g.fillStyle = r() < 0.5 ? 'rgba(30,41,59,0.18)' : 'rgba(226,232,240,0.14)'; g.fillRect(r() * 512, r() * 512, 1.5, 1.5); }
+  g.strokeStyle = 'rgba(30,41,59,0.35)'; g.lineWidth = 1.1;
+  for (let i = 0; i < 5; i++) { let x = r() * 512, y = r() * 512; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (r() - 0.5) * 30; y += 12 + r() * 20; g.lineTo(x, y); } g.stroke(); }
+  return c;
+}
+/** PAANI v2 — depot ki halki neeli tiles + grout */
+export function tiles(seed = 52) {
+  const [c, g] = cv(512, 512), r = rng(seed), n = 6, w = 512 / n;
+  g.fillStyle = '#94a3b8'; g.fillRect(0, 0, 512, 512);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const L = 82 + r() * 8;
+    g.fillStyle = hsl(200 + r() * 10, 30, L);
+    g.beginPath(); g.roundRect(x * w + 3, y * w + 3, w - 6, w - 6, 4); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(x * w + 8, y * w + 6, w - 16, 4);
+    if (r() < 0.3) { g.fillStyle = 'rgba(15,23,42,0.16)'; g.beginPath(); g.ellipse(x * w + w / 2, y * w + w / 2, 12 + r() * 18, 8 + r() * 10, 0, 0, 7); g.fill(); }
+  }
+  return c;
+}
+/** PAANI v2 — tin ki chhat: corrugated gehri teal dharriyaan + zang ke daag */
+export function tinRoof(seed = 53) {
+  const [c, g] = cv(512, 256), r = rng(seed);
+  g.fillStyle = '#134e4a'; g.fillRect(0, 0, 512, 256);
+  for (let x = 0; x < 512; x += 16) {
+    const gr = g.createLinearGradient(x, 0, x + 16, 0);
+    gr.addColorStop(0, 'rgba(0,0,0,0.35)'); gr.addColorStop(0.5, 'rgba(94,234,212,0.20)'); gr.addColorStop(1, 'rgba(0,0,0,0.35)');
+    g.fillStyle = gr; g.fillRect(x, 0, 16, 256);
+  }
+  for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(120,53,15,${0.12 + r() * 0.2})`; g.beginPath(); g.ellipse(r() * 512, r() * 256, 3 + r() * 10, 2 + r() * 5, 0, 0, 7); g.fill(); }
+  for (let i = 0; i < 8; i++) { g.fillStyle = '#0f766e'; g.beginPath(); g.arc(r() * 512, r() * 256, 2.5, 0, 7); g.fill(); }
+  return c;
+}
 export function signNoPets() {
   const [c, g] = cv(256, 320);
   g.fillStyle = '#e8dfc8'; g.fillRect(0, 0, 256, 320);
