@@ -57,6 +57,7 @@ for (let i = 0; i < 4; i++) { const sp = new THREE.Sprite(moteMat()); sp.scale.s
 function setNightLamp(on, f) {
   streetLampLight.intensity = on ? 4 : 0;
   lampConeMat.opacity = on ? 0.13 : 0;
+  lampHead.visible = on; lampBulb.visible = on; // 9b: band lamp ka kaala head frame kinare par speck banta tha
   lampMotes.forEach((m, i) => {
     m.material.opacity = on ? 0.45 : 0;
     m.position.set(2.25 + Math.sin(f * 0.02 + i * 1.7) * 0.5, 1.0 + ((f * 0.004 + i * 0.23) % 1) * 1.6, -1.1 + Math.cos(f * 0.017 + i * 2.1) * 0.35);
@@ -162,10 +163,10 @@ const RIVAL = { tunic: '#7c2d12', shirt: '#fef3c7', skin: '#c98a54', hair: '#1e1
 // ENVS — har samay ka apna natural rang, koi single wash NAHI
 // =====================================================================
 const ENVS = {
-  morning: { bg: 0x9fd8d4, fogC: 0xbfe8e2, fogNear: 16, fogFar: 60, hemi: 1.06, hemiC: 0xeafaf6, hemiG: 0x7a9a8a, sun: 1.35, sunC: 0xfff7cc, sunPos: [-8, 7, 6], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.1, sky: 'morning' },
-  day: { bg: 0x7cc7de, fogC: 0xa9d4e6, fogNear: 14, fogFar: 60, hemi: 1.0, hemiC: 0xcfe4ff, hemiG: 0x8a7a5a, sun: 1.42, sunC: 0xffffff, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.13, sky: 'day' },
-  noon: { bg: 0xbae6fd, fogC: 0xcdebfd, fogNear: 16, fogFar: 64, hemi: 1.18, hemiC: 0xf6fbff, hemiG: 0x9a9a8a, sun: 1.66, sunC: 0xffffff, sunPos: [-2.5, 12, 4.5], bounce: 0.34, bounceC: 0xe2efff, expo: 1.09, sky: 'day' },
-  evening: { bg: 0x0f766e, fogC: 0x115e59, fogNear: 14, fogFar: 68, hemi: 0.9, hemiC: 0xccfbf1, hemiG: 0x134e4a, sun: 1.1, sunC: 0xfbbf24, sunPos: [-9, 4, 6], bounce: 0.22, bounceC: 0xfde68a, expo: 1.08, sky: 'evening' },
+  morning: { bg: 0xd8e8ee, fogC: 0xd8e4e0, fogNear: 10, fogFar: 42, hemi: 1.06, hemiC: 0xdfe8f0, hemiG: 0x8a7a5a, sun: 1.35, sunC: 0xffe9b8, sunPos: [-8, 7, 6], bounce: 0.3, bounceC: 0xe8e0d0, expo: 1.1, sky: 'morning' },
+  day: { bg: 0xc8dcec, fogC: 0xd0dde6, fogNear: 12, fogFar: 48, hemi: 1.0, hemiC: 0xdfe8f0, hemiG: 0x8a7a5a, sun: 1.42, sunC: 0xfff6e0, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xe8e0d0, expo: 1.13, sky: 'day' },
+  noon: { bg: 0xb8d4e8, fogC: 0xc8dcea, fogNear: 12, fogFar: 50, hemi: 1.18, hemiC: 0xf0f4f8, hemiG: 0x8a7a5a, sun: 1.66, sunC: 0xffffff, sunPos: [-2.5, 12, 4.5], bounce: 0.34, bounceC: 0xe2efff, expo: 1.09, sky: 'day' },
+  evening: { bg: 0xd88a5e, fogC: 0xe0a878, fogNear: 9, fogFar: 38, hemi: 0.9, hemiC: 0xf0c8a8, hemiG: 0x5a3a2a, sun: 1.2, sunC: 0xff8a3c, sunPos: [-9, 4, 6], bounce: 0.22, bounceC: 0xe8a06a, expo: 1.08, sky: 'evening' },
 };
 const applyEnv = (name) => {
   const e = ENVS[name] || ENVS.day;
@@ -189,23 +190,38 @@ function skyTex(stops) {
 }
 const skyGeo = new THREE.PlaneGeometry(110, 30);
 const skyMeshes = {
-  morning: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#0f766e'], [0.55, '#5eead4'], [1, '#fef9c3']]), fog: false })),
-  day: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#0284c7'], [0.55, '#7dd3fc'], [1, '#f0f9ff']]), fog: false })),
-  evening: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#134e4a'], [0.55, '#0d9488'], [1, '#fde68a']]), fog: false })),
+  morning: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#7fa8c9'], [0.55, '#bcd8e8'], [1, '#f6e8c8']]), fog: false })),
+  day: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#6fa3d0'], [0.55, '#a8cde8'], [1, '#f2e6c8']]), fog: false })),
+  evening: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#7a4a6e'], [0.55, '#d96a3a'], [1, '#ffd9a0']]), fog: false })),
 };
 for (const k in skyMeshes) { skyMeshes[k].position.set(0, 11, -30); skyMeshes[k].visible = false; scene.add(skyMeshes[k]); }
-const cloudMat = new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), transparent: true, opacity: 0.55, depthWrite: false });
+const cloudMat = new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']]), transparent: true, opacity: 0.8, depthWrite: false, fog: false });
 const clouds = [];
 for (let i = 0; i < 7; i++) {
   const sp = new THREE.Sprite(cloudMat);
-  sp.position.set(-22 + i * 7.5, 8.5 + (i % 3) * 1.6, -24);
-  sp.scale.set(7 + (i % 3) * 2.5, 2.2 + (i % 2), 1);
+  sp.position.set(-22 + i * 7.5, 7.2 + (i % 3) * 1.8, -24);
+  sp.scale.set(7 + (i % 3) * 2.5, 2.6 + (i % 2) * 0.8, 1);
   scene.add(sp); clouds.push(sp);
+}
+// ---------- DISTANT SKYLINE (background depth): hazy buildings peeche, har non-map shot me ----------
+// Fog se halke dhundhle — hero ke peeche asli duniya dikhe, khaali aasmaan nahi.
+const skylineG = new THREE.Group(); scene.add(skylineG);
+{
+  const skyCols = [0xb8a888, 0xa89a80, 0x9a8f7a, 0xc4b49a, 0x8a7f6e];
+  const skySpots = [[-22.5, 7], [-17.5, 9], [-12.5, 6], [-7.5, 8], [-2.5, 10], [2.5, 7], [7.5, 9], [12.5, 6], [17.5, 8], [22.5, 7]];
+  skySpots.forEach(([sx, sh], i) => {
+    const b = box(5.5, sh, 1.2, lam({ color: skyCols[i % skyCols.length] }));
+    b.position.set(sx, sh / 2, -19); skylineG.add(b);
+    for (let r = 0; r < Math.floor(sh / 1.6); r++) for (let cix = 0; cix < 3; cix++) {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.6), bas({ color: 0x6b7a72 }));
+      win.position.set(sx - 1.2 + cix * 1.2, 1.2 + r * 1.6, -18.35); skylineG.add(win);
+    }
+  });
 }
 function mkTree(x, z, s = 1) {
   const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s);
   const trunk = cyl(0.09, 0.13, 1.6, lam({ color: 0x6d4a2c })); trunk.position.y = 0.8; g.add(trunk);
-  const cols = [0x3e7d32, 0x4c9141, 0x35702c];
+  const cols = [0x4a6b2f, 0x5a7a35, 0x3d5c2a];
   [[0, 2.2, 0, 0.85], [-0.55, 1.85, 0.1, 0.6], [0.55, 1.9, -0.1, 0.65], [0.1, 2.6, 0, 0.55]].forEach(([px, py, pz, r], i) => {
     const m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), lam({ color: cols[i % 3] }));
     m.position.set(px, py, pz); g.add(m);
@@ -251,7 +267,7 @@ depotG.add(chalkBoard);
 const wallCanvas = document.createElement('canvas'); wallCanvas.width = 1024; wallCanvas.height = 360;
 {
   const g = wallCanvas.getContext('2d');
-  g.fillStyle = '#0f766e'; g.fillRect(0, 0, 1024, 360);
+  g.fillStyle = '#2f5d50'; g.fillRect(0, 0, 1024, 360);
   g.textAlign = 'left'; g.fillStyle = '#f8fafc';
   g.font = 'bold 200px "Comic Sans MS", "Chalkboard SE", cursive';
   g.fillText('₹60,000', 48, 200);
@@ -262,12 +278,21 @@ const wallTex = new THREE.CanvasTexture(wallCanvas); wallTex.colorSpace = THREE.
 const wallSign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.92), lam({ map: wallTex }));
 wallSign.position.set(-2.2, 2.55, -4.24); wallSign.rotation.z = -0.03; wallSign.visible = false;
 depotG.add(wallSign);
+// deewaar par hand-painted sign (board nahi — seedha deewaar par likha) — module scope (s40 toggle ke liye)
+// NOTE: canvas transparent hai (clearRect) — isliye material transparent:true chahiye, warna kaala dabba dikhta hai
+const depotSignTex = textBoard(768, 132, (g, w, h) => {
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = '#f8fafc'; g.font = 'bold 72px "Comic Sans MS", cursive'; g.textAlign = 'center';
+  g.fillText('DEEPAK PAANI SEVA', w / 2, 88);
+});
+const depotSign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.45), bas({ map: depotSignTex, transparent: true }));
+depotSign.position.set(-2.2, 2.7, -4.24); depotG.add(depotSign);
 const glassCanvas = document.createElement('canvas'); glassCanvas.width = 512; glassCanvas.height = 320;
 {
   const g = glassCanvas.getContext('2d'); g.clearRect(0, 0, 512, 320);
-  g.textAlign = 'center'; g.fillStyle = '#0f766e';
+  g.textAlign = 'center'; g.fillStyle = '#2f5d50';
   g.font = 'bold 170px Arial'; g.fillText('₹30', 256, 190);
-  g.fillStyle = '#134e4a'; g.font = 'bold 52px Arial'; g.fillText('OFFICE RATE', 256, 275);
+  g.fillStyle = '#2f4a4a'; g.font = 'bold 52px Arial'; g.fillText('OFFICE RATE', 256, 275);
 }
 const glassTex = new THREE.CanvasTexture(glassCanvas); glassTex.colorSpace = THREE.SRGBColorSpace;
 const glassNote = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 0.72), new THREE.MeshBasicMaterial({ map: glassTex, transparent: true, depthWrite: false }));
@@ -276,7 +301,7 @@ lobbyG.add(glassNote);
 const dropCanvas = document.createElement('canvas'); dropCanvas.width = 256; dropCanvas.height = 256;
 {
   const g = dropCanvas.getContext('2d');
-  g.fillStyle = '#06b6d4'; g.beginPath();
+  g.fillStyle = '#0e8fb5'; g.beginPath();
   g.moveTo(128, 12); g.bezierCurveTo(200, 120, 210, 160, 200, 190);
   g.bezierCurveTo(185, 235, 70, 235, 56, 190); g.bezierCurveTo(46, 160, 56, 120, 128, 12); g.fill();
   g.fillStyle = '#ffffff'; g.font = 'bold 64px Arial'; g.textAlign = 'center'; g.fillText('₹3', 128, 190);
@@ -304,20 +329,20 @@ const mapGroup = new THREE.Group(); mapGroup.position.set(0, 0.02, -0.6); mapGro
 {
   const mapCanvas = document.createElement('canvas'); mapCanvas.width = 512; mapCanvas.height = 920;
   const g = mapCanvas.getContext('2d');
-  g.fillStyle = '#e0f2fe'; g.fillRect(0, 0, 512, 920);
-  g.fillStyle = '#bbf7d0'; g.fillRect(20, 120, 130, 180); g.fillRect(360, 420, 130, 200);
-  g.fillStyle = '#94a3b8'; g.fillRect(210, 40, 92, 840);
+  g.fillStyle = '#e8e0cc'; g.fillRect(0, 0, 512, 920);
+  g.fillStyle = '#c8d8b0'; g.fillRect(20, 120, 130, 180); g.fillRect(360, 420, 130, 200);
+  g.fillStyle = '#8a8578'; g.fillRect(210, 40, 92, 840);
   g.fillStyle = '#f8fafc';
   for (let y = 60; y < 880; y += 56) g.fillRect(250, y, 12, 30);
-  g.fillStyle = '#94a3b8'; g.fillRect(20, 430, 472, 70);
-  g.fillStyle = '#0f766e'; g.fillRect(170, 760, 172, 120);
+  g.fillStyle = '#8a8578'; g.fillRect(20, 430, 472, 70);
+  g.fillStyle = '#2f5d50'; g.fillRect(170, 760, 172, 120);
   g.fillStyle = '#f8fafc'; g.font = 'bold 44px Arial'; g.textAlign = 'center'; g.fillText('DEPOT', 256, 830);
-  g.fillStyle = '#facc15';
+  g.fillStyle = '#e8c85a';
   [[60, 300], [380, 300], [60, 560]].forEach(([x, y]) => g.fillRect(x, y, 90, 70));
-  g.fillStyle = '#134e4a'; g.font = 'bold 30px Arial'; g.fillText('GHAR', 105, 345);
+  g.fillStyle = '#2f4a4a'; g.font = 'bold 30px Arial'; g.fillText('GHAR', 105, 345);
   g.fillStyle = '#134e4a';
   [[180, 60], [250, 60], [180, 140], [250, 140]].forEach(([x, y]) => g.fillRect(x, y, 56, 64));
-  g.fillStyle = '#0f766e'; g.font = 'bold 34px Arial'; g.fillText('4 TOWERS', 105, 60);
+  g.fillStyle = '#2f5d50'; g.font = 'bold 34px Arial'; g.fillText('4 TOWERS', 105, 60);
   const mapTex = new THREE.CanvasTexture(mapCanvas); mapTex.colorSpace = THREE.SRGBColorSpace; mapTex.anisotropy = 4;
   const mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 6.5), lam({ map: mapTex }));
   mapPlane.rotation.x = -Math.PI / 2; mapGroup.add(mapPlane);
@@ -332,7 +357,7 @@ const routeDots = [];
     segs.push(len); total += len;
   }
   const dotGeo = new THREE.PlaneGeometry(0.14, 0.14);
-  const dotMat = bas({ color: 0x0f766e });
+  const dotMat = bas({ color: 0x2f5d50 });
   for (let i = 0; i < ROUTE_N; i++) {
     const d = (i / (ROUTE_N - 1)) * total;
     let acc = 0, px = ROUTE_WPS[0][0], pz = ROUTE_WPS[0][1];
@@ -367,101 +392,118 @@ function setRoute(p) {
 // ---------- DEPOT: RO plant, left-third deewaar, tin chhat, kaala tank ----------
 {
   const S = depotG;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(17), 8, 8), color: 0x8fa3b0 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(17), 8, 8), color: 0x9c9180 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
-  const tileFloor = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 4.5), lam({ map: tex(tiles(52), 3, 2), color: 0xe0f2fe }));
+  const tileFloor = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 4.5), lam({ map: tex(tiles(52), 3, 2), color: 0xd8d2c4 }));
   tileFloor.rotation.x = -Math.PI / 2; tileFloor.position.set(2.2, 0.0, -2.4); S.add(tileFloor);
   // puddles (geeli zameen)
   [[-1.0, 0.6, 0.9], [2.8, 1.4, 1.2], [-4.2, 2.2, 0.7]].forEach(([px, pz, pr]) => {
-    const pd = new THREE.Mesh(new THREE.CircleGeometry(pr, 20), new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.32, depthWrite: false }));
+    const pd = new THREE.Mesh(new THREE.CircleGeometry(pr, 20), new THREE.MeshBasicMaterial({ color: 0x9db8c4, transparent: true, opacity: 0.28, depthWrite: false }));
     pd.rotation.x = -Math.PI / 2; pd.position.set(px, 0.012, pz); S.add(pd);
   });
   // depot deewaar LEFT-THIRD (x=-2.2), teal
-  const dwall = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 3.9), lam({ map: tex(plaster(41, 38), 2, 1), color: 0x0f766e }));
-  dwall.position.set(-2.2, 1.95, -4.3); S.add(dwall);
+  const dwall = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 3.1), lam({ map: tex(plaster(41, 38), 2, 1), color: 0xb59d7d }));
+  dwall.position.set(-2.2, 1.55, -4.3); // deewaar neechi — upar aasmaan + skyline dikhe (depth) S.add(dwall);
   for (const px of [-4.6, 0.2]) {
-    const pil = box(0.28, 3.3, 0.28, lam({ color: 0xf8fafc })); pil.position.set(px, 1.65, -3.3); S.add(pil);
+    const pil = box(0.28, 3.1, 0.28, lam({ color: 0xe8ddc8 })); pil.position.set(px, 1.55, -3.3); S.add(pil);
   }
   // tin chhat + kaala paani tank upar
-  const roof = box(5.6, 0.12, 2.4, lam({ map: tex(tinRoof(53), 2, 1), color: 0x134e4a })); roof.position.set(-2.2, 3.5, -3.3); S.add(roof);
-  const roofEdge = box(5.6, 0.1, 0.08, lam({ color: 0x14b8a6 })); roofEdge.position.set(-2.2, 3.44, -2.12); S.add(roofEdge);
-  const tank = cyl(0.55, 0.55, 0.9, lam({ color: 0x1e293b }), 16); tank.position.set(-3.6, 4.0, -3.6); S.add(tank);
-  const tankPipe = cyl(0.05, 0.05, 1.1, lam({ color: 0x475569 }), 8); tankPipe.position.set(-3.6, 3.4, -3.6); S.add(tankPipe);
-  // deewaar par hand-painted sign (board nahi — seedha deewaar par likha)
-  const depotSign = boardMesh(2.6, 0.45, textBoard(768, 132, (g, w, h) => {
-    g.clearRect(0, 0, w, h);
-    g.fillStyle = '#f8fafc'; g.font = 'bold 72px "Comic Sans MS", cursive'; g.textAlign = 'center';
-    g.fillText('DEEPAK PAANI SEVA', w / 2, 88);
-  }), true); depotSign.position.set(-2.2, 3.12, -4.24); S.add(depotSign);
+  const roof = box(5.6, 0.12, 2.4, lam({ map: tex(tinRoof(53), 2, 1), color: 0x4a5a52 })); roof.position.set(-2.2, 3.15, -3.3); S.add(roof);
+  const roofEdge = box(5.6, 0.1, 0.08, lam({ color: 0x5a8a80 })); roofEdge.position.set(-2.2, 3.09, -2.12); S.add(roofEdge);
+  const tank = cyl(0.55, 0.55, 0.9, lam({ color: 0x1e293b }), 16); tank.position.set(-3.6, 3.6, -3.6); S.add(tank);
+  const tankPipe = cyl(0.05, 0.05, 0.5, lam({ color: 0x475569 }), 8); tankPipe.position.set(-3.6, 3.35, -3.6); S.add(tankPipe);
   // RO PLANT right: neele drums + steel tank + pipes + nal
   [[1.8, -3.4], [2.7, -3.6], [3.6, -3.4]].forEach(([dx, dz]) => {
-    const dr = cyl(0.42, 0.42, 1.1, lam({ color: 0x0369a1 }), 16); dr.position.set(dx, 0.55, dz); S.add(dr);
-    const lid = cyl(0.44, 0.44, 0.06, lam({ color: 0x075985 }), 16); lid.position.set(dx, 1.13, dz); S.add(lid);
+    const dr = cyl(0.42, 0.42, 1.1, lam({ color: 0x2f5d7a }), 16); dr.position.set(dx, 0.55, dz); S.add(dr);
+    const lid = cyl(0.44, 0.44, 0.06, lam({ color: 0x274b5e }), 16); lid.position.set(dx, 1.13, dz); S.add(lid);
   });
   const steelTank = cyl(0.55, 0.55, 1.7, lam({ color: 0xcbd5e1 }), 16); steelTank.position.set(2.7, 0.85, -4.15); S.add(steelTank);
-  const pipeH = cyl(0.05, 0.05, 2.2, lam({ color: 0x94a3b8 }), 8); pipeH.rotation.z = Math.PI / 2; pipeH.position.set(2.7, 1.5, -3.9); S.add(pipeH);
-  const pipeV = cyl(0.05, 0.05, 1.0, lam({ color: 0x94a3b8 }), 8); pipeV.position.set(1.7, 1.0, -3.9); S.add(pipeV);
+  const pipeH = cyl(0.05, 0.05, 2.2, lam({ color: 0x8a8578 }), 8); pipeH.rotation.z = Math.PI / 2; pipeH.position.set(2.7, 1.5, -3.9); S.add(pipeH);
+  const pipeV = cyl(0.05, 0.05, 1.0, lam({ color: 0x8a8578 }), 8); pipeV.position.set(1.7, 1.0, -3.9); S.add(pipeV);
   const tap = cyl(0.04, 0.04, 0.3, lam({ color: 0x475569 }), 8); tap.rotation.z = Math.PI / 2; tap.position.set(1.55, 1.35, -3.5); S.add(tap);
   // peeche ki buildings (depth) — teal/pastel, Sona ke rang nahi
-  const bgCols = [0x99f6e4, 0xfde68a, 0xe0f2fe, 0xccfbf1];
+  const bgCols = [0xc9b8a3, 0xb8a888, 0xa8a49a, 0xc4b49a];
   [[-9, -9.5, 5, 7], [-3.5, -10, 4, 5.5], [4, -10.5, 5, 8], [9.5, -9, 4, 6]].forEach(([bx, bz, bw, bh], i) => {
     const b = box(bw, bh, 0.5, lam({ color: bgCols[i] })); b.position.set(bx, bh / 2, bz); S.add(b);
     for (let r = 0; r < Math.floor(bh / 1.3); r++) for (let cix = 0; cix < Math.floor(bw / 1.1); cix++) {
-      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.7), bas({ color: 0x134e4a }));
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.7), bas({ color: 0x2f4a4a }));
       win.position.set(bx - bw / 2 + 0.8 + cix * 1.1, 1 + r * 1.3, bz + 0.27); S.add(win);
     }
   });
   const t1 = mkTree(-5.6, -3.4, 1.1); S.add(t1); depotTrees.push(t1);
   const t2 = mkTree(5.9, -3.2, 0.9); S.add(t2); depotTrees.push(t2);
+  // beech ki kataar (midground) — plant ke peeche, bg se pehle: depot gehri lage
+  [[-7.5, 4.0, 0xb8a888], [7.0, 4.6, 0xa8a49a]].forEach(([mx, mh, mcol]) => {
+    const m = box(3.2, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -7); S.add(m);
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), bas({ color: 0x6b7a72 }));
+    mw.position.set(mx + 0.7, 2.0, -6.72); S.add(mw);
+  });
+  // taar — depot ke upar (tank se khambe tak)
+  const dpole = cyl(0.04, 0.05, 4.0, lam({ color: 0x39434c })); dpole.position.set(4.6, 2.0, -4.0); S.add(dpole);
+  const dwire = cyl(0.015, 0.015, 8.2, lam({ color: 0x2c343c }), 6); dwire.rotation.z = Math.PI / 2; dwire.position.set(0.5, 3.85, -4.0); S.add(dwire);
 }
 
 // ---------- STREET: geeli sadak, puddles, ghar facades, lamp ----------
 {
   const S = streetG;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(19), 8, 8), color: 0x8fa3b0 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(19), 8, 8), color: 0x9c9180 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(40, 3.4), lam({ color: 0x334155 }));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(40, 3.4), lam({ color: 0x4a4640 }));
   road.rotation.x = -Math.PI / 2; road.position.set(0, 0, 1.8); S.add(road);
   for (let i = 0; i < 8; i++) {
     const dash = box(1.1, 0.012, 0.14, bas({ color: 0xe2e8f0 }));
     dash.position.set(-14 + i * 4, 0.008, 1.8); S.add(dash);
   }
   // paani ki patli dhaar + puddles sadak par
-  const stream = new THREE.Mesh(new THREE.PlaneGeometry(9, 0.5), new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.3, depthWrite: false }));
+  const stream = new THREE.Mesh(new THREE.PlaneGeometry(9, 0.5), new THREE.MeshBasicMaterial({ color: 0x9db8c4, transparent: true, opacity: 0.25, depthWrite: false }));
   stream.rotation.x = -Math.PI / 2; stream.position.set(1.5, 0.012, 0.7); S.add(stream);
   [[-3.5, 2.6, 1.0], [4.5, 1.0, 0.8]].forEach(([px, pz, pr]) => {
-    const pd = new THREE.Mesh(new THREE.CircleGeometry(pr, 20), new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.32, depthWrite: false }));
+    const pd = new THREE.Mesh(new THREE.CircleGeometry(pr, 20), new THREE.MeshBasicMaterial({ color: 0x9db8c4, transparent: true, opacity: 0.28, depthWrite: false }));
     pd.rotation.x = -Math.PI / 2; pd.position.set(px, 0.012, pz); S.add(pd);
   });
   // ghar facades (3 alag rang)
-  [[-4.4, 3.0, 0xfde68a, 3.2], [0.4, 2.6, 0xe0f2fe, 3.0], [4.8, 3.2, 0xccfbf1, 3.4]].forEach(([hx, hh, col, hw]) => {
+  [[-4.4, 3.0, 0xd8c49a, 3.2], [0.4, 2.6, 0xcac2b4, 3.0], [4.8, 3.2, 0xb8c4b8, 3.4]].forEach(([hx, hh, col, hw]) => {
     const f = box(hw, hh, 0.4, lam({ color: col })); f.position.set(hx, hh / 2, -4.2); S.add(f);
-    const d = box(0.9, 1.8, 0.1, lam({ color: 0x0f766e })); d.position.set(hx - 0.6, 0.9, -3.95); S.add(d);
-    const w = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.9), bas({ color: 0xbae6fd })); w.position.set(hx + 0.8, 1.9, -3.95); S.add(w);
+    const d = box(0.9, 1.8, 0.1, lam({ color: 0x3a6b5e })); d.position.set(hx - 0.6, 0.9, -3.95); S.add(d);
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.9), bas({ color: 0x9db8c4 })); w.position.set(hx + 0.8, 1.9, -3.95); S.add(w);
   });
   const pole = cyl(0.045, 0.055, 3.2, lam({ color: 0x39434c })); pole.position.set(2.9, 1.6, -1.1); S.add(pole);
   const armLamp = cyl(0.035, 0.035, 0.8, lam({ color: 0x39434c })); armLamp.rotation.z = Math.PI / 2.3; armLamp.position.set(2.58, 3.15, -1.1); S.add(armLamp);
-  const bg1 = box(6, 6, 0.5, lam({ color: 0x99f6e4 })); bg1.position.set(-8, 3, -9.5); S.add(bg1);
-  const bg2 = box(5, 7.5, 0.5, lam({ color: 0xfde68a })); bg2.position.set(8.5, 3.75, -9); S.add(bg2);
+  const bg1 = box(6, 6, 0.5, lam({ color: 0xb8a888 })); bg1.position.set(-8, 3, -9.5); S.add(bg1);
+  const bg2 = box(5, 7.5, 0.5, lam({ color: 0xa89a80 })); bg2.position.set(8.5, 3.75, -9); S.add(bg2);
   const t1 = mkTree(-6.2, -3.6, 1.05); S.add(t1); streetTrees.push(t1);
   const t2 = mkTree(6.4, -3.4, 0.9); S.add(t2); streetTrees.push(t2);
+  // beech ki kataar (midground) — facades ke peeche, bg se pehle: gali gehri lage
+  [[-6.5, 4.2, 0xb8a888], [-1.5, 3.6, 0xa8a49a], [3.5, 4.5, 0xc4b49a]].forEach(([mx, mh, mcol]) => {
+    const m = box(3.0, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -6.5); S.add(m);
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), bas({ color: 0x6b7a72 }));
+    mw.position.set(mx + 0.7, 2.0, -6.22); S.add(mw);
+  });
+  // taar (wires) — gali ke upar, halka sag; khambe kinaro par
+  const wireMat = lam({ color: 0x2c343c });
+  const wirePole1 = cyl(0.04, 0.05, 4.2, lam({ color: 0x39434c })); wirePole1.position.set(-6.5, 2.1, -3.6); S.add(wirePole1);
+  const wirePole2 = cyl(0.04, 0.05, 4.2, lam({ color: 0x39434c })); wirePole2.position.set(6.5, 2.1, -3.6); S.add(wirePole2);
+  [[3.9, -3.5], [3.55, -3.9]].forEach(([wy, wz]) => {
+    const segL = cyl(0.015, 0.015, 6.8, wireMat, 6); segL.rotation.z = Math.PI / 2 + 0.06; segL.position.set(-3.3, wy - 0.12, wz); S.add(segL);
+    const segR = cyl(0.015, 0.015, 6.8, wireMat, 6); segR.rotation.z = Math.PI / 2 - 0.06; segR.position.set(3.3, wy - 0.12, wz); S.add(segR);
+  });
 }
 
 // ---------- HOME: ghar ka darwaza (peela ghar, teal darwaza) ----------
 {
   const S = homeG;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(23), 8, 8), color: 0x94a3b8 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(wetConcrete(23), 8, 8), color: 0xa08f78 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(7.0, 3.6), lam({ map: tex(plaster(43, 40), 2, 1), color: 0xfde68a }));
-  wall.position.set(0, 1.8, -3.8); S.add(wall);
-  const door = box(1.1, 2.2, 0.12, lam({ color: 0x0f766e })); door.position.set(-0.8, 1.1, -3.7); S.add(door);
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(7.0, 3.2), lam({ map: tex(plaster(43, 40), 2, 1), color: 0xd9c49c }));
+  wall.position.set(0, 1.6, -3.8); // deewaar neechi — upar aasmaan + peeche makaan dikhe S.add(wall);
+  const door = box(1.1, 2.2, 0.12, lam({ color: 0x3a6b5e })); door.position.set(-0.8, 1.1, -3.7); S.add(door);
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), lam({ color: 0xfacc15 })); knob.position.set(-0.4, 1.1, -3.62); S.add(knob);
-  const step1 = box(1.5, 0.14, 0.5, lam({ color: 0x94a3b8 })); step1.position.set(-0.8, 0.07, -3.3); S.add(step1);
-  const step2 = box(1.3, 0.14, 0.35, lam({ color: 0x64748b })); step2.position.set(-0.8, 0.2, -3.45); S.add(step2);
-  const win = box(1.0, 1.0, 0.1, lam({ color: 0xbae6fd })); win.position.set(1.6, 2.0, -3.72); S.add(win);
-  const winBar = box(0.06, 1.0, 0.12, lam({ color: 0x134e4a })); winBar.position.set(1.6, 2.0, -3.7); S.add(winBar);
+  const step1 = box(1.5, 0.14, 0.5, lam({ color: 0x8a7f6e })); step1.position.set(-0.8, 0.07, -3.3); S.add(step1);
+  const step2 = box(1.3, 0.14, 0.35, lam({ color: 0x6e6558 })); step2.position.set(-0.8, 0.2, -3.45); S.add(step2);
+  const win = box(1.0, 1.0, 0.1, lam({ color: 0x9db8c4 })); win.position.set(1.6, 2.0, -3.72); S.add(win);
+  const winBar = box(0.06, 1.0, 0.12, lam({ color: 0x2f4a4a })); winBar.position.set(1.6, 2.0, -3.7); S.add(winBar);
   const houseNo = boardMesh(0.5, 0.5, textBoard(256, 256, (g, w, h) => {
-    g.fillStyle = '#0f766e'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#2f5d50'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#f8fafc'; g.font = 'bold 150px Arial'; g.textAlign = 'center'; g.fillText('12', w / 2, 190);
   }), true); houseNo.position.set(-0.8, 2.62, -3.72); S.add(houseNo);
   const mat = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), lam({ color: 0x92400e }));
@@ -469,69 +511,78 @@ function setRoute(p) {
   const bucket = cyl(0.22, 0.18, 0.3, lam({ color: 0x0369a1 }), 12); bucket.position.set(0.6, 0.15, -3.0); S.add(bucket);
   const ghada = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), lam({ color: 0xb45309 })); ghada.scale.y = 1.15; ghada.position.set(1.1, 0.3, -3.1); S.add(ghada);
   const pot = cyl(0.16, 0.12, 0.3, lam({ color: 0xb45309 })); pot.position.set(2.5, 0.15, -3.2); S.add(pot);
-  const plantBall = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), lam({ color: 0x3e7d32 })); plantBall.position.set(2.5, 0.62, -3.2); S.add(plantBall);
+  const plantBall = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), lam({ color: 0x4a6b2f })); plantBall.position.set(2.5, 0.62, -3.2); S.add(plantBall);
+  // peeche ki kataar — ghar ke peeche duniya
+  [[-5.5, 4.2, 0xb8a888], [5.0, 3.8, 0xa8a49a]].forEach(([mx, mh, mcol]) => {
+    const m = box(3.2, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -8); S.add(m);
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), bas({ color: 0x6b7a72 }));
+    mw.position.set(mx + 0.7, 2.0, -7.72); S.add(mw);
+  });
+  const ht = mkTree(3.2, -5.5, 1.4); S.add(ht); // ped deewaar ke upar jhaankta
 }
 
 // ---------- GATE: office gate + guard booth + 4 towers (alag rang) ----------
 {
   const S = gateG;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(46, 34), lam({ map: tex(wetConcrete(29), 8, 8), color: 0x64748b }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(46, 34), lam({ map: tex(wetConcrete(29), 8, 8), color: 0x8a7f6e }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
-  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), lam({ color: 0x1e293b }));
+  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), lam({ color: 0x3a3733 }));
   plaza.rotation.x = -Math.PI / 2; plaza.position.set(0, 0.01, -2.5); S.add(plaza);
   for (let i = 0; i < 4; i++) {
     const ln = box(0.08, 0.012, 5.5, bas({ color: 0xf8fafc }));
     ln.position.set(-4.5 + i * 3, 0.015, -2.5); S.add(ln);
   }
   for (const px of [-1.6, 1.6]) {
-    const pil = box(0.5, 3.2, 0.5, lam({ color: 0xf8fafc })); pil.position.set(px, 1.6, -4.0); S.add(pil);
-    const capT = box(0.58, 0.18, 0.58, lam({ color: 0x0f766e })); capT.position.set(px, 3.28, -4.0); S.add(capT);
+    const pil = box(0.5, 3.2, 0.5, lam({ color: 0xe8ddc8 })); pil.position.set(px, 1.6, -4.0); S.add(pil);
+    const capT = box(0.58, 0.18, 0.58, lam({ color: 0x3a6b5e })); capT.position.set(px, 3.28, -4.0); S.add(capT);
   }
   for (let i = 0; i < 6; i++) {
     const bar = cyl(0.035, 0.035, 2.2, lam({ color: 0x1e293b }), 8);
     bar.position.set(-1.25 + i * 0.5, 1.1, -4.0); S.add(bar);
   }
   const gateRail = box(3.0, 0.08, 0.06, lam({ color: 0x1e293b })); gateRail.position.set(0, 2.2, -4.0); S.add(gateRail);
-  const booth = box(1.2, 2.4, 1.2, lam({ color: 0x0f766e })); booth.position.set(2.8, 1.2, -4.6); S.add(booth);
-  const boothWin = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.7), bas({ color: 0xfde68a })); boothWin.position.set(2.8, 1.7, -3.98); S.add(boothWin);
+  const booth = box(1.2, 2.4, 1.2, lam({ color: 0x4a7a6e })); booth.position.set(2.8, 1.2, -4.6); S.add(booth);
+  const boothWin = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.7), bas({ color: 0xd8c49a })); boothWin.position.set(2.8, 1.7, -3.98); S.add(boothWin);
   // facade (halka teal glass building)
-  const facade = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), lam({ map: tex(stone(11), 4, 2), color: 0xe0f2fe }));
+  const facade = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), lam({ map: tex(stone(11), 4, 2), color: 0xcfc8b8 }));
   facade.position.set(0, 3.5, -6.5); S.add(facade);
   for (let r = 0; r < 4; r++) for (let cix = 0; cix < 10; cix++) {
-    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 1.0), bas({ color: (r + cix) % 3 === 0 ? 0xfde68a : 0xbae6fd }));
+    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 1.0), bas({ color: (r + cix) % 3 === 0 ? 0xd8c49a : 0x9db8c4 }));
     win.position.set(-5.4 + cix * 1.2, 1.6 + r * 1.5, -6.45); S.add(win);
   }
   const gateSign = boardMesh(3.0, 0.5, textBoard(1024, 170, (g, w, h) => {
-    g.fillStyle = '#0f766e'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#2f5d50'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#f8fafc'; g.font = 'bold 88px "Arial Narrow", Arial'; g.textAlign = 'center';
     g.fillText('4 TOWERS • OFFICE', w / 2, 112);
   }), true); gateSign.position.set(0, 3.6, -6.4); S.add(gateSign);
   // 4 TOWERS — ek teal glass, ek safed, ek peela accent, ek halka teal
-  const towerCols = [0x0f766e, 0xf8fafc, 0xfacc15, 0x14b8a6];
+  const towerCols = [0x4a7a6e, 0xd8d2c4, 0xc9a227, 0x6b8a80];
   [[-6, 11], [-2, 13], [2, 12], [6, 14]].forEach(([tx, th], i) => {
     const tw = box(2.6, th, 2.0, lam({ color: towerCols[i] })); tw.position.set(tx, th / 2, -10); S.add(tw);
     for (let r = 0; r < Math.floor(th / 1.4); r++) for (let cix = 0; cix < 2; cix++) {
-      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.8), bas({ color: (r + cix) % 2 === 0 ? 0xfde68a : 0x134e4a }));
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.8), bas({ color: (r + cix) % 2 === 0 ? 0xd8c49a : 0x2f4a4a }));
       win.position.set(tx - 0.6 + cix * 1.2, 1.2 + r * 1.4, -8.95); S.add(win);
     }
   });
+  const gt1 = mkTree(-4.6, -5.6, 1.2); S.add(gt1); // gate ke dono taraf ped — zinda background
+  const gt2 = mkTree(4.6, -5.6, 1.1); S.add(gt2);
 }
 
 // ---------- LOBBY: reception, glass deewaar, lift ----------
 {
   const S = lobbyG;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), lam({ map: tex(tiles(57), 4, 4), color: 0xe0f2fe }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), lam({ map: tex(tiles(57), 4, 4), color: 0xd8d2c4 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 0); S.add(ground);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), lam({ map: tex(plaster(47, 45), 2, 1), color: 0xf8fafc }));
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), lam({ map: tex(plaster(47, 45), 2, 1), color: 0xe8ddc8 }));
   wall.position.set(0, 2.5, -6.0); S.add(wall);
   // glass deewaar (peeche)
-  const glassWall = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 3.0), new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.4, depthWrite: false }));
+  const glassWall = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 3.0), new THREE.MeshBasicMaterial({ color: 0x9db8c4, transparent: true, opacity: 0.4, depthWrite: false }));
   glassWall.position.set(-1.8, 1.9, -5.9); S.add(glassWall);
   const glassFrame = box(5.7, 0.1, 0.06, lam({ color: 0x134e4a })); glassFrame.position.set(-1.8, 3.45, -5.9); S.add(glassFrame);
   // reception desk (teal, gol nahi — L-shape jaisa chauda)
-  const recep = box(2.6, 1.0, 0.8, lam({ color: 0x0f766e })); recep.position.set(0, 0.5, -4.2); S.add(recep);
-  const recepTop = box(2.8, 0.06, 1.0, lam({ color: 0xf8fafc })); recepTop.position.set(0, 1.03, -4.2); S.add(recepTop);
-  const recepSide = box(0.9, 1.0, 0.7, lam({ color: 0x14b8a6 })); recepSide.position.set(1.7, 0.5, -4.0); S.add(recepSide);
+  const recep = box(2.6, 1.0, 0.8, lam({ color: 0x4a7a6e })); recep.position.set(0, 0.5, -4.2); S.add(recep);
+  const recepTop = box(2.8, 0.06, 1.0, lam({ color: 0xe8ddc8 })); recepTop.position.set(0, 1.03, -4.2); S.add(recepTop);
+  const recepSide = box(0.9, 1.0, 0.7, lam({ color: 0x6b8a80 })); recepSide.position.set(1.7, 0.5, -4.0); S.add(recepSide);
   // latakte lamp
   for (const lx of [-1.2, 1.2]) {
     const cord = cyl(0.015, 0.015, 0.9, lam({ color: 0x1e293b }), 6); cord.position.set(lx, 3.6, -4.4); S.add(cord);
@@ -539,16 +590,17 @@ function setRoute(p) {
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), lam({ color: 0xfff7cc })); bulb.position.set(lx, 2.95, -4.4); S.add(bulb);
   }
   // lift doors
-  const lift = box(1.4, 2.6, 0.15, lam({ color: 0xcbd5e1 })); lift.position.set(3.2, 1.3, -5.9); S.add(lift);
+  const lift = box(1.4, 2.6, 0.15, lam({ color: 0xcfc8b8 })); lift.position.set(3.2, 1.3, -5.9); S.add(lift);
   const liftSlit = box(0.05, 2.6, 0.02, lam({ color: 0x475569 })); liftSlit.position.set(3.2, 1.3, -5.81); S.add(liftSlit);
   const plantPot = cyl(0.16, 0.12, 0.3, lam({ color: 0xb45309 })); plantPot.position.set(-2.6, 0.15, -5.2); S.add(plantPot);
-  const plantBall = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), lam({ color: 0x3e7d32 })); plantBall.position.set(-2.6, 0.62, -5.2); S.add(plantBall);
+  const plantBall = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), lam({ color: 0x4a6b2f })); plantBall.position.set(-2.6, 0.62, -5.2); S.add(plantBall);
   // deewaar art — teal square, safed boond
   const art = boardMesh(0.9, 0.9, textBoard(256, 256, (g, w, h) => {
-    g.fillStyle = '#0f766e'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#2f5d50'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#5eead4'; g.beginPath(); g.arc(128, 128, 70, 0, 7); g.fill();
     g.fillStyle = '#f8fafc'; g.font = 'bold 90px Arial'; g.textAlign = 'center'; g.fillText('₹', 128, 160);
   }), true); art.position.set(-3.6, 2.4, -5.9); S.add(art);
+  const clock = new THREE.Mesh(new THREE.CircleGeometry(0.28, 20), lam({ color: 0xf8fafc })); clock.position.set(1.5, 3.6, -5.95); S.add(clock); // deewaar ghadi
 }
 
 // =====================================================================
@@ -556,9 +608,9 @@ function setRoute(p) {
 // =====================================================================
 function mkJar(s = 1) {
   const g = new THREE.Group(); g.scale.setScalar(s);
-  const bodyMat = lam({ color: 0x06b6d4, transparent: true, opacity: 0.94 });
+  const bodyMat = lam({ color: 0x0e8fb5, transparent: true, opacity: 0.94 });
   const body = cyl(0.14, 0.15, 0.42, bodyMat, 16); body.position.y = 0.21; g.add(body);
-  const water = cyl(0.12, 0.13, 0.34, lam({ color: 0xa5f3fc }), 16); water.position.y = 0.19; g.add(water);
+  const water = cyl(0.12, 0.13, 0.34, lam({ color: 0x9db8c4 }), 16); water.position.y = 0.19; g.add(water);
   const neck = cyl(0.06, 0.09, 0.08, bodyMat, 12); neck.position.y = 0.46; g.add(neck);
   const cap = cyl(0.07, 0.07, 0.05, lam({ color: 0x0e7490 }), 12); cap.position.y = 0.52; g.add(cap);
   const label = boardMesh(0.2, 0.1, textBoard(256, 128, (gg, w, h) => {
@@ -609,7 +661,7 @@ function setStackCount(n, label, x, z) {
   if (label !== countKey) {
     countKey = label;
     const g = countCanvas.getContext('2d');
-    g.fillStyle = '#0f766e'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = '#2f5d50'; g.fillRect(0, 0, 512, 256);
     g.strokeStyle = '#f8fafc'; g.lineWidth = 4; g.strokeRect(10, 10, 492, 236);
     g.fillStyle = '#f8fafc'; g.textAlign = 'center';
     g.font = label.length > 10 ? 'bold 58px Arial' : 'bold 84px Arial';
@@ -626,7 +678,7 @@ let tempoSideKey = '';
 function setTempoSide(txt) {
   if (txt === tempoSideKey) return; tempoSideKey = txt;
   const g = tempoSideCanvas.getContext('2d');
-  g.fillStyle = '#facc15'; g.fillRect(0, 0, 768, 160);
+  g.fillStyle = '#eab308'; g.fillRect(0, 0, 768, 160);
   g.fillStyle = '#0f766e'; g.font = 'bold 62px "Arial Narrow", Arial'; g.textAlign = 'center';
   g.fillText(txt, 384, 102);
   tempoSideTex.needsUpdate = true;
@@ -635,13 +687,15 @@ setTempoSide('DEEPAK PAANI SEVA');
 const tempoG = new THREE.Group(); scene.add(tempoG);
 let tempoWheels = [];
 {
-  const bed = box(2.6, 0.12, 1.5, lam({ color: 0xfacc15 })); bed.position.set(0, 0.55, 0); tempoG.add(bed);
+  const bed = box(2.6, 0.12, 1.5, lam({ color: 0xeab308 })); bed.position.set(0, 0.55, 0); tempoG.add(bed);
   const stripe = box(2.62, 0.14, 0.06, lam({ color: 0x0f766e })); stripe.position.set(0, 0.55, 0.76); tempoG.add(stripe);
   const stripe2 = box(2.62, 0.14, 0.06, lam({ color: 0x0f766e })); stripe2.position.set(0, 0.55, -0.76); tempoG.add(stripe2);
-  const cab = box(0.9, 0.85, 1.4, lam({ color: 0xfacc15 })); cab.position.set(1.55, 0.95, 0); tempoG.add(cab);
+  const cab = box(0.9, 0.85, 1.4, lam({ color: 0xeab308 })); cab.position.set(1.55, 0.95, 0); tempoG.add(cab);
   const cabStripe = box(0.92, 0.12, 1.42, lam({ color: 0x0f766e })); cabStripe.position.set(1.55, 0.75, 0); tempoG.add(cabStripe);
-  const shield = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.5), new THREE.MeshBasicMaterial({ color: 0x9fd4e8, transparent: true, opacity: 0.75, depthWrite: false }));
-  shield.position.set(2.01, 1.1, 0); shield.rotation.y = Math.PI / 2; tempoG.add(shield);
+  const shield = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.5), new THREE.MeshBasicMaterial({ color: 0x5a8cae, transparent: true, opacity: 0.9, depthWrite: false }));
+  shield.position.set(2.012, 1.1, 0); shield.rotation.y = Math.PI / 2; tempoG.add(shield);
+  const shieldFrame = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 0.58), new THREE.MeshBasicMaterial({ color: 0x2c343c }));
+  shieldFrame.position.set(2.004, 1.1, 0); shieldFrame.rotation.y = Math.PI / 2; tempoG.add(shieldFrame); // 9a: windshield ka dark frame — safed board na lage
   const sideBoard = boardMesh(1.9, 0.4, tempoSideTex, true); sideBoard.position.set(-0.2, 0.85, 0.76); tempoG.add(sideBoard);
   const wheelMat = lam({ color: 0x1c222a });
   [[1.5, 0.78], [1.5, -0.78], [-1.0, 0.78], [-1.0, -0.78]].forEach(([wx, wz]) => {
@@ -662,7 +716,7 @@ let tempoWheels = [];
 const tarpGroup = new THREE.Group(); tarpGroup.visible = false; tempoG.add(tarpGroup);
 {
   const t = box(2.5, 0.3, 1.5, lam({ color: 0x0f766e })); t.position.set(-0.2, 1.05, 0); tarpGroup.add(t);
-  const r = box(2.52, 0.05, 0.08, lam({ color: 0xfacc15 })); r.position.set(-0.2, 1.21, 0); tarpGroup.add(r);
+  const r = box(2.52, 0.05, 0.08, lam({ color: 0xeab308 })); r.position.set(-0.2, 1.21, 0); tarpGroup.add(r);
 }
 const headlightMat = new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,244,200,0.95)'], [1, 'rgba(255,244,200,0)']]), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
 const headGlowL = new THREE.Sprite(headlightMat); headGlowL.scale.setScalar(0.7); scene.add(headGlowL);
@@ -770,10 +824,12 @@ window.renderFrame = (f) => {
   }
   const env = applyEnv(shot.env);
   for (const k in skyMeshes) skyMeshes[k].visible = (k === env.sky);
+  if (isMap) { scene.background = new THREE.Color(0xe8e0cc); scene.fog = null; } // map kagaz par — aqua void nahi
   clouds.forEach((sp, i) => {
     sp.visible = !isMap;
     sp.position.x = -22 + i * 7.5 + Math.sin(f * 0.004 + i) * 0.6;
   });
+  skylineG.visible = !isMap; // distant skyline: map me nahi
   ALL_CARDS.forEach((c) => c.hide());
   const cp = cam.pos;
   // ---- set visibility ----
@@ -792,6 +848,7 @@ window.renderFrame = (f) => {
   setTempoSide(tempoSide);
   chalkBoard.visible = (id === 's15');
   wallSign.visible = (id === 's40');
+  depotSign.visible = (id !== 's40'); // s40 me wallSign akela — depotSign overlap karta tha (re-grade fix)
   glassNote.visible = (id === 's23');
   // SAFAR-MAP route progress: s09 30% / s19 65% / s30 100%
   if (id === 's09') setRoute(0.3);
