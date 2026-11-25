@@ -41,6 +41,36 @@ scene.add(bounce); scene.add(bounce.target);
 // almari lamp (QA FIX v2): ghar-kone wali almari par garam roshni — sirf s21/s34 me ON
 const almariLamp = new THREE.PointLight(0xffc27a, 0, 7, 1.8);
 almariLamp.position.set(-3.3, 2.2, -2.6); scene.add(almariLamp);
+// v3 J2: street lamp (pole pehle se hai) — head + roshni + cone + dust motes; sirf raat shots me ON
+const streetLampLight = new THREE.PointLight(0xffc27a, 0, 9, 1.6);
+streetLampLight.position.set(2.25, 2.9, -1.1); scene.add(streetLampLight);
+const lampHead = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 0.16), lam({ color: 0x2c343c })); lampHead.position.set(2.25, 3.02, -1.1); scene.add(lampHead); // (box() yahan nahi — wo line 83 ke baad define hai)
+const lampBulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), lam({ color: 0xffe2a0 })); lampBulb.position.set(2.25, 2.96, -1.1); scene.add(lampBulb);
+const lampConeMat = new THREE.MeshBasicMaterial({ color: 0xffc27a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+const lampCone = new THREE.Mesh(new THREE.ConeGeometry(1.15, 2.6, 24, 1, true), lampConeMat);
+lampCone.position.set(2.25, 1.72, -1.1); scene.add(lampCone);
+const almariConeMat = new THREE.MeshBasicMaterial({ color: 0xffc27a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+const almariCone = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.7, 24, 1, true), almariConeMat);
+almariCone.position.set(-3.3, 1.35, -2.6); scene.add(almariCone);
+const moteMat = () => new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,230,180,0.9)'], [1, 'rgba(255,230,180,0)']]), transparent: true, opacity: 0, depthWrite: false });
+const lampMotes = [], almariMotes = [];
+for (let i = 0; i < 4; i++) { const sp = new THREE.Sprite(moteMat()); sp.scale.setScalar(0.09); scene.add(sp); lampMotes.push(sp); }
+for (let i = 0; i < 2; i++) { const sp = new THREE.Sprite(moteMat()); sp.scale.setScalar(0.08); scene.add(sp); almariMotes.push(sp); }
+function setNightLamp(on, f) {
+  streetLampLight.intensity = on ? 4 : 0;
+  lampConeMat.opacity = on ? 0.13 : 0;
+  lampMotes.forEach((m, i) => {
+    m.material.opacity = on ? 0.45 : 0;
+    m.position.set(2.25 + Math.sin(f * 0.02 + i * 1.7) * 0.5, 1.0 + ((f * 0.004 + i * 0.23) % 1) * 1.6, -1.1 + Math.cos(f * 0.017 + i * 2.1) * 0.35);
+  });
+}
+function setAlmariCone(on, f) {
+  almariConeMat.opacity = on ? 0.14 : 0;
+  almariMotes.forEach((m, i) => {
+    m.material.opacity = on ? 0.4 : 0;
+    m.position.set(-3.3 + Math.sin(f * 0.02 + i * 2.3) * 0.35, 1.0 + ((f * 0.005 + i * 0.31) % 1) * 1.2, -2.6 + Math.cos(f * 0.019 + i * 1.9) * 0.25);
+  });
+}
 
 // ---------- helpers ----------
 function textBoard(w, h, draw) {
@@ -77,7 +107,7 @@ const cardGeo = new THREE.PlaneGeometry(CARD_M * 0.6, CARD_M); cardGeo.translate
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d'); const gr = g.createRadialGradient(64, 64, 4, 64, 64, 62);
-  gr.addColorStop(0, 'rgba(14,9,20,0.5)'); gr.addColorStop(1, 'rgba(14,9,20,0)');
+  gr.addColorStop(0, 'rgba(14,9,20,0.62)'); // v3 J1: contact shadow gehra gr.addColorStop(1, 'rgba(14,9,20,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
   return new THREE.CanvasTexture(c);
 })();
@@ -87,7 +117,7 @@ class Card {
     this.g = this.c.getContext('2d');
     this.t = new THREE.CanvasTexture(this.c); this.t.colorSpace = THREE.SRGBColorSpace; this.t.anisotropy = 4;
     this.mesh = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({ map: this.t, transparent: true, alphaTest: 0.02, side: THREE.DoubleSide, fog: true }));
-    this.blob = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, fog: true }));
+    this.blob = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.9), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, fog: true }));
     this.blob.rotation.x = -Math.PI / 2; this.blob.renderOrder = 1;
     scene.add(this.mesh); scene.add(this.blob); this.key = '';
   }
@@ -140,9 +170,9 @@ const CHAIWALA = { tunic: '#e8e4da', shirt: '#31517a', skin: '#a06a3c', hair: '#
 // ENVS — har samay ka apna natural rang, koi single wash NAHI
 // =====================================================================
 const ENVS = {
-  morning: { bg: 0xbfe0f2, fogC: 0xcfe4f2, fogNear: 16, fogFar: 70, hemi: 1.06, hemiC: 0xeaf4ff, hemiG: 0x8a9a6a, sun: 1.35, sunC: 0xfff1cf, sunPos: [-6, 9, 6], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.1, sky: 'morning' },
-  day: { bg: 0x8ec9ee, fogC: 0xa9cfe6, fogNear: 14, fogFar: 72, hemi: 1.0, hemiC: 0xcfe4ff, hemiG: 0x8a7a5a, sun: 1.42, sunC: 0xffeec2, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.13, sky: 'day' },
-  noon: { bg: 0x9fd2f2, fogC: 0xbcd9ee, fogNear: 16, fogFar: 75, hemi: 1.18, hemiC: 0xf6fbff, hemiG: 0x9a9a8a, sun: 1.66, sunC: 0xfffdf4, sunPos: [-2.5, 12, 4.5], bounce: 0.34, bounceC: 0xe2efff, expo: 1.09, sky: 'day' },
+  morning: { bg: 0xbfe0f2, fogC: 0xcfe4f2, fogNear: 16, fogFar: 60, hemi: 1.06, hemiC: 0xeaf4ff, hemiG: 0x8a9a6a, sun: 1.35, sunC: 0xfff1cf, sunPos: [-6, 9, 6], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.1, sky: 'morning' },
+  day: { bg: 0x8ec9ee, fogC: 0xa9cfe6, fogNear: 14, fogFar: 60, hemi: 1.0, hemiC: 0xcfe4ff, hemiG: 0x8a7a5a, sun: 1.42, sunC: 0xffeec2, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xd6e6ff, expo: 1.13, sky: 'day' },
+  noon: { bg: 0x9fd2f2, fogC: 0xbcd9ee, fogNear: 16, fogFar: 64, hemi: 1.18, hemiC: 0xf6fbff, hemiG: 0x9a9a8a, sun: 1.66, sunC: 0xfffdf4, sunPos: [-2.5, 12, 4.5], bounce: 0.34, bounceC: 0xe2efff, expo: 1.09, sky: 'day' },
   evening: { bg: 0xe08a4e, fogC: 0xe0a266, fogNear: 14, fogFar: 68, hemi: 0.85, hemiC: 0xffd9b0, hemiG: 0x6a5a4a, sun: 1.1, sunC: 0xff9a3c, sunPos: [-9, 4, 6], bounce: 0.22, bounceC: 0xffc890, expo: 1.08, sky: 'evening' },
   night: { bg: 0x1c2b45, fogC: 0x24344f, fogNear: 12, fogFar: 60, hemi: 0.5, hemiC: 0x8fa8d0, hemiG: 0x2a2a33, sun: 0.55, sunC: 0xffd9a0, sunPos: [3, 6, 2], bounce: 0.15, bounceC: 0x5a6a8a, expo: 1.0, sky: 'night' },
 };
@@ -168,8 +198,8 @@ function skyTex(stops) {
 }
 const skyGeo = new THREE.PlaneGeometry(110, 30);
 const skyMeshes = {
-  morning: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#5f9fd8'], [0.55, '#a8d2f0'], [1, '#fdf3d0']]), fog: false })),
-  day: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#2f7fe0'], [0.55, '#8ec9ee'], [1, '#ffe9c4']]), fog: false })),
+  morning: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#4a8cc8'], [0.55, '#a8d2f0'], [1, '#fdf3d0']]), fog: false })),
+  day: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#1f6fd0'], [0.55, '#8ec9ee'], [1, '#ffe9c4']]), fog: false })), // v3 J3: gehra aasmaan
   evening: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#4a3a6e'], [0.55, '#e07840'], [1, '#ffd9a0']]), fog: false })),
   night: new THREE.Mesh(skyGeo, bas({ map: skyTex([[0, '#0a1230'], [0.55, '#1c2b45'], [1, '#3a4a6a']]), fog: false })),
 };
@@ -250,12 +280,18 @@ setPrice('₹4,20,000', 'gold');
   // counter + upar ki shelf par dibbe
   const counter = box(2.3, 1.0, 0.72, lam({ map: FX.woodTexture(), color: 0x7a4a22 })); counter.position.set(0, 0.5, -3.0); S.add(counter);
   const cTop = box(2.45, 0.06, 0.85, lam({ color: 0xd9b078 })); cTop.position.set(0, 1.03, -3.0); S.add(cTop);
-  const silverMat = lam({ color: 0xd8dee2 });
+  // v3 J4: counter par garam roshni ka pool + farsh par halki spill (flat rang nahi)
+  const warmPoolTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); const gr = g.createRadialGradient(64, 64, 4, 64, 64, 62); gr.addColorStop(0, 'rgba(255,214,140,0.4)'); gr.addColorStop(0.6, 'rgba(255,190,110,0.15)'); gr.addColorStop(1, 'rgba(255,190,110,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+  const counterGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.8), new THREE.MeshBasicMaterial({ map: warmPoolTex, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }));
+  counterGlow.rotation.x = -Math.PI / 2; counterGlow.position.set(0, 1.065, -3.0); counterGlow.renderOrder = 2; S.add(counterGlow);
+  const floorSpill = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.6), new THREE.MeshBasicMaterial({ map: warmPoolTex, transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending }));
+  floorSpill.rotation.x = -Math.PI / 2; floorSpill.position.set(0, 0.02, -1.6); floorSpill.renderOrder = 2; S.add(floorSpill);
+  const silverMat = lam({ color: 0xe2e9ee }); // v3 F: halki chaandi
   const silverDark = lam({ color: 0xaab4bb });
   // galla (counter par, left)
   const galla = box(0.4, 0.18, 0.3, lam({ color: 0x2c343c })); galla.position.set(-0.72, 1.15, -3.05); S.add(galla);
   // ---- TARAZU (counter par, right) — beam hilta hai ----
-  const tarazu = new THREE.Group(); tarazu.position.set(0.62, 1.06, -3.0); S.add(tarazu);
+  const tarazu = new THREE.Group(); tarazu.position.set(1.0, 1.06, -3.0); S.add(tarazu); // v3 C: daayein — beam/pan sunar ke chehre se door
   const brass = lam({ color: 0xc8952e });
   const tBase = box(0.18, 0.035, 0.18, brass); tBase.position.y = 0.02; tarazu.add(tBase);
   const tPole = cyl(0.016, 0.02, 0.44, brass); tPole.position.y = 0.24; tarazu.add(tPole);
@@ -364,11 +400,11 @@ const gaddiG = new THREE.Group(); scene.add(gaddiG);
 const dibbaG = new THREE.Group(); scene.add(dibbaG);
 const dibbaLidPivot = new THREE.Group();
 {
-  const silverMat = lam({ color: 0xc3ccd2 });
+  const silverMat = lam({ color: 0xe2e9ee }); // v3 F: dibba grey box nahi — halki chaandi
   const base = box(0.34, 0.2, 0.26, silverMat); base.position.y = 0.1; dibbaG.add(base);
-  const rim = box(0.37, 0.03, 0.29, lam({ color: 0x9aa4ac })); rim.position.y = 0.2; dibbaG.add(rim);
+  const rim = box(0.37, 0.03, 0.29, lam({ color: 0xb8c2ca })); rim.position.y = 0.2; dibbaG.add(rim);
   dibbaLidPivot.position.set(0, 0.215, -0.145); dibbaG.add(dibbaLidPivot);
-  const lid = box(0.37, 0.035, 0.29, lam({ color: 0xd8dee2 })); lid.position.set(0, 0.017, 0.145); dibbaLidPivot.add(lid);
+  const lid = box(0.37, 0.035, 0.29, lam({ color: 0xe8eef2 })); lid.position.set(0, 0.017, 0.145); dibbaLidPivot.add(lid);
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), lam({ color: 0xc8952e })); knob.position.set(0, 0.05, 0.145); dibbaLidPivot.add(knob);
   dibbaG.visible = false;
 }
@@ -518,6 +554,7 @@ window.renderFrame = (f) => {
   // glints default band
   glintBoard1.material.opacity = 0; glintBoard2.material.opacity = 0; glintShow.material.opacity = 0;
   almariLamp.intensity = 0;
+  setNightLamp(false, f); setAlmariCone(false, f);
   boardGlow.material.opacity = 0;
   dustSprite.material.opacity = 0;
   cycleG.visible = false;
@@ -535,7 +572,7 @@ window.renderFrame = (f) => {
     }
     case 's02': { // Ramesh gaddi nikaalta (garv) + peeche sunar + guzarta aadmi
       const lift = clamp((u - 0.15) / 0.3);
-      drawChar(rameshCard, 31, RAMESH, 'grin', 'reach', 'hang', f, cp, -0.9, 0, -1.6, 1.06, 0, lift, 0);
+      drawChar(rameshCard, 31, RAMESH, 'grin', 'up', 'hang', f, cp, -0.9, 0, -1.6, 1.06, 0, lift, 0); // v3 D1: baanh seedha upar — tarazu ke upar diagonal nahi
       drawChar(sunarCard, 32, SUNAR, 'neutral', 'hang', 'hang', f, cp, 0.3, 0, -3.65, 0.92);
       drawWalk(w1Card, 36, WALK1, 'neutral', f, cp, 3.4, 0.9, 1.1, 0.9, u, 0.9);
       if (u > 0.12) {
@@ -548,7 +585,7 @@ window.renderFrame = (f) => {
     }
     case 's03': // pull-back: Ramesh SHOCK, board ₹1,60,000 flash
       drawChar(rameshCard, 31, RAMESH, 'shock', 'up', 'up', f, cp, -0.9, 0, -1.6, 1.1);
-      drawChar(sunarCard, 32, SUNAR, 'nervous', 'hang', 'hang', f, cp, 0.3, 0, -3.65, 0.92);
+      drawChar(sunarCard, 32, SUNAR, 'nervous', 'hang', 'hang', f, cp, 0.2, 0, -3.65, 0.92); // v3 C: sunar baayein — tarazu beam chehre se door
       break;
     case 's04': // udaas closeup: halka dibba, lid khula
       drawChar(rameshCard, 31, RAMESH, 'pained', 'belly', 'belly', f, cp, -0.9, 0, -1.6, 1.12, 0, null, 2);
@@ -556,6 +593,7 @@ window.renderFrame = (f) => {
       dibbaG.position.set(-0.88, 0.8, -1.24);
       dibbaG.rotation.z = 0.06;
       dibbaLidPivot.rotation.x = -0.55;
+      glintShow.position.set(-0.88, 0.95, -1.1); glintShow.material.opacity = 0.4 + 0.3 * Math.sin(f * 0.3); // v3 F: khule dibbe me chamak
       break;
     case 's05': { // NAYA DIN wide: dukaan bheed-bhaad, cycle, chai
       drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'hang', f, cp, 0.3, 0, -3.65, 0.95);
@@ -585,7 +623,7 @@ window.renderFrame = (f) => {
       boardGlow.material.opacity = 0.3 + 0.14 * Math.sin(f * 0.22);
       break;
     case 's09': // sunar tarazu taul raha + naya graahak aata
-      drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'reach', f, cp, 0.3, 0, -3.65, 1.0);
+      drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'reach', f, cp, 0.2, 0, -3.65, 1.0); // v3 C
       drawChar(g1Card, 34, GRA1, 'neutral', 'hang', 'hang', f, cp, -0.55, 0, -2.35, 0.97);
       drawWalk(g2Card, 35, GRA2, 'smile', f, cp, 2.4, -1.3, 1.15, -1.9, clamp(u * 0.9), 0.94);
       break;
@@ -632,7 +670,7 @@ window.renderFrame = (f) => {
       break;
     }
     case 's13': // Ramesh counter par GARV big closeup + gaddi
-      drawChar(rameshCard, 31, RAMESH, 'grin', 'reach', 'hip', f, cp, -0.55, 0, -2.2, 1.14, 0, 0.85, 0);
+      drawChar(rameshCard, 31, RAMESH, 'grin', 'up', 'hip', f, cp, -0.55, 0, -2.2, 1.14, 0, 0.85, 0); // v3 D2: baanh seedha upar — sunar ke chehre ke upar se nahi
       drawChar(sunarCard, 32, SUNAR, 'smile', 'hang', 'hang', f, cp, 0.35, 0, -3.65, 0.95);
       gaddiG.visible = true;
       gaddiG.position.set(-0.22, 1.16 + Math.sin(f * 0.12) * 0.012, -2.0);
@@ -644,6 +682,7 @@ window.renderFrame = (f) => {
       const uc = clamp((u - 0.35) / 0.23);
       dibbaLidPivot.rotation.x = -1.85 * (1 - M.easeIn(uc));
       dibbaG.position.set(0.28 - (u > 0.62 ? (u - 0.62) * 0.26 : 0), 1.06, -2.95);
+      glintShow.position.set(0.28, 1.2, -2.8); glintShow.material.opacity = 0.4 + 0.3 * Math.sin(f * 0.3); // v3 F
       break;
     }
     case 's15': { // Ramesh dibba seene se lagaye nikalta; peeche khareedari jaari
@@ -652,7 +691,8 @@ window.renderFrame = (f) => {
       drawChar(rameshCard, 31, RAMESH, 'smile_closed', 'belly', 'belly', f, cp, rx, Math.abs(Math.sin(f * 0.5)) * 0.03, rz, 1.02, (f % 14) / 14, null, 1);
       dibbaG.visible = true;
       dibbaG.position.set(rx + 0.05, 0.88, rz + 0.34);
-      drawChar(g1Card, 34, GRA1, 'smile', 'reach', 'hang', f, cp, -0.35, 0, -2.35, 0.97, 0, 0.5, 0);
+      glintShow.position.set(rx + 0.05, 1.02, rz + 0.2); glintShow.material.opacity = 0.35 + 0.25 * Math.sin(f * 0.3); // v3 F
+      drawChar(g1Card, 34, GRA1, 'smile', 'hang', 'hang', f, cp, -0.35, 0, -2.35, 0.97, 0, 0.5, 0); // v3 D3: graahak ki baanh neeche — sunar ke chehre par nahi
       drawChar(g2Card, 35, GRA2, 'smile', 'hang', 'hang', f, cp, 0.78, 0, -2.4, 0.95);
       drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'hang', f, cp, 0.3, 0, -3.65, 0.95);
       drawChar(chaiCard, 39, CHAIWALA, 'smile', 'reach', 'hang', f, cp, 3.6, 0, -3.75, 0.9);
@@ -688,7 +728,7 @@ window.renderFrame = (f) => {
     case 's19': { // Dost sar hilata, Ramesh dibba leke mudta
       const e = M.easeInOut(u);
       const rx = -0.35 - 0.5 * e;
-      drawChar(rameshCard, 31, RAMESH, 'smile_closed', 'belly', 'belly', f, cp, rx, Math.abs(Math.sin(f * 0.5)) * 0.03, -1.55, 1.06, (f % 14) / 14, null, 1);
+      drawChar(rameshCard, 31, RAMESH, 'smile_closed', 'belly', 'belly', f, cp, rx, Math.abs(Math.sin(f * 0.5)) * 0.03, -1.55, 1.06, (f % 14) / 14, null, 1, ENV[f]); // v3 G: lip-sync — 'tu dekhta reh jayega!'
       dibbaG.visible = true;
       dibbaG.position.set(rx + 0.05, 0.88, -1.2);
       drawChar(dostCard, 33, DOST, 'stern', 'hang', 'hang', f, cp, -1.02, 0, -1.62, 1.05, 0, null, Math.sin(u * Math.PI * 2) * 2.5);
@@ -705,6 +745,8 @@ window.renderFrame = (f) => {
     case 's21': { // ALMARI: dibba andar slide, darwaze BAND
       almariG.visible = true;
       almariLamp.intensity = 8;
+      setAlmariCone(true, f);
+      drawChar(rameshCard, 31, RAMESH, 'smile_closed', 'hang', 'reach', f, cp, -2.45, 0, -3.3, 1.05, 0, 0.5, 0); // v3 E: Ramesh almari ke side me, haath darwaze ki taraf
       const o = 1.6 * (1 - M.easeInOut(clamp((u - 0.35) / 0.5))); // darwaze khule -> band
       almariDoorL.rotation.y = -o; almariDoorR.rotation.y = o;
       dibbaG.visible = true;
@@ -723,7 +765,7 @@ window.renderFrame = (f) => {
       dibbaG.visible = true;
       dibbaG.position.set(-2.55, 1.05, -2.85);
       glintShow.position.set(-2.55, 1.25, -2.7);
-      glintShow.material.opacity = 0.5 + 0.4 * Math.sin(f * 0.3);
+      glintShow.material.opacity = 0.35 + 0.25 * Math.sin(f * 0.3); // v3 I2: sapne ki chamak halki — dibba lightbox nahi
       break;
     }
     case 's24': { // Roshni badli: smile dheere mit ti
@@ -785,6 +827,8 @@ window.renderFrame = (f) => {
     case 's34': { // RAAT: almari khulti, dibba uthaya
       almariG.visible = true;
       almariLamp.intensity = 8;
+      setAlmariCone(true, f);
+      drawChar(rameshCard, 31, RAMESH, 'neutral', 'hang', 'reach', f, cp, -2.45, 0, -3.3, 1.05, 0, 0.5, 0); // v3 E
       const o = 1.6 * M.easeInOut(clamp(u / 0.5)); // darwaze band -> khule
       almariDoorL.rotation.y = -o; almariDoorR.rotation.y = o;
       dibbaG.visible = true;
@@ -794,22 +838,23 @@ window.renderFrame = (f) => {
     case 's35': { // KHALI DUKAAN wide: koi bheed nahi, sunar akela
       drawChar(sunarCard, 32, SUNAR, 'neutral', 'hang', 'hang', f, cp, 0.3, 0, -3.65, 0.95);
       drawWalk(rameshCard, 31, RAMESH, 'pained', f, cp, -2.5, 1.0, -0.9, -1.6, clamp(u * 0.8), 1.02, 'hang', 'hang');
+      runCycle(f, cp, -8.5 + 17 * u, 2.6, 1); // v3 L4: foreground cycle — neeche khaali sadak nahi
       break;
     }
     case 's36': { // Tarazu closeup: dibba pan par, beam jhoolta
-      drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'reach', f, cp, 0.3, 0, -3.65, 1.0);
+      drawChar(sunarCard, 32, SUNAR, 'smile', 'reach', 'reach', f, cp, 0.2, 0, -3.65, 1.0); // v3 C
       dibbaG.visible = true;
-      dibbaG.position.set(0.32, 1.34, -3.0);
-      tarazuBeam.rotation.z = 0.1 * Math.sin(u * 9) * (1 - u * 0.4);
+      dibbaG.position.set(1.3, 1.34, -3.0); // v3 L5: dibba DAAYEIN pan me — sunar ka chehra saaf
+      tarazuBeam.rotation.z = -0.05 + 0.08 * Math.sin(u * 9) * (1 - u * 0.4); // v3 L5: bhaari dibba se beam daayein jhuka
       tarazuPanL.rotation.z = -tarazuBeam.rotation.z * 0.75; tarazuPanR.rotation.z = -tarazuBeam.rotation.z * 0.75;
-      glintShow.position.set(0.32, 1.5, -2.8);
+      glintShow.position.set(1.3, 1.5, -2.8);
       glintShow.material.opacity = 0.4 + 0.3 * Math.sin(f * 0.3);
       break;
     }
     case 's37': { // CALCULATOR closeup: ungli keys par
       drawChar(sunarCard, 32, SUNAR, 'neutral', 'reach', 'hang', f, cp, 0.3, 0, -3.65, 1.0);
       calcG.visible = true;
-      calcG.position.set(0.95, 1.07, -2.95);
+      calcG.position.set(0.55, 1.07, -2.95); // v3 L6
       calcG.rotation.y = -0.15 + Math.sin(f * 0.3) * 0.02;
       break;
     }
@@ -843,16 +888,19 @@ window.renderFrame = (f) => {
       break;
     }
     case 's43': { // Ramesh board -> dibba dekhta
+      setNightLamp(true, f); // v3 J2: raat — lamp cone + motes
       drawChar(rameshCard, 31, RAMESH, 'neutral', 'belly', 'belly', f, cp, -0.5, 0, -2.0, 1.06);
       dibbaG.visible = true;
       dibbaG.position.set(-0.45, 0.9, -1.65);
       break;
     }
     case 's44': { // Hold: khaali sadak, lamp, Ramesh akele khada
+      setNightLamp(true, f); // v3 J2
       drawChar(rameshCard, 31, RAMESH, 'neutral', 'hang', 'hang', f, cp, -0.4, 0, -1.2, 1.0);
       break;
     }
     case 's45': { // THESIS two-shot: board (badla) vs dibba (waisa)
+      setNightLamp(true, f); // v3 J2
       drawChar(rameshCard, 31, RAMESH, 'neutral', 'belly', 'belly', f, cp, -0.4, 0, -2.0, 1.08);
       dibbaG.visible = true;
       dibbaG.position.set(-0.35, 1.15, -1.7);
