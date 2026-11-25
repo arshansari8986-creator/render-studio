@@ -38,6 +38,9 @@ sun.shadow.bias = -0.0022; sun.shadow.normalBias = 0.02;
 const bounce = new THREE.DirectionalLight(0xd6e6ff, 0.3);
 bounce.position.set(6, 8, 14); bounce.castShadow = false;
 scene.add(bounce); scene.add(bounce.target);
+// almari lamp (QA FIX v2): ghar-kone wali almari par garam roshni — sirf s21/s34 me ON
+const almariLamp = new THREE.PointLight(0xffc27a, 0, 7, 1.8);
+almariLamp.position.set(-3.3, 2.2, -2.6); scene.add(almariLamp);
 
 // ---------- helpers ----------
 function textBoard(w, h, draw) {
@@ -401,7 +404,7 @@ const thaaliG = new THREE.Group(); scene.add(thaaliG);
 // ---- ALMARI (ghar kona, -3.3,-3.95): dibba andar/bahar; darwaze khulte-band hote ----
 const almariG = new THREE.Group(); almariG.position.set(-3.3, 0, -3.95); scene.add(almariG);
 {
-  const awood = lam({ color: 0x6b4423 });
+  const awood = lam({ color: 0x8a5a30 });
   const aDark = lam({ color: 0x241608 });
   const aBody = box(1.2, 2.1, 0.5, awood); aBody.position.y = 1.05; almariG.add(aBody);
   const aInner = box(1.04, 1.94, 0.06, aDark); aInner.position.set(0, 1.05, 0.22); almariG.add(aInner);
@@ -514,6 +517,7 @@ window.renderFrame = (f) => {
   tarazuPanL.rotation.z = -beamTilt * 0.75; tarazuPanR.rotation.z = -beamTilt * 0.75;
   // glints default band
   glintBoard1.material.opacity = 0; glintBoard2.material.opacity = 0; glintShow.material.opacity = 0;
+  almariLamp.intensity = 0;
   boardGlow.material.opacity = 0;
   dustSprite.material.opacity = 0;
   cycleG.visible = false;
@@ -700,6 +704,7 @@ window.renderFrame = (f) => {
     }
     case 's21': { // ALMARI: dibba andar slide, darwaze BAND
       almariG.visible = true;
+      almariLamp.intensity = 8;
       const o = 1.6 * (1 - M.easeInOut(clamp((u - 0.35) / 0.5))); // darwaze khule -> band
       almariDoorL.rotation.y = -o; almariDoorR.rotation.y = o;
       dibbaG.visible = true;
@@ -779,6 +784,7 @@ window.renderFrame = (f) => {
     }
     case 's34': { // RAAT: almari khulti, dibba uthaya
       almariG.visible = true;
+      almariLamp.intensity = 8;
       const o = 1.6 * M.easeInOut(clamp(u / 0.5)); // darwaze band -> khule
       almariDoorL.rotation.y = -o; almariDoorR.rotation.y = o;
       dibbaG.visible = true;
