@@ -317,7 +317,7 @@ const mapGroup = new THREE.Group(); mapGroup.position.set(0, 0.02, -0.6); mapGro
   g.fillStyle = '#134e4a'; g.font = 'bold 30px Arial'; g.fillText('GHAR', 105, 345);
   g.fillStyle = '#134e4a';
   [[180, 60], [250, 60], [180, 140], [250, 140]].forEach(([x, y]) => g.fillRect(x, y, 56, 64));
-  g.fillStyle = '#0f766e'; g.font = 'bold 34px Arial'; g.fillText('4 TOWERS', 256, 250);
+  g.fillStyle = '#0f766e'; g.font = 'bold 34px Arial'; g.fillText('4 TOWERS', 105, 60);
   const mapTex = new THREE.CanvasTexture(mapCanvas); mapTex.colorSpace = THREE.SRGBColorSpace; mapTex.anisotropy = 4;
   const mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 6.5), lam({ map: mapTex }));
   mapPlane.rotation.x = -Math.PI / 2; mapGroup.add(mapPlane);
@@ -783,6 +783,7 @@ window.renderFrame = (f) => {
   gateG.visible = (shot.set === 'gate' && !isMap);
   lobbyG.visible = (shot.set === 'lobby');
   mapGroup.visible = isMap;
+  lampHead.visible = !isMap; lampBulb.visible = !isMap;
   // ---- numbers as objects: tempo side paint + board toggles (max 2 boards) ----
   let tempoSide = 'DEEPAK PAANI SEVA';
   if (id === 's01') tempoSide = '₹60,000 MAHINA';
@@ -901,8 +902,8 @@ window.renderFrame = (f) => {
       drawChar(w1Card, 46, WALK1, 'smile', 'reach', 'hang', f, cp, -0.3, 0, -3.1, 0.98);
       const ue = clamp((u - 0.1) / 0.4);
       noteProp.visible = true;
-      noteProp.position.set(-0.55 - 0.3 * ue, 1.12, -2.6);
-      noteProp.rotation.y = Math.sin(f * 0.2) * 0.15;
+      noteProp.position.set(-0.4 - 0.3 * ue, 1.05, -2.5);
+      noteProp.rotation.set(-Math.PI / 2, 0, 0);
       heroJar.visible = true;
       heroJar.position.set(-0.9, 0.85, -2.8);
       drawWalk(w2Card, 47, WALK2, 'neutral', f, cp, 2.5, 1.2, -1.5, 1.0, clamp(u * 0.9), 0.9);
@@ -1015,10 +1016,10 @@ window.renderFrame = (f) => {
       const ue = clamp((u - 0.1) / 0.4);
       noteProp.visible = true;
       noteProp.position.set(-0.1 - 0.3 * ue, 1.12, -4.0);
+      noteProp.rotation.x = 0;
       noteProp.rotation.y = Math.sin(f * 0.2) * 0.15;
       heroJar.visible = true;
       heroJar.position.set(-0.2, 0.85, -4.0);
-      drawWalk(w1Card, 46, WALK1, 'neutral', f, cp, -2.5, -2.6, 1.5, -3.0, clamp(u * 0.9), 0.9);
       break;
     }
     case 's24': { // Office wala bhav-tol mana karta, thumbs up
@@ -1129,6 +1130,7 @@ window.renderFrame = (f) => {
       drawChar(deepakCard, 41, DEEPAK, 'neutral', 'hang', 'hang', f, cp, -0.2, 0, -2.0, 1.0);
       noteProp.visible = true;
       noteProp.position.set(0.55, 1.1, -2.3);
+      noteProp.rotation.x = 0;
       noteProp.rotation.y = Math.sin(f * 0.2) * 0.15;
       drawWalk(w1Card, 46, WALK1, 'neutral', f, cp, -2.5, -1.0, 0.5, -1.4, clamp(u * 0.9), 0.9);
       break;
