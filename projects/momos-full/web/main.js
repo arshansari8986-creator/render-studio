@@ -375,12 +375,14 @@ const midG = new THREE.Group(); scene.add(midG);
     mw2.position.set(mx - 0.7, 1.3, -7.72); midG.add(mw2);
     const par = box(3.3, 0.18, 0.55, lam({ color: 0x8a7a5a })); par.position.set(mx, mh + 0.09, -8); midG.add(par);
   });
-  const tank = cyl(0.5, 0.5, 0.9, lam({ color: 0x374151 }), 14); tank.position.set(0.5, 4.05, -8); midG.add(tank);
-  const tankTop = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), lam({ color: 0x4b5563 }));
-  tankTop.position.set(0.5, 4.5, -8); midG.add(tankTop);
-  for (const lx of [-0.1, 1.1]) {
-    const leg = cyl(0.04, 0.04, 0.5, lam({ color: 0x4b5563 }), 6); leg.position.set(lx, 3.6, -8); midG.add(leg);
-  }
+  // FIX 26 Nov LAYOUT LOCK (D): pehle kaala gumbad (tank + hemisphere dome, 0x374151/0x4b5563) har chhat par
+  // random kaala blob lagta tha. Ab SAHI water tank: halka slate-blue body + safed band + chapta dhakkan + knob
+  // + deewaar ke saamne down-pipe (tank zameen se juda dikhe, hawa me nahi).
+  const tank = cyl(0.5, 0.5, 0.9, lam({ color: 0x64748b }), 14); tank.position.set(0.5, 4.05, -8); midG.add(tank);
+  const tankBand = cyl(0.51, 0.51, 0.08, lam({ color: 0xf1f5f9 }), 14); tankBand.position.set(0.5, 4.05, -8); midG.add(tankBand);
+  const tankLid = cyl(0.52, 0.52, 0.1, lam({ color: 0x475569 }), 14); tankLid.position.set(0.5, 4.55, -8); midG.add(tankLid);
+  const tankKnob = cyl(0.06, 0.06, 0.08, lam({ color: 0x334155 }), 8); tankKnob.position.set(0.5, 4.62, -8); midG.add(tankKnob);
+  const tankPipe = cyl(0.035, 0.035, 3.6, lam({ color: 0x475569 }), 6); tankPipe.position.set(0.5, 1.8, -7.72); midG.add(tankPipe);
   const ant = cyl(0.02, 0.02, 1.6, lam({ color: 0x39434c }), 6); ant.position.set(-7.5, 4.8, -8); midG.add(ant);
   const antBar = cyl(0.015, 0.015, 0.9, lam({ color: 0x39434c }), 6); antBar.rotation.z = Math.PI / 2; antBar.position.set(-7.5, 5.3, -8); midG.add(antBar);
   const antBar2 = cyl(0.015, 0.015, 0.6, lam({ color: 0x39434c }), 6); antBar2.rotation.z = Math.PI / 2; antBar2.position.set(-7.5, 5.0, -8); midG.add(antBar2);
@@ -470,7 +472,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     for (let i = 0; i < 20; i++) {
       const px = -6 + rnd() * 12, pz = -3.5 + rnd() * 7.5;
       const peb = box(0.06 + rnd() * 0.07, 0.03 + rnd() * 0.02, 0.05 + rnd() * 0.05, lam({ color: pebCols[i % 4] }));
-      peb.position.set(px, 0.02, pz); peb.rotation.y = rnd() * 3; S.add(peb);
+      peb.position.set(px, -0.005, pz); peb.rotation.y = rnd() * 3; S.add(peb); // FIX 26 Nov LAYOUT LOCK (B): pehle y=0.02 — zameen (y=-0.02) se 0.025 upar tairta dikhta tha (t14 cube); ab zameen me dhansa hua.
     }
   }
   const road = new THREE.Mesh(new THREE.PlaneGeometry(40, 3.4), lam({ color: 0x4a4640 }));
@@ -502,7 +504,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     g.fillStyle = '#92400e'; g.fillRect(w / 2 - 40, 240, 80, 44);
     g.fillStyle = '#f8fafc'; g.fillRect(w / 2 - 40, 240, 80, 10);
   });
-  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(1.25, 1.6, -4.24); S.add(chaiPoster); // FIX 26 Nov: x 0.9 -> 1.25 — thela ki chhat (roof top) poster ka 'C' dhak rahi thi (f_0.5s).
+  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(1.4, 1.6, -4.24); S.add(chaiPoster); // FIX 26 Nov: x 0.9 -> 1.25 — thela ki chhat (roof top) poster ka 'C' dhak rahi thi (f_0.5s). FIX 26 Nov LAYOUT LOCK (H): x 1.25 -> 1.4 — roof top face ab bhi 1.8% dhak raha tha (aerial s01); poster aur dayein.
   const momosPosterTex = textBoard(256, 320, (g, w, h) => {
     g.fillStyle = '#7f1d1d'; g.fillRect(0, 0, w, h);
     g.strokeStyle = '#facc15'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
@@ -563,7 +565,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     [[-0.85, -0.45], [0.85, -0.45], [-0.85, 0.45], [0.85, 0.45]].forEach(([px, pz]) => {
       const pole = cyl(0.03, 0.03, 1.5, lam({ color: 0x6d3d1a }), 8); pole.position.set(px, 1.35, pz); thela.add(pole);
     });
-    const roof = box(2.0, 0.06, 1.2, lam({ map: tex(tinRoof(53), 2, 1), color: 0x9a3412 })); roof.position.set(0, 2.12, 0); roof.rotation.z = 0.06; thela.add(roof);
+    const roof = box(2.0, 0.06, 1.2, lam({ map: tex(tinRoof(53), 2, 1), color: 0x9a3412 })); roof.position.set(0, 2.10, 0); thela.add(roof); // FIX 26 Nov LAYOUT LOCK (B): pehle rotation.z=0.06 + y=2.12 — chhat tedhi tairti thi, ek taraf khambhe se upar (t2); ab seedhi, khambhon par baithi (pole top 2.10, roof bottom 2.07).
     // 3-tier steamer — steel cylinders, upar se bhaap
     for (let i = 0; i < 3; i++) {
       const tier = cyl(0.28, 0.28, 0.16, lam({ color: 0x9aa5ad }), 16); tier.position.set(-0.45, 0.68 + i * 0.17, 0); thela.add(tier);
@@ -571,7 +573,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
       rim.rotation.x = Math.PI / 2; rim.position.set(-0.45, 0.76 + i * 0.17, 0); thela.add(rim);
     }
     const lid = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), lam({ color: 0x7a8288 }));
-    lid.position.set(-0.45, 1.19, 0); thela.add(lid);
+    lid.position.set(-0.45, 1.10, 0); thela.add(lid); // FIX 26 Nov LAYOUT LOCK (B): pehle y=1.19 — upar wale tier ke rim (1.10) se 0.09 upar hawa me tairta tha (t22); ab rim par baitha.
     // sign — chhat ke neeche, saamne (frame 1 se readable)
     const sign = boardMesh(1.7, 0.35, sonuSignTex, true); sign.position.set(0, 1.92, 0.62); thela.add(sign);
     // menu board — thele ke saamne (VEG ₹50)
@@ -594,16 +596,16 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
   }
   // ---- GAS CYLINDER + CRATES + CYCLE + LAMP + STOOL ----
   {
-    const gas = cyl(0.22, 0.22, 0.65, lam({ color: 0xdc2626 }), 14); gas.position.set(1.6, 0.32, -3.6); S.add(gas);
-    const gasTop = cyl(0.08, 0.08, 0.1, lam({ color: 0x9ca3af }), 10); gasTop.position.set(1.6, 0.7, -3.6); S.add(gasTop);
+    const gas = cyl(0.22, 0.22, 0.65, lam({ color: 0xdc2626 }), 14); gas.position.set(1.6, 0.30, -3.6); S.add(gas); // FIX 26 Nov LAYOUT LOCK (B): sab zameen wale props 0.02 neeche — base zameen (y=-0.02) ko chhooye (pehle 0.015-0.02 tairte the)
+    const gasTop = cyl(0.08, 0.08, 0.1, lam({ color: 0x9ca3af }), 10); gasTop.position.set(1.6, 0.68, -3.6); S.add(gasTop);
     const hose = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.02, 8, 16, Math.PI), lam({ color: 0x1f2937 }));
     hose.position.set(1.35, 0.5, -3.4); hose.rotation.y = Math.PI / 2; S.add(hose);
-    const c1 = box(0.55, 0.45, 0.55, lam({ color: 0x8a6844 })); c1.position.set(-4.3, 0.22, -2.2); S.add(c1);
-    const c1e = box(0.57, 0.06, 0.57, lam({ color: 0x6d5136 })); c1e.position.set(-4.3, 0.45, -2.2); S.add(c1e);
-    const c2 = box(0.45, 0.4, 0.45, lam({ color: 0x9a7a52 })); c2.position.set(-4.28, 0.67, -2.2); c2.rotation.y = 0.3; S.add(c2);
+    const c1 = box(0.55, 0.45, 0.55, lam({ color: 0x8a6844 })); c1.position.set(-4.3, 0.20, -2.2); S.add(c1);
+    const c1e = box(0.57, 0.06, 0.57, lam({ color: 0x6d5136 })); c1e.position.set(-4.3, 0.43, -2.2); S.add(c1e);
+    const c2 = box(0.45, 0.4, 0.45, lam({ color: 0x9a7a52 })); c2.position.set(-4.28, 0.65, -2.2); c2.rotation.y = 0.3; S.add(c2);
     const sack = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), lam({ color: 0xc2b280 }));
-    sack.scale.set(1, 0.75, 0.9); sack.position.set(-3.6, 0.22, -2.3); S.add(sack);
-    const cy = new THREE.Group(); cy.position.set(1.7, 0, -3.85); cy.rotation.y = -0.35; cy.rotation.z = 0.1; S.add(cy);
+    sack.scale.set(1, 0.75, 0.9); sack.position.set(-3.6, 0.20, -2.3); S.add(sack);
+    const cy = new THREE.Group(); cy.position.set(1.7, -0.02, -3.85); cy.rotation.y = -0.35; cy.rotation.z = 0.1; S.add(cy);
     const wheelMat = lam({ color: 0x1f2937 });
     [-0.55, 0.55].forEach((wx) => {
       const wh = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.03, 8, 20), wheelMat);
@@ -626,11 +628,11 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     const shade = cyl(0.08, 0.22, 0.18, lam({ color: 0x166534 }), 12); shade.position.set(-0.2, 2.52, -3.95); S.add(shade);
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), lampBulbMat); bulb.position.set(-0.2, 2.42, -3.95); S.add(bulb);
     // stool + folded stack (thele ke paas)
-    const stool = cyl(0.28, 0.32, 0.42, lam({ color: 0x6d4a2c }), 12); stool.position.set(0.9, 0.21, -3.55); S.add(stool);
-    const sf1 = box(0.4, 0.08, 0.3, lam({ color: 0xfca5a5 })); sf1.position.set(0.9, 0.46, -3.55); sf1.rotation.y = 0.1; S.add(sf1);
-    const sf2 = box(0.38, 0.08, 0.28, lam({ color: 0x86efac })); sf2.position.set(0.9, 0.53, -3.55); sf2.rotation.y = -0.15; S.add(sf2);
+    const stool = cyl(0.28, 0.32, 0.42, lam({ color: 0x6d4a2c }), 12); stool.position.set(0.9, 0.19, -3.55); S.add(stool);
+    const sf1 = box(0.4, 0.08, 0.3, lam({ color: 0xfca5a5 })); sf1.position.set(0.9, 0.44, -3.55); sf1.rotation.y = 0.1; S.add(sf1);
+    const sf2 = box(0.38, 0.08, 0.28, lam({ color: 0x86efac })); sf2.position.set(0.9, 0.51, -3.55); sf2.rotation.y = -0.15; S.add(sf2);
     // gamle wala paudha
-    const pp = cyl(0.18, 0.14, 0.3, lam({ color: 0x9a5a34 }), 12); pp.position.set(1.3, 0.15, -3.8); S.add(pp);
+    const pp = cyl(0.18, 0.14, 0.3, lam({ color: 0x9a5a34 }), 12); pp.position.set(1.3, 0.13, -3.8); S.add(pp);
     [[0, 0.45, 0, 0.16], [-0.1, 0.38, 0.08, 0.12], [0.1, 0.4, -0.06, 0.13]].forEach(([px, py, pz, r]) => {
       const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), lam({ color: 0x4a6b2f }));
       leaf.position.set(1.3 + px, py, -3.8 + pz); S.add(leaf);
@@ -666,11 +668,18 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
   // desk + 2 chairs
   const desk = box(3.2, 0.08, 1.2, lam({ color: 0x6d4a2c })); desk.position.set(0, 0.78, -2.6); S.add(desk);
   [[-1.5, -3.1], [1.5, -3.1], [-1.5, -2.1], [1.5, -2.1]].forEach(([lx, lz]) => {
-    const leg = box(0.08, 0.78, 0.08, lam({ color: 0x4a3220 })); leg.position.set(lx, 0.39, lz); S.add(leg);
+    const leg = box(0.08, 0.78, 0.08, lam({ color: 0x4a3220 })); leg.position.set(lx, 0.37, lz); S.add(leg);
   });
+  // FIX 26 Nov LAYOUT LOCK (I): desk ka saamne wala panel (modesty panel) — pehle desk khula tha, characters ki
+  // taangein neeche latakti dikhti thi (t18/t26); ab panel (y 0.06-0.78) taangein dhakta hai, sirf upar ka hissa dikhega.
+  const deskPanel = box(3.2, 0.72, 0.06, lam({ color: 0x6d4a2c })); deskPanel.position.set(0, 0.42, -2.0); S.add(deskPanel);
   [-1.2, 1.2].forEach((cx) => {
-    const seat = box(0.55, 0.08, 0.55, lam({ color: 0x374151 })); seat.position.set(cx, 0.5, -1.7); S.add(seat);
-    const back = box(0.55, 0.7, 0.08, lam({ color: 0x374151 })); back.position.set(cx, 0.9, -1.42); S.add(back);
+    const seat = box(0.55, 0.08, 0.55, lam({ color: 0x4b5563 })); seat.position.set(cx, 0.5, -1.7); S.add(seat);
+    const back = box(0.55, 0.7, 0.08, lam({ color: 0x4b5563 })); back.position.set(cx, 0.9, -1.42); S.add(back);
+    // FIX 26 Nov LAYOUT LOCK (I): kursi ki 4 taangein — pehle bina taang ke kaale slab tairte lagte the (t18/t26).
+    [[-0.22, -0.22], [0.22, -0.22], [-0.22, 0.22], [0.22, 0.22]].forEach(([ox, oz]) => {
+      const chairLeg = box(0.05, 0.5, 0.05, lam({ color: 0x4a3220 })); chairLeg.position.set(cx + ox, 0.24, -1.7 + oz); S.add(chairLeg);
+    });
   });
   // plate stacks (momos plates — steel carrier ke paas)
   for (let i = 0; i < 3; i++) {
@@ -679,11 +688,16 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     const pl2 = cyl(0.18, 0.18, 0.03, lam({ color: 0xd6dde3 }), 14);
     pl2.position.set(0.9, 0.84 + i * 0.035, -2.6); S.add(pl2);
   }
-  // files + papers + pen stand
-  for (let i = 0; i < 3; i++) {
-    const fl = box(0.3, 0.05, 0.4, lam({ color: [0xdc2626, 0x1d4ed8, 0x16a34a][i] }));
-    fl.position.set(-0.3 + i * 0.35, 0.85, -2.9); fl.rotation.y = (i - 1) * 0.15; S.add(fl);
+  // desk par asli cheezein — momos ki plate + glass + file stack (FIX 26 Nov LAYOUT LOCK (C): pehle laal/neele/hare
+  // flat blocks (0.3x0.05x0.4) bachchon ke khilone lagte the (t18/t26); ab plate + glass + halke rang ki files.)
+  const momosPlate = cyl(0.16, 0.16, 0.03, lam({ color: 0xf8fafc }), 14); momosPlate.position.set(-0.3, 0.835, -2.9); S.add(momosPlate);
+  for (let i = 0; i < 4; i++) {
+    const mo = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), lam({ color: 0xf8f0dc }));
+    mo.position.set(-0.36 + (i % 2) * 0.12, 0.875, -2.95 + Math.floor(i / 2) * 0.1); S.add(mo);
   }
+  const glassCup = cyl(0.05, 0.045, 0.12, lam({ color: 0x9db8d9 }), 12); glassCup.position.set(0.05, 0.88, -2.9); S.add(glassCup);
+  const fileA = box(0.3, 0.05, 0.4, lam({ color: 0xd6c9a8 })); fileA.position.set(0.4, 0.845, -2.9); fileA.rotation.y = 0.1; S.add(fileA);
+  const fileB = box(0.28, 0.05, 0.38, lam({ color: 0xc9b896 })); fileB.position.set(0.4, 0.895, -2.9); fileB.rotation.y = -0.08; S.add(fileB);
   const penCup = cyl(0.06, 0.05, 0.14, lam({ color: 0x1d4ed8 }), 10); penCup.position.set(1.35, 0.9, -2.9); S.add(penCup);
   const plant = cyl(0.16, 0.12, 0.28, lam({ color: 0x9a5a34 }), 12); plant.position.set(-1.7, 0.95, -2.9); S.add(plant);
   const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 8), lam({ color: 0x4a6b2f }));
@@ -700,7 +714,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
   const t1 = mkTree(-4.5, -3.0, 1.2); S.add(t1); officeTrees.push(t1);
 }
 
-// ---------- HOTEL: marble counter, "SONU'S MOMOS" board, chandelier, plants, carpet ----------
+// ---------- HOTEL: marble counter, "SONU'S MOMOS" board, wall lamps, plants, carpet ----------
 {
   const S = hotelG;
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(marble(10), 6, 6), color: 0xd8cfc0 }));
@@ -715,31 +729,27 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
   // marble counter + gold trim
   const counter = box(3.4, 1.05, 0.9, lam({ map: tex(marble(10), 2, 1), color: 0xf5f0e6 })); counter.position.set(0, 0.52, -2.8); S.add(counter);
   const trim = box(3.44, 0.08, 0.94, lam({ color: 0xfacc15 })); trim.position.set(0, 1.08, -2.8); S.add(trim);
-  const counterBase = box(3.5, 0.12, 1.0, lam({ color: 0x1e293b })); counterBase.position.set(0, 0.06, -2.8); S.add(counterBase);
+  const counterBase = box(3.5, 0.12, 1.0, lam({ color: 0x1e293b })); counterBase.position.set(0, 0.04, -2.8); S.add(counterBase); // FIX 26 Nov LAYOUT LOCK (B): base zameen (y=-0.02) ko chhooye
   // hotel menu board — deewaar par, bada (b13-b14 hero)
   const hBoard = boardMesh(2.0, 1.0, hotelMenuTex, true); hBoard.position.set(-0.2, 2.15, -3.72); S.add(hBoard); // FIX 26 Nov: x 0 -> -0.2 — s42 me chef se board clear rahe (board text vs chef card overlap khatam).
-  // chandelier — chain + ring + bulbs (garam roshni)
-  const chain = cyl(0.02, 0.02, 0.8, lam({ color: 0x9ca3af }), 6); chain.position.set(0, 3.6, -2.0); S.add(chain);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 10, 24), lam({ color: 0xfacc15 }));
-  ring.rotation.x = Math.PI / 2; ring.position.set(0, 3.2, -2.0); S.add(ring);
-  for (let i = 0; i < 6; i++) {
-    const a = i / 6 * Math.PI * 2;
-    const b = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), bas({ color: 0xffe9a8 }));
-    b.position.set(Math.cos(a) * 0.45, 3.2, -2.0 + Math.sin(a) * 0.45); S.add(b);
-    const drop = cyl(0.015, 0.03, 0.18, lam({ color: 0xd6dde3 }), 8);
-    drop.position.set(Math.cos(a) * 0.45, 3.0, -2.0 + Math.sin(a) * 0.45); S.add(drop);
-  }
+  // FIX 26 Nov LAYOUT LOCK (E): chandelier HATAYA — sone ka ring (0,3.2,-2.0) + chain (3.2-4.0, deewaar 3.4 se upar)
+  // hawa me tairta tha, raat ke aasmaan ke saamne latka dikhta tha (t38/t42/t46). Jagah par 2 deewaar-lamp (board ke dono taraf,
+  // deewaar se jude hue). chandLight (point light, intensity 4 hotel me) wahi hai — garam roshni ab bhi aayegi.
+  [[-1.35, 2.6], [1.2, 2.6]].forEach(([lx, ly]) => { // FIX 26 Nov LAYOUT LOCK (E): left lamp x -1.6 -> -1.35 — s42 me kinare aadha kata tha (probe)
+    const wallLampShade = cyl(0.07, 0.15, 0.14, lam({ color: 0x1e293b }), 10); wallLampShade.position.set(lx, ly, -3.68); S.add(wallLampShade);
+    const wallLampBulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), bas({ color: 0xffe9a8 })); wallLampBulb.position.set(lx, ly - 0.08, -3.68); S.add(wallLampBulb);
+  });
   // plants (2 bade gamle) + side table + bell
   [[-2.2, -3.2], [2.2, -3.2]].forEach(([px, pz]) => {
-    const pot = cyl(0.25, 0.2, 0.45, lam({ color: 0x7f1d1d }), 12); pot.position.set(px, 0.22, pz); S.add(pot);
+    const pot = cyl(0.25, 0.2, 0.45, lam({ color: 0x7f1d1d }), 12); pot.position.set(px, 0.20, pz); S.add(pot); // FIX 26 Nov LAYOUT LOCK (B): gamle zameen ko chhooye
     [[0, 0.85, 0, 0.3], [-0.2, 0.65, 0.1, 0.22], [0.2, 0.7, -0.1, 0.24]].forEach(([ox, oy, oz, r]) => {
       const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), lam({ color: 0x2f5c2a }));
       leaf.position.set(px + ox, oy, pz + oz); S.add(leaf);
     });
   });
   const bell = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), lam({ color: 0xfacc15 }));
-  bell.position.set(1.2, 1.12, -2.8); S.add(bell);
-  const bellBase = cyl(0.11, 0.11, 0.02, lam({ color: 0x1e293b }), 12); bellBase.position.set(1.2, 1.12, -2.8); S.add(bellBase);
+  bell.position.set(1.2, 1.05, -2.8); S.add(bell); // FIX 26 Nov LAYOUT LOCK (B): pehle y=1.12 — counter top (1.045) se 0.075 upar tairti thi
+  const bellBase = cyl(0.11, 0.11, 0.02, lam({ color: 0x1e293b }), 12); bellBase.position.set(1.2, 1.05, -2.8); S.add(bellBase);
   // hotel ke saamne thela (ending — thela hotel me khada hoga): chhota thela silhouette, s52/s56 me dikhe
   const t2 = mkTree(5.5, -3.2, 1.0); S.add(t2); hotelTrees.push(t2);
 }
@@ -751,7 +761,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
 const pilePlates = [];
 for (let i = 0; i < 8; i++) {
   const pl = cyl(0.17, 0.17, 0.03, lam({ color: i % 2 ? 0xf8fafc : 0xdbeafe }), 14);
-  pl.position.set(-0.55, 0.66 + i * 0.035, -2.45);
+  pl.position.set(-0.55, 0.615 + i * 0.035, -2.45); // FIX 26 Nov LAYOUT LOCK (B): pehle base 0.66 — neeche wali plate ka bottom (0.645) thela bed top (0.60) se 0.045 upar tairta tha (t10); ab bottom 0.60 = bed top.
   pl.visible = false; scene.add(pl); pilePlates.push(pl);
 }
 // ---- ₹30 BACHAT TAG (b04) — sunehra gol tag, bada ----
@@ -877,7 +887,7 @@ let clockHour = null, clockMin = null;
   clockHour = new THREE.Mesh(hourGeo, bas({ color: 0x1e293b })); clockHour.position.z = 0.01; clockG.add(clockHour);
   const minGeo = new THREE.BoxGeometry(0.02, 0.24, 0.01); minGeo.translate(0, 0.11, 0);
   clockMin = new THREE.Mesh(minGeo, bas({ color: 0x1e293b })); clockMin.position.z = 0.015; clockG.add(clockMin);
-  clockG.position.set(-2.6, 1.9, -4.22);
+  clockG.position.set(-2.3, 1.9, -4.22); // FIX 26 Nov LAYOUT LOCK (H): pehle x=-2.6 — wide shots (s01/s25b) me baayein kinare kata dikhta tha (t2/t22); ab 0.3 andar
   clockG.visible = false;
 }
 // ---- CHUTNEY CLOSE-UP DABBE (b07 s26 / b10 s37) — bade laal + hari dabbe ----
@@ -916,12 +926,12 @@ const hotelThelaG = new THREE.Group(); scene.add(hotelThelaG);
   [[-0.85, -0.45], [0.85, -0.45], [-0.85, 0.45], [0.85, 0.45]].forEach(([px, pz]) => {
     const pole = cyl(0.03, 0.03, 1.5, lam({ color: 0x6d3d1a }), 8); pole.position.set(px, 1.35, pz); hotelThelaG.add(pole);
   });
-  const roof = box(2.0, 0.06, 1.2, lam({ color: 0x9a3412 })); roof.position.set(0, 2.12, 0); hotelThelaG.add(roof);
+  const roof = box(2.0, 0.06, 1.2, lam({ color: 0x9a3412 })); roof.position.set(0, 2.10, 0); hotelThelaG.add(roof); // FIX 26 Nov LAYOUT LOCK (B): y 2.12 -> 2.10, khambhon (top 2.10) par baithi
   for (let i = 0; i < 3; i++) {
     const tier = cyl(0.28, 0.28, 0.16, lam({ color: 0x9aa5ad }), 16); tier.position.set(-0.45, 0.68 + i * 0.17, 0); hotelThelaG.add(tier);
   }
   const sign = boardMesh(1.7, 0.35, sonuSignTex, true); sign.position.set(0, 1.92, 0.62); hotelThelaG.add(sign);
-  hotelThelaG.position.set(1.7, 0, -2.4); hotelThelaG.rotation.y = -0.35;
+  hotelThelaG.position.set(1.7, -0.02, -2.4); hotelThelaG.rotation.y = -0.35; // FIX 26 Nov LAYOUT LOCK (B): y -0.02 — pahiye zameen ko chhooyein
   hotelThelaG.visible = false;
 }
 // ---- BHAAP (steamer se) ----
@@ -1064,7 +1074,7 @@ window.renderFrame = (f) => {
         bird.position.set(-4 + 8 * u, 5.5 + Math.sin(f * 0.1) * 0.2, -12);
         bird.rotation.z = Math.sin(f * 0.2) * 0.2;
       } else if (sub === 1) {
-        drawChar(sonuCard, 61, SONU, 'laugh', 'hang', 'hang', f, cp, -0.2, 0, -1.4, 2.0, 0, null, 2, null, 'sonu');
+        drawChar(sonuCard, 61, SONU, 'laugh', 'hang', 'hang', f, cp, -0.2, 0, -1.4, 1.6, 0, null, 2, null, 'sonu'); // FIX 26 Nov LAYOUT LOCK (A): pehle scale 2.0 — chehra upar+dayein kata tha (t6, s07); ab 1.6 + camera peeche (story.js s07)
       } else {
         drawChar(custAuntyCard, 69, CUST_AUNTY, 'laugh', 'hang', 'hang', f, cp, 1.2, 0, -1.8, 1.0, 0, null, -3, null, false);
         drawChar(sonuCard, 61, SONU, 'laugh', 'hang', 'hang', f, cp, -0.2, 0, -1.4, 0.9, 0, null, 0, null, 'sonu');
@@ -1072,10 +1082,17 @@ window.renderFrame = (f) => {
       break;
     }
     case 'b03': { // SONU INTRO — sub0 thela wide + menu, sub1 Sonu medium (apron+towel), sub2 plate stack close, sub3 ghadi 5 baje
-      drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.05, 0, 0.3, 0, mouthFor(f), 'sonu');
-      if (sub === 2) pilePlates.forEach((m, i) => { m.visible = i < 4; });
+      // FIX 26 Nov LAYOUT LOCK (A): sub2 (plate stack close) me Sonu camera aur pile ke beech me tha — camera uske
+      // chehre ke 0.73 peeche tha, chehra poora frame bhar gaya tha (t10, s11). Ab sub2 me Sonu pile ke dayein-peeche
+      // khada hai (0.9, -1.9), camera seedha pile par — chehra frame se bahar, sirf pile ka close-up.
+      if (sub === 2) {
+        drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, 0.9, 0, -1.9, 0.9, 0, 0.3, 0, mouthFor(f), 'sonu');
+        pilePlates.forEach((m, i) => { m.visible = i < 4; });
+      } else {
+        drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.05, 0, 0.3, 0, mouthFor(f), 'sonu');
+      }
       if (sub === 3) {
-        glintBoard.position.set(-2.6, 2.05, -4.0);
+        glintBoard.position.set(-2.3, 2.05, -4.0); // FIX 26 Nov LAYOUT LOCK (H): ghadi x -2.6 -> -2.3
         glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       }
       break;
@@ -1199,8 +1216,10 @@ window.renderFrame = (f) => {
       if (sub === 0) {
         drawChar(sonuCard, 61, SONU, 'smile', 'point', 'hang', f, cp, -0.2, 0, -1.4, 1.5, 0, null, 0, mouthFor(f), 'sonu');
       } else if (sub === 1) {
-        chutneyCloseG.visible = true;
-        drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.2, 0, -1.4, 0.9, 0, null, 0, mouthFor(f), 'sonu');
+        // FIX 26 Nov LAYOUT LOCK (A/H): thela ke dabbe close-up hain — Sonu camera aur dabbon ke beech me tha, chehra
+        // kinare kata dikhta tha; ab Sonu dayein-peeche (0.9, -1.9). chutneyCloseG yahan NAHI (wo sub2 aunty scene ka
+        // hai — yahan uska kinara frame ke dayein kata dikhta tha).
+        drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, 0.9, 0, -1.9, 0.9, 0, null, 0, mouthFor(f), 'sonu');
       } else if (sub === 2) {
         drawChar(custAuntyCard, 69, CUST_AUNTY, 'smile', 'reach', 'hang', f, cp, 1.2, 0, -1.8, 1.0, 0, 0.3, 0, null, false);
         drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.0, 0, 0.35, 0, mouthFor(f), 'sonu');
@@ -1223,7 +1242,7 @@ window.renderFrame = (f) => {
         drawChar(chefCard, 65, CHEF, 'shock', 'hang', 'hang', f, cp, 1.25, 0, -2.2, 2.0, 0, null, 0, null, 'chef'); // FIX 26 Nov: x 0.6 -> 1.25 — chef board dhak raha tha (f_13.0s, 50% cover).
         glintHotel.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       } else {
-        drawChar(sonuCard, 61, SONU, 'shock', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 2.0, 0, null, 0, null, 'sonu');
+        drawChar(sonuCard, 61, SONU, 'shock', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 1.1, 0, null, 0, null, 'sonu'); // FIX 26 Nov LAYOUT LOCK (F): pehle scale 2.0 — Sonu chef se 2x bada tha, uska sir chef ke poore shareer jitna (t38, s43); ab 1.1 ~ chef 0.9
         drawChar(chefCard, 65, CHEF, 'shock', 'hang', 'hang', f, cp, 0.6, 0, -2.2, 0.9, 0, null, 0, null, 'chef');
       }
       break;
@@ -1258,7 +1277,7 @@ window.renderFrame = (f) => {
         drawChar(chefCard, 65, CHEF, 'smile', 'reach', 'hang', f, cp, 0.6, 0, -2.2, 1.05, 0, 0.4, 0, null, 'chef');
         drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.6, 0, -1.6, 1.05, 0, 0.4, 0, mouthFor(f), 'sonu');
       } else {
-        drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 2.0, 0, null, 0, mouthFor(f), 'sonu');
+        drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 1.35, 0, null, 0, mouthFor(f), 'sonu'); // FIX 26 Nov LAYOUT LOCK (A): pehle scale 2.0 — smile CU me chehra frame bhar jata tha (s50); ab 1.35 + camera peeche
       }
       break;
     }
@@ -1271,15 +1290,17 @@ window.renderFrame = (f) => {
         hotelThelaG.visible = true;
         drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, 0.6, 0, -1.6, 1.0, 0, null, 0, mouthFor(f), 'sonu');
       } else if (sub === 2) {
-        hotelThelaG.visible = true;
+        // FIX 26 Nov LAYOUT LOCK (G): hotelThelaG yahan VISIBLE NAHI — two-shot me thela ka laal banner dayein kinare
+        // aadha kata dikhta tha ("SO...", t46, s53) — set leak lagta tha. Thela s52 (saamne) aur s56 (freeze) me
+        // poora dikhega; two-shot sirf Sonu + chef ka hai.
         drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 1.0, 0, null, 0, mouthFor(f), 'sonu');
         drawChar(chefCard, 65, CHEF, 'smile', 'hang', 'hang', f, cp, 0.6, 0, -2.2, 1.0, 0, null, 0, null, 'chef');
       } else if (sub === 3) {
-        hotelThelaG.visible = true;
+        // FIX 26 Nov LAYOUT LOCK (G): board push-in me bhi thela nahi — banner kinare kata dikhta tha; sirf board + Sonu.
         glintHotel.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
         drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 0.9, 0, null, 0, null, 'sonu');
       } else if (sub === 4) {
-        drawChar(sonuCard, 61, SONU, 'relief', 'up', 'hang', f, cp, -0.6, 0, -1.6, 2.0, 0, null, 0, null, 'sonu');
+        drawChar(sonuCard, 61, SONU, 'relief', 'up', 'hang', f, cp, -0.6, 0, -1.6, 1.35, 0, null, 0, null, 'sonu'); // FIX 26 Nov LAYOUT LOCK (A): pehle scale 2.0 — relief CU me chehra frame bhar jata tha (s55); ab 1.35 + camera peeche
       } else {
         // FREEZE — chehra + thela + hotel board teeno frame me, kuch kata nahi
         hotelThelaG.visible = true;
