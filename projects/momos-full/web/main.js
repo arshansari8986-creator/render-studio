@@ -504,7 +504,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     g.fillStyle = '#92400e'; g.fillRect(w / 2 - 40, 240, 80, 44);
     g.fillStyle = '#f8fafc'; g.fillRect(w / 2 - 40, 240, 80, 10);
   });
-  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(1.4, 1.6, -4.24); S.add(chaiPoster); // FIX 26 Nov: x 0.9 -> 1.25 — thela ki chhat (roof top) poster ka 'C' dhak rahi thi (f_0.5s). FIX 26 Nov LAYOUT LOCK (H): x 1.25 -> 1.4 — roof top face ab bhi 1.8% dhak raha tha (aerial s01); poster aur dayein.
+  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(1.15, 1.6, -4.24); S.add(chaiPoster); // FIX 26 Nov FIX ROUND 4: x 1.4 -> 1.15 — khamba (pillar x=1.6) poster ka 'AI' + '₹5' dhak raha tha (f417/f745, 25% cover, 3D ray se verify); poster ab khambhe se saaf (right edge 1.425 < pillar 1.46) + khidki se saaf (left edge 0.875 > window 0.8). s01 aerial me chhat-fascia 8% corner (f0, clear hota hai f12 tak) — acceptable, poster chhota hai.
   const momosPosterTex = textBoard(256, 320, (g, w, h) => {
     g.fillStyle = '#7f1d1d'; g.fillRect(0, 0, w, h);
     g.strokeStyle = '#facc15'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
@@ -887,7 +887,7 @@ let clockHour = null, clockMin = null;
   clockHour = new THREE.Mesh(hourGeo, bas({ color: 0x1e293b })); clockHour.position.z = 0.01; clockG.add(clockHour);
   const minGeo = new THREE.BoxGeometry(0.02, 0.24, 0.01); minGeo.translate(0, 0.11, 0);
   clockMin = new THREE.Mesh(minGeo, bas({ color: 0x1e293b })); clockMin.position.z = 0.015; clockG.add(clockMin);
-  clockG.position.set(-2.3, 1.9, -4.22); // FIX 26 Nov LAYOUT LOCK (H): pehle x=-2.6 — wide shots (s01/s25b) me baayein kinare kata dikhta tha (t2/t22); ab 0.3 andar
+  clockG.position.set(-1.6, 2.6, -4.22); // FIX 26 Nov FIX ROUND 4: (-2.3,1.9) -> (-1.6,2.6) — ghadi (a) sign ke peeche 51-64% dhaki thi (f137, 3D ray se verify), (b) thela-chhat ke peeche (f958, high cam se), (c) wide shots me baayein kinare kati thi (f417/f60/f745/f958). Ab ghadi sign ke UPAR (bottom 2.325 > sign top 2.095) + chhat ke UPAR (bottom 2.325 > roof 2.13) + saare wide shots me frame ke andar (max<=0.85, s02 end 0.84). s12 camera + glint bhi nayi jagah par.
   clockG.visible = false;
 }
 // ---- CHUTNEY CLOSE-UP DABBE (b07 s26 / b10 s37) — bade laal + hari dabbe ----
@@ -1092,7 +1092,7 @@ window.renderFrame = (f) => {
         drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.05, 0, 0.3, 0, mouthFor(f), 'sonu');
       }
       if (sub === 3) {
-        glintBoard.position.set(-2.3, 2.05, -4.0); // FIX 26 Nov LAYOUT LOCK (H): ghadi x -2.6 -> -2.3
+        glintBoard.position.set(-1.6, 2.75, -4.0); // FIX 26 Nov FIX ROUND 4: ghadi nayi jagah (-1.6,2.6) — chamak uske upar
         glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       }
       break;
@@ -1116,7 +1116,7 @@ window.renderFrame = (f) => {
         plateSingleG.visible = true;
         plateSingleG.position.set(0.6, 1.15, -1.6);
       } else {
-        drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.0, 0, 0.3, 0, mouthFor(f), 'sonu');
+        drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, 0.1, 0, -1.4, 1.0, 0, 0.3, 0, mouthFor(f), 'sonu'); // FIX 26 Nov FIX ROUND 4: Sonu x -0.2 -> 0.1 — menu board ki teesri line "CHUTNEY FREE" Sonu ke peeche dhaki thi (f417, 15% cover, 3D ray se verify); ab board poora readable (menu-vs-Sonu 0%)
         gallaG.visible = true;
         if (gallaLid) gallaLid.rotation.x = -1.9 * M.surge(clamp(u * 2, 0, 1));
         countNote.visible = true;
