@@ -37,15 +37,15 @@ export const FLASH = {};
 
 // ---------- set layout (centre ~ (0,0,-3)) ----------
 // gali: sadak z=1.8 (x -8..8); press dukaan building x=-1.5 (deewaar z=-4.3, 6.5 chaudi, 3.2 unchi),
-//   "RAJU PRESS" sign (-1.5, 2.95), "₹2,00,000" board (-2.6, 1.9, -4.22), kapdon ki kataar (rasse par, z=-3.5, y~2.2),
+//   "RAJU PRESS" sign (-1.5, 2.95), "₹2,00,000" board (-2.7, 1.85, -4.22, 1.8x1.08 — bada), kapdon ki kataar (rasse par x -1.6..1.2, z=-3.5, y~2.2 — BOARD se door),
 //   darwaza (-1.2), khidki (0.3); padosi makaan mid-row z=-7; skyline z=-19; ped (-6.2,-3.6) & (6.4,-3.4); khambe + taar;
 //   Raju dukaan ke bahar (-1.5, 0, -1.6); aangan me kapdon ki tokri (2.4, -0.8) + ghada foreground.
 // dukaan: counter (0.3, -2.6), kapdon ka dher counter par, press loha (0.3, -2.6), latakta bulb,
 //   bada "RAJU PRESS" board deewaar par (1.25, 1.8, -3.72), deewaar z=-3.8 (neechi — upar aasmaan + skyline dikhe),
 //   peeche kapdon ki kataar deewaar par; Raju counter ke peeche (-0.35, 0, -3.0).
 export const CAMS = {
-  // s01 HOOK: high-angle aerial wide → tez push-in dukaan par; board + Raju dono end par frame ke andar
-  s01: [[-7.5, 6.5, 9.5], [-1.0, 0.8, -3.0], 58, 0, [-3.0, 2.7, 3.6], [-1.9, 1.7, -3.9], 48, 0],
+  // s01 HOOK: high-angle aerial wide → tez push-in dukaan par; board + Raju dono end par frame ke andar (board left, Raju uske bagal right)
+  s01: [[-7.5, 6.5, 9.5], [-1.0, 0.8, -3.0], 58, 0, [-3.2, 2.8, 4.2], [-1.9, 1.65, -3.9], 52, 0],
   // s02 CLOSE-UP: Raju s 2.1 — camera door (dist ~7.5) taaki chehra frame ka ~65% le, margin ke saath; pencil dikhe
   s02: [[-1.35, 2.25, 5.9], [-1.5, 2.1, -1.6], 42, 0, [-1.35, 2.22, 5.5], [-1.5, 2.1, -1.6], 40, 0],
   // s03 INTRO MEDIUM: Raju left-centre, "RAJU PRESS" board upar + kapdon ki kataar peeche — sab frame ke andar
