@@ -129,8 +129,10 @@ export const CAMS = {
   s20: [[0.3, 1.6, 1.2], [0.3, 1.35, -2.2], 46, 0, [0.3, 1.55, 1.2], [0.35, 1.28, -2.2], 44, 0],
   // s21 TWO-SHOT: Raju (-1.5) + graahak (0.2) dono frame me; Raju suit ki taraf ishaara karta hai (camera peeche + chauda)
   s21: [[-0.6, 1.9, 3.4], [-0.65, 1.5, -1.9], 54, 0, [-0.6, 1.88, 3.1], [-0.65, 1.5, -1.9], 52, 0],
-  // s22 ENDING TRAVELLING: sadak par lateral track (x 4.5 → -0.6) → Raju par push-in closeup (fov 56 → 42); ant me camera settle = FREEZE
-  s22: [[4.5, 2.2, 3.0], [-1.0, 1.4, -1.8], 56, 0, [-0.6, 2.0, 1.6], [-1.2, 1.7, -1.8], 42, 0],
+  // s22 ENDING TRAVELLING: sadak par lateral track (x 4.5 → -1.7) → Raju par settle — FIX run 2: end camera
+  // peeche + chauda (z 1.6 → 4.0, fov 42 → 56) taaki peeche hook board ka "₹2,00,000" POORA + Raju ka chehra +
+  // suit teeno freeze frame me andar aayein (f1210 me ₹ left edge se kata tha, suit chehra dhak raha tha).
+  s22: [[4.5, 2.2, 3.0], [-1.0, 1.4, -1.8], 56, 0, [-1.7, 2.1, 4.0], [-1.6, 1.65, -1.9], 56, 0],
 };
 export const camFor = (shot, u) => {
   const c = CAMS[shot.id];

@@ -444,8 +444,9 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(7.0, 2.8), lam({ map: tex(plaster(43, 40), 2, 1), color: 0xe8dcc0 }));
   wall.position.set(0, 1.4, -3.8); S.add(wall);
   const bigSign = boardMesh(1.6, 0.28, pressSignTex, true); bigSign.position.set(-1.6, 2.3, -3.72); S.add(bigSign);
-  // kapdon ki kataar deewaar par (peeche)
-  mkClothesLine(S, -0.6, 3.4, 2.1, -3.7, [0xf8fafc, 0xfca5a5, 0x86efac, 0xfde68a]);
+  // kapdon ki kataar deewaar par (peeche) — FIX run 2: line x -3.0..-0.6 (board x 0.0..1.2 se door);
+  // pehle -0.6..3.4 thi aur kagaz counter board "₹2,83,500" ko dhak raha tha (run #186 QA fail 1).
+  mkClothesLine(S, -3.0, -0.6, 2.1, -3.7, [0xf8fafc, 0xfca5a5, 0x86efac, 0xfde68a]);
   // counter (lakdi) + upar kapdon ka dher
   const counter = box(2.8, 1.0, 0.8, lam({ color: 0x8a6844 })); counter.position.set(0.3, 0.5, -2.6); S.add(counter);
   const counterTop = box(3.0, 0.06, 0.9, lam({ color: 0xc9a06a })); counterTop.position.set(0.3, 1.03, -2.6); S.add(counterTop);
@@ -639,20 +640,30 @@ suitGlowLight.position.set(-0.6, 1.6, -2.0); scene.add(suitGlowLight);
 const glintSuit = mkGlint(-0.6, 1.5, -1.95, 0.6);
 
 // ---- SUIT (single, hanger par) — s14/s15/s21/s22 me jagah badalta hai ----
-function mkSuit(w, h, color) {
+// hero=true: ENDING wala suit — halke lapel + badi safed shirt (unlit, sunset me bhi safed) + tie,
+// taaki suit kaale dabbe jaisa na lage (run #186 QA fail 2: f1210 me suit sirf kaala rectangle tha).
+function mkSuit(w, h, color, hero = false) {
   const g = new THREE.Group();
   const jacket = box(w, h, 0.08, lam({ color })); g.add(jacket);
-  const lapL = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.3), lam({ color: 0x2c4a6b, side: THREE.DoubleSide }));
+  const lapCol = hero ? 0x9db8d9 : 0x2c4a6b;
+  const lapL = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.3), lam({ color: lapCol, side: THREE.DoubleSide }));
   lapL.position.set(-0.09, h * 0.22, 0.045); lapL.rotation.z = 0.35; g.add(lapL);
   const lapR = lapL.clone(); lapR.position.x = 0.09; lapR.rotation.z = -0.35; g.add(lapR);
-  const shirt = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.2), lam({ color: 0xf8fafc, side: THREE.DoubleSide }));
+  const shirtW = hero ? 0.2 : 0.14, shirtH = hero ? 0.3 : 0.2;
+  const shirt = new THREE.Mesh(new THREE.PlaneGeometry(shirtW, shirtH), hero ? bas({ color: 0xffffff, side: THREE.DoubleSide }) : lam({ color: 0xf8fafc, side: THREE.DoubleSide }));
   shirt.position.set(0, h * 0.28, 0.045); g.add(shirt);
+  if (hero) {
+    const tie = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.16), bas({ color: 0x7f1d1d, side: THREE.DoubleSide }));
+    tie.position.set(0, h * 0.1, 0.05); g.add(tie);
+  }
   const hook = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 8, 16, Math.PI), lam({ color: 0x9ca3af }));
   hook.position.set(0, h / 2 + 0.05, 0); g.add(hook);
   const bar = box(w * 0.9, 0.025, 0.03, lam({ color: 0x6b7280 })); bar.position.set(0, h / 2 - 0.01, 0); g.add(bar);
   return g;
 }
 const suitG = mkSuit(0.55, 0.75, 0x1e3a5f); suitG.visible = false; scene.add(suitG);
+// ENDING hero suit (sirf s22) — halka jacket, lapel/shirt/tie saaf dikhe
+const suitEndG = mkSuit(0.55, 0.8, 0x2c4a6b, true); suitEndG.visible = false; scene.add(suitEndG);
 
 // ---- 20 SUIT KA DHER (s16-s17) — folded suits, pyramid: 8+6+4+2 = 20 ----
 const pileSuits = [];
@@ -715,7 +726,9 @@ const counterCtx = counterCanvas.getContext('2d');
 const counterTex = new THREE.CanvasTexture(counterCanvas); counterTex.colorSpace = THREE.SRGBColorSpace;
 let lastCounterVal = -1;
 function drawCounter(v) {
-  const q = Math.floor(v / 5000) * 5000;
+  // FIX run 2: 500-step (pehle 5000-step tha — floor(283500/5000)*5000 = 2,80,000 aata tha,
+  // final value ₹2,83,500 kabhi display hi nahi hota tha — run #186 QA fail 1).
+  const q = Math.floor(v / 500) * 500;
   if (q === lastCounterVal) return; lastCounterVal = q;
   const g = counterCtx;
   g.fillStyle = '#134e4a'; g.fillRect(0, 0, 512, 360);
@@ -793,6 +806,7 @@ window.renderFrame = (f) => {
   tag3500.visible = false;
   tag350.visible = false; suitGlowLight.intensity = 0; glintSuit.material.opacity = 0;
   suitG.visible = false;
+  suitEndG.visible = false;
   pileSuits.forEach((m) => { m.visible = false; });
   rackG.visible = false;
   notebookSmall.visible = false;
@@ -969,7 +983,11 @@ window.renderFrame = (f) => {
     case 's19': { // COUNTER ₹2,83,500 + SUIT KA PAHAAD (pull-back) — counter gin kar badhta hai → pull-back: peeche rack-pahaad, Raju chhota
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, 0.3, 0, mouthFor(f), true);
       counterBoard.visible = true;
-      drawCounter(283500 * (u * u * (3 - 2 * u)));
+      // FIX run 2: tez gino — u=0.75 (f~997) par ₹2,83,500 par pahuncho, phir ~0.83 s HOLD.
+      // Pehle smoothstep(u) poore shot me chalta tha: shot end (u=1) par hi full hota, aur woh frame
+      // s20 ka hota hai — isliye run #186 me counter kabhi ₹2,83,500 par ruka hi nahi.
+      const cp19 = clamp(u / 0.75, 0, 1);
+      drawCounter(283500 * (cp19 * cp19 * (3 - 2 * cp19)));
       rackG.visible = true;
       gallaG.visible = true; // mahine ka galla — counter par khula, note bhara
       if (gallaLid) gallaLid.rotation.x = -1.9;
@@ -989,9 +1007,11 @@ window.renderFrame = (f) => {
     }
     case 's22': { // ENDING TRAVELLING — Raju suit uthata hai (upar), muskura kar camera ki taraf dekhta hai → FREEZE sabse badi smile par. Loop — koi CTA nahi.
       drawChar(rajuCard, 61, RAJU, 'relief', 'up', 'hang', f, cp, -1.2, 0, -1.8, 1.05, 0, null, 0, mouthFor(f), true);
-      suitG.visible = true;
-      suitG.position.set(-0.95, 1.15 + 0.45 * u, -1.6);
-      suitG.rotation.z = Math.sin(f * 0.04) * 0.03;
+      // FIX run 2: suit Raju ke CHEHRE ke BAGAL me (screen-right, x=-0.55) — pehle x=-0.95 par chehre ke
+      // SAAMNE tha aur freeze frame me chehra poora dhak gaya tha (f1210). Hero suit: lapel/shirt/tie saaf.
+      suitEndG.visible = true;
+      suitEndG.position.set(-0.55, 1.25 + 0.4 * u, -1.7);
+      suitEndG.rotation.z = Math.sin(f * 0.04) * 0.03;
       break;
     }
   }
