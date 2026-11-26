@@ -1,8 +1,8 @@
 // "Momos Wala" — SAMPLE v2 REAL (18.63 s, 559 frames @30fps). Full main.js ka copy, beat-gating sirf sample beats par.
 // RE-ANCHORED 26 Nov 2026: 5 segments (L1+L9+L10+L11+L14, full lines), 23 shots.
 // Segments: hook s01-s05 (L1) + galla s33/s34/s34b/s35 (L9 counter) + khud-check s36-s39 (L10) + chef reveal s40-s43 (L11) + ending s51-s56 (L14 freeze).
-// Sample story.js me beats sirf b01/b09/b11/b14 hain; sub-remap (neeche renderFrame me):
-//   b11 sub0 -> full s42 jaisa reveal (sub 2), b14 sub0 -> full s56 jaisa FREEZE (sub 5).
+// Sample story.js me beats sirf b01/b09/b11/b14 hain; sub seedha use hota hai (koi remap NAHI —
+// remap 26 Nov ko hataya: b11->2 / b14->5 remap se s41 (chef face), s43 (two-shot), s55 (CU) kharab hue the).
 // Chef sample me sirf reveal shot me dikhe — usse pehle phone/peon only (WITHHELD).
 // NO captions, NO music. MUNH beat-level (4 states), NO phoneme lip-sync, envelope.js import NAHI.
 // NO walk cycle, NO low angle, NO orbit. Ant = loop freeze, KOI CTA NAHI.
@@ -467,7 +467,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
     g.fillStyle = '#92400e'; g.fillRect(w / 2 - 40, 240, 80, 44);
     g.fillStyle = '#f8fafc'; g.fillRect(w / 2 - 40, 240, 80, 10);
   });
-  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(0.9, 1.6, -4.24); S.add(chaiPoster);
+  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(1.25, 1.6, -4.24); S.add(chaiPoster); // FIX 26 Nov: x 0.9 -> 1.25 — thela ki chhat (roof top) poster ka 'C' dhak rahi thi (f_0.5s).
   const momosPosterTex = textBoard(256, 320, (g, w, h) => {
     g.fillStyle = '#7f1d1d'; g.fillRect(0, 0, w, h);
     g.strokeStyle = '#facc15'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
@@ -682,7 +682,7 @@ const clockTex = textBoard(256, 256, (g, w, h) => {
   const trim = box(3.44, 0.08, 0.94, lam({ color: 0xfacc15 })); trim.position.set(0, 1.08, -2.8); S.add(trim);
   const counterBase = box(3.5, 0.12, 1.0, lam({ color: 0x1e293b })); counterBase.position.set(0, 0.06, -2.8); S.add(counterBase);
   // hotel menu board — deewaar par, bada (b13-b14 hero)
-  const hBoard = boardMesh(2.0, 1.0, hotelMenuTex, true); hBoard.position.set(0, 2.15, -3.72); S.add(hBoard);
+  const hBoard = boardMesh(2.0, 1.0, hotelMenuTex, true); hBoard.position.set(-0.2, 2.15, -3.72); S.add(hBoard); // FIX 26 Nov: x 0 -> -0.2 — s42 me chef se board clear rahe (board text vs chef card overlap khatam).
   // chandelier — chain + ring + bulbs (garam roshni)
   const chain = cyl(0.02, 0.02, 0.8, lam({ color: 0x9ca3af }), 6); chain.position.set(0, 3.6, -2.0); S.add(chain);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 10, 24), lam({ color: 0xfacc15 }));
@@ -813,7 +813,7 @@ function drawCounter(v) {
   counterTex.needsUpdate = true;
 }
 const counterBoard = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.85), bas({ map: counterTex }));
-counterBoard.position.set(0.6, 2.0, -4.22); counterBoard.visible = false; scene.add(counterBoard);
+counterBoard.position.set(-1.3, 2.0, -4.22); counterBoard.visible = false; scene.add(counterBoard); // FIX 26 Nov: x 0.6 -> -1.3 — khidki ki salakh (winBar) board dhak rahi thi (f_6.5s, render #198).
 // ---- CALENDAR BOARD + PAID STAMP (b07 s27) — "15 DIN PEHLE" ----
 const calendarTex = textBoard(512, 384, (g, w, h) => {
   g.fillStyle = '#fef9ec'; g.fillRect(0, 0, w, h);
@@ -1001,7 +1001,7 @@ window.renderFrame = (f) => {
   // sub = beat ke andar shot ka index (0-based). Har sub-shot me alag angle (story.js CAMS) + alag action-step.
   const beat = BEAT_OF[id], bu = beatU(f), sub = shot.sub;
   // SAMPLE sub-remap: sample shots full ke beech wale shots hain — unka action wahi mile.
-  const subEff = beat === 'b11' ? 2 : beat === 'b14' ? 5 : sub;
+  const subEff = sub; // FIX 26 Nov: remap HATAYA — b11/b14 remap (sub->2/5) se s41/s43/s55 me chehra frame se bahar kata tha (render #198, f_11.5s/f_17.5s).
   switch (beat) {
     case 'b01': { // HOOK paradox — sub0 aerial (padosi gali paar karta hai), sub1 sign push-in, sub2 board+bhaap, sub3 Sonu wonder, sub4 KHAALI thela wide (koi grahak nahi)
       if (subEff === 4) {
@@ -1172,7 +1172,7 @@ window.renderFrame = (f) => {
         drawChar(custAuntyCard, 69, CUST_AUNTY, 'smile', 'reach', 'hang', f, cp, 1.2, 0, -1.8, 1.0, 0, 0.3, 0, null, false);
         drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.0, 0, 0.35, 0, mouthFor(f), 'sonu');
         chutneyCloseG.visible = true;
-        chutneyCloseG.position.set(0.9, 1.05, -1.9);
+        chutneyCloseG.position.set(0.85, 0.45, -1.85); // FIX 26 Nov: y 1.05 -> 0.45 — dabba aunty ka chehra dhak raha tha (f_9.5s, 62% cover).
       } else {
         drawChar(sonuCard, 61, SONU, 'smile', 'hang', 'hang', f, cp, -0.2, 0, -1.4, 1.0, 0, null, 0, mouthFor(f), 'sonu');
         drawChar(custManCard, 63, CUST_MAN, 'smile', 'hang', 'hang', f, cp, 1.4, 0, -2.0, 0.95, 0, null, 0, null, false);
@@ -1187,7 +1187,7 @@ window.renderFrame = (f) => {
         // peeche se: chef door khada, toque+coat pehchan; card camera-facing hai isliye scale chhota + headTilt se peeche ka ehsaas
         drawChar(chefCard, 65, CHEF, 'neutral', 'hang', 'hang', f, cp, 0.6, 0, -2.6, 0.9, 0, null, 4, null, 'chef');
       } else if (subEff === 2) {
-        drawChar(chefCard, 65, CHEF, 'shock', 'hang', 'hang', f, cp, 0.6, 0, -2.2, 2.0, 0, null, 0, null, 'chef');
+        drawChar(chefCard, 65, CHEF, 'shock', 'hang', 'hang', f, cp, 1.25, 0, -2.2, 2.0, 0, null, 0, null, 'chef'); // FIX 26 Nov: x 0.6 -> 1.25 — chef board dhak raha tha (f_13.0s, 50% cover).
         glintHotel.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       } else {
         drawChar(sonuCard, 61, SONU, 'shock', 'hang', 'hang', f, cp, -0.6, 0, -1.6, 2.0, 0, null, 0, null, 'sonu');
