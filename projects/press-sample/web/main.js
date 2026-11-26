@@ -313,9 +313,9 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
   const winBar = box(0.06, 1.0, 0.12, lam({ color: 0x2f4a4a })); winBar.position.set(0.3, 1.9, -4.2); S.add(winBar);
   // signs + boards (deewaar par)
   const pressSign = boardMesh(2.2, 0.45, pressSignTex, true); pressSign.position.set(-1.5, 2.95, -4.24); S.add(pressSign);
-  const lakhBoard = boardMesh(1.5, 0.9, lakhTex, true); lakhBoard.position.set(-2.6, 1.9, -4.22); S.add(lakhBoard);
-  // kapdon ki kataar — dukaan ke saamne rassi par (Raju ke peeche)
-  mkClothesLine(S, -3.6, 1.2, 2.3, -3.5, [0xf8fafc, 0x93c5fd, 0xfca5a5, 0x86efac, 0xfde68a]);
+  const lakhBoard = boardMesh(1.8, 1.08, lakhTex, true); lakhBoard.position.set(-2.7, 1.85, -4.22); S.add(lakhBoard);
+  // kapdon ki kataar — dukaan ke saamne rassi par (Raju ke peeche; BOARD se door — line kabhi board ke upar se na guzre)
+  mkClothesLine(S, -1.6, 1.2, 2.3, -3.5, [0xf8fafc, 0x93c5fd, 0xfca5a5, 0x86efac, 0xfde68a]);
   // aangan: kapdon ki tokri (foreground right) + ghada (foreground left)
   const basket = cyl(0.32, 0.26, 0.45, lam({ color: 0x8a6844 }), 14); basket.position.set(2.4, 0.22, -0.8); S.add(basket);
   const fold1 = box(0.4, 0.09, 0.3, lam({ color: 0xf8fafc })); fold1.position.set(2.4, 0.48, -0.8); fold1.rotation.y = 0.2; S.add(fold1);
@@ -428,7 +428,7 @@ const tagCanvas = document.createElement('canvas'); tagCanvas.width = 256; tagCa
   g.fillStyle = '#fef3c7'; g.beginPath(); g.arc(128, 34, 10, 0, 7); g.fill(); // tag ka chhed
 }
 const tagTex = new THREE.CanvasTexture(tagCanvas); tagTex.colorSpace = THREE.SRGBColorSpace;
-const tag10 = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: tagTex, transparent: true, depthWrite: false }));
+const tag10 = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), new THREE.MeshBasicMaterial({ map: tagTex, transparent: true, depthWrite: false }));
 tag10.visible = false; scene.add(tag10);
 // tag ki dor (kapde se bandha) — s05 me tag ke saath
 const tagString = new THREE.Mesh(new THREE.PlaneGeometry(0.02, 0.3), bas({ color: 0x7f1d1d }));
@@ -508,12 +508,12 @@ window.renderFrame = (f) => {
   }
 
   switch (id) {
-    case 's01': { // HOOK (2.76s): aerial wide → tez push-in dukaan par; board bada; Raju bahar khada
-      drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -1.5, 0, -1.6, 1.05, 0, 0.35, 0, mouthFor(f), true);
+    case 's01': { // HOOK (2.76s): aerial wide → tez push-in dukaan par; board bada; Raju board ke BAGAL me (board ko kabhi cover na kare)
+      drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -1.0, 0, -1.6, 1.05, 0, 0.35, 0, mouthFor(f), true);
       // padosi chhote kadmon se gali paar karta hai (background movement; daudna nahi)
       const nx = 3.5 - 2.0 * u;
       drawChar(neighCard, 63, NEIGH, 'neutral', 'hang', 'hang', f, cp, nx, 0, -3.2, 0.85, 0.5 + 0.08 * Math.sin(f * 0.15), null, 0, null, false);
-      glintBoard.position.set(-2.6, 2.1, -4.0);
+      glintBoard.position.set(-2.7, 2.05, -4.0);
       glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       break;
     }
@@ -544,15 +544,15 @@ window.renderFrame = (f) => {
       ironG.rotation.y = 0.1;
       break;
     }
-    case 's05': { // ₹10 TAG EXTREME CLOSE-UP — laal tag bada, peeche bhaap halki
+    case 's05': { // ₹10 TAG EXTREME CLOSE-UP — laal tag bada, dher ke SAAMNE (pile front z=-2.4 se aage), peeche bhaap halki
       const pop = clamp(u * 4, 0, 1);
       tag10.visible = true;
-      tag10.position.set(0.3, 1.35, -2.5);
+      tag10.position.set(0.3, 1.35, -2.3);
       tag10.scale.setScalar(Math.max(0.01, pop));
       tag10.material.opacity = pop;
       tag10.rotation.z = Math.sin(f * 0.05) * 0.05;
       tagString.visible = true;
-      tagString.position.set(0.3, 1.68, -2.51);
+      tagString.position.set(0.3, 1.68, -2.31);
       tagString.material.opacity = pop;
       break;
     }
