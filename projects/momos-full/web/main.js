@@ -816,14 +816,14 @@ const carrierPlates = [];
 const gallaG = new THREE.Group(); scene.add(gallaG);
 let gallaLid = null;
 {
-  const gbox = box(0.55, 0.28, 0.4, lam({ color: 0x8a6844 })); gbox.position.set(-0.2, 0.78, -2.5); gallaG.add(gbox);
-  const gtop = box(0.57, 0.03, 0.42, lam({ color: 0xc9a06a })); gtop.position.set(-0.2, 0.93, -2.5); gallaG.add(gtop);
+  const gbox = box(0.55, 0.28, 0.4, lam({ color: 0x8a6844 })); gbox.position.set(-0.05, 0.78, -2.62); gallaG.add(gbox); // FIX 26 Nov FIX ROUND 5: (-0.2,-2.5) -> (-0.05,-2.62) — galla ka saamne wala kinara (z -2.30) menu board ke dayein kinare (z -2.389) se AAGE tha, isliye s16/s35 me "CHUTNEY FR" + "PANEER ₹7" dhaka tha (f417/f958, 3D ray 13.6%/10.4%); ab front z -2.42 < menu -2.389, menu 0.0% (ray se verify). G4 (-0.05) G2 (+0.05) se behtar: note 65% vs 30% dikhta (s16), galla combined (Sonu+menu) s16 50% / s35 45% / s33 35% (v3 s33 me 10% tha); thela bed ke dayein kinare (-0.246) se chipka hai, counter par baitha lagta hai.
+  const gtop = box(0.57, 0.03, 0.42, lam({ color: 0xc9a06a })); gtop.position.set(-0.05, 0.93, -2.62); gallaG.add(gtop); // FIX ROUND 5: galla ke saath (-0.2,-2.5) -> (-0.05,-2.62).
   const lidGeo = new THREE.BoxGeometry(0.55, 0.04, 0.4); lidGeo.translate(0, 0, 0.2);
   gallaLid = new THREE.Mesh(lidGeo, lam({ color: 0x6d5136 }));
-  gallaLid.position.set(-0.2, 0.94, -2.7); gallaG.add(gallaLid);
+  gallaLid.position.set(-0.05, 0.94, -2.82); gallaG.add(gallaLid); // FIX ROUND 5: galla ke saath (-0.2,-2.7) -> (-0.05,-2.82) — khula dhakkan menu ke peeche rahe.
   for (let i = 0; i < 3; i++) {
     const n = box(0.3, 0.015, 0.2, lam({ color: i % 2 ? 0xd9f99d : 0xbbf7d0 }));
-    n.position.set(-0.2 + (i - 1) * 0.02, 0.94 + i * 0.018, -2.5); n.rotation.y = (i - 1) * 0.12; gallaG.add(n);
+    n.position.set(-0.05 + (i - 1) * 0.02, 0.94 + i * 0.018, -2.62); n.rotation.y = (i - 1) * 0.12; gallaG.add(n); // FIX ROUND 5: galla ke saath (-0.2,-2.5) -> (-0.05,-2.62).
   }
   gallaG.visible = false;
 }
@@ -835,7 +835,7 @@ const notesHeapG = new THREE.Group(); scene.add(notesHeapG);
 {
   for (let i = 0; i < 6; i++) {
     const n = box(0.32, 0.02, 0.22, lam({ color: i % 2 ? 0xd9f99d : 0xbbf7d0 }));
-    n.position.set(0.45 + (i % 2 ? 0.03 : -0.02), 0.66 + i * 0.022, -2.5); n.rotation.y = (i % 2 ? 0.12 : -0.1) * (i + 1) * 0.4; notesHeapG.add(n);
+    n.position.set(0.55 + (i % 2 ? 0.03 : -0.02), 0.66 + i * 0.022, -2.5); n.rotation.y = (i % 2 ? 0.12 : -0.1) * (i + 1) * 0.4; notesHeapG.add(n); // FIX ROUND 5: base x 0.45 -> 0.55 — galla dayein (-0.05) aaya to ghume hue note ka kona (0.236 tak) galle ke dayein kinare (0.225) se takra sakta tha; ab base 0.55 par bayein kona 0.336 — 0.11 saaf, phir bhi "galle ke paas".
   }
   notesHeapG.visible = false;
 }
@@ -887,7 +887,7 @@ let clockHour = null, clockMin = null;
   clockHour = new THREE.Mesh(hourGeo, bas({ color: 0x1e293b })); clockHour.position.z = 0.01; clockG.add(clockHour);
   const minGeo = new THREE.BoxGeometry(0.02, 0.24, 0.01); minGeo.translate(0, 0.11, 0);
   clockMin = new THREE.Mesh(minGeo, bas({ color: 0x1e293b })); clockMin.position.z = 0.015; clockG.add(clockMin);
-  clockG.position.set(-1.6, 2.6, -4.22); // FIX 26 Nov FIX ROUND 4: (-2.3,1.9) -> (-1.6,2.6) — ghadi (a) sign ke peeche 51-64% dhaki thi (f137, 3D ray se verify), (b) thela-chhat ke peeche (f958, high cam se), (c) wide shots me baayein kinare kati thi (f417/f60/f745/f958). Ab ghadi sign ke UPAR (bottom 2.325 > sign top 2.095) + chhat ke UPAR (bottom 2.325 > roof 2.13) + saare wide shots me frame ke andar (max<=0.85, s02 end 0.84). s12 camera + glint bhi nayi jagah par.
+  clockG.position.set(0.55, 2.70, -4.22); // FIX 26 Nov FIX ROUND 5: (-1.6,2.6) -> (0.55,2.70) — ghadi counter board (-1.3,2.35; x -1.9..-0.7, y 1.925..2.775) ke upar-left kone par aa gayi thi, "MAHINE" 45.8% dhaka (f958, coplanar z=-4.22 isliye 2D NDC overlap se verify); ab board se dayein 0.975 saaf (boardCov 0.0%, titleCov 0.0%). Upar bhi: bottom 2.425 > sign top 2.095 + roof 2.13 + khidki top 2.40 (strip 0.0) — khidki/winBar se bhi saaf; top 2.975 < deewaar top 3.2; lamp (x -0.2) se 0.255 saaf. Wide shots me IN (s01 end par push-in exit — transient, checker me darj). s12 camera + glint bhi nayi jagah par.
   clockG.visible = false;
 }
 // ---- CHUTNEY CLOSE-UP DABBE (b07 s26 / b10 s37) — bade laal + hari dabbe ----
@@ -1092,7 +1092,7 @@ window.renderFrame = (f) => {
         drawChar(sonuCard, 61, SONU, 'smile', 'reach', 'hang', f, cp, -0.2, 0, -1.4, 1.05, 0, 0.3, 0, mouthFor(f), 'sonu');
       }
       if (sub === 3) {
-        glintBoard.position.set(-1.6, 2.75, -4.0); // FIX 26 Nov FIX ROUND 4: ghadi nayi jagah (-1.6,2.6) — chamak uske upar
+        glintBoard.position.set(0.55, 2.85, -4.0); // FIX 26 Nov FIX ROUND 5: ghadi nayi jagah (0.55,2.70) — chamak uske upar (FIX ROUND 4: -1.6,2.75 tha).
         glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       }
       break;
@@ -1120,7 +1120,7 @@ window.renderFrame = (f) => {
         gallaG.visible = true;
         if (gallaLid) gallaLid.rotation.x = -1.9 * M.surge(clamp(u * 2, 0, 1));
         countNote.visible = true;
-        countNote.position.set(-0.2, 1.15 + 0.08 * Math.abs(Math.sin(f * 0.5)), -2.3);
+        countNote.position.set(-0.05, 1.15 + 0.08 * Math.abs(Math.sin(f * 0.5)), -2.42); // FIX ROUND 5: galla ke saath (-0.2,-2.3) -> (-0.05,-2.42) — note menu ke dayein kinare (z -2.389) ke saamne tha, upar-dayein kona dhak raha tha (1.1% ray cover); ab menu ke peeche + dayein.
         countNote.rotation.set(-0.5, 0, Math.sin(f * 0.5) * 0.15);
       }
       break;
