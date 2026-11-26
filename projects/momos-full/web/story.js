@@ -125,7 +125,7 @@ export const CAMS = {
   s09: [[-3.18, 4, 4.08], [-0.8, 1.4, -2.4], 56, 0, [-3.15, 3.98, 3.93], [-0.8, 1.4, -2.4], 55, 0],
   s10: [[-0.85, 2.1, 1.64], [-0.2, 1.6, -1.4], 48, 0, [-0.82, 2.08, 1.49], [-0.2, 1.6, -1.4], 47, 0],
   s11: [[-2.0, 1.45, -0.2], [-0.55, 0.65, -2.45], 48, 0, [-1.95, 1.43, -0.35], [-0.55, 0.65, -2.45], 47, 0], // FIX 26 Nov LAYOUT LOCK (A): pehle camera [-0.32,1.5,-0.67] Sonu ke chehre ke 0.73 peeche tha — chehra poora frame bhar gaya, ek aankh dikhti thi (t10); ab camera pile par (2.8 door, fov 48) — menu peeche poora dikhega, Sonu dayein-peeche frame se bahar (b03 sub2). Look y 0.65 — thela sign upar frame se bahar (probe).
-  s12: [[-1.75, 3.0, -1.64], [-1.6, 2.6, -3.9], 42, 0, [-1.72, 2.98, -1.79], [-1.6, 2.6, -3.9], 41, 0], // FIX 26 Nov FIX ROUND 4: ghadi (-1.6,2.6) par gayi — look + camera uske peeche (purana look (-2.3,1.9) ab khaali deewaar dikhata). FIX 26 Nov LAYOUT LOCK (H): ghadi x -2.6 -> -2.3 — look + camera uske peeche.
+  s12: [[0.40, 3.10, -1.64], [0.55, 2.70, -3.9], 42, 0, [0.43, 3.08, -1.79], [0.55, 2.70, -3.9], 41, 0], // FIX 26 Nov FIX ROUND 5: ghadi (0.55,2.70) par gayi — look + camera uske peeche (purana look (-1.6,2.6) ab khaali deewaar dikhata). Wahi offset (pos = ghadi + (-0.15,+0.40,+2.58)); ghadi frame me 27% height, max|ndc| 0.54 (ray se verify). FIX ROUND 4: (-1.75,3.0) look (-1.6,2.6) tha.
   s13: [[-0.99, 1.8, 0.86], [-0.4, 1.3, -2], 48, 0, [-0.96, 1.78, 0.71], [-0.4, 1.3, -2], 47, 0],
   s14: [[0.3, 1.8, 0.9], [0.3, 1.3, -2], 40, 0, [0.3, 1.75, 0.75], [0.3, 1.3, -2], 39, 0],
   s15: [[0.5, 1.95, 3.3], [0.5, 1.37, -1.6], 52, 0, [0.5, 1.9, 3.15], [0.5, 1.37, -1.6], 51, 0],
