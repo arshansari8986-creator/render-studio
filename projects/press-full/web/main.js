@@ -1,4 +1,4 @@
-// "Press Wala" — FULL VIDEO (40.53s, 1216 frames @30fps, 22 shots). Mirror kit + Gullak density.
+// "Press Wala" — FULL VIDEO v3 FAST-CUT REBUILD (40.53s, 1216 frames @30fps, 52 shots, avg ~0.78 s/shot).
 // DO SET: 'gali' (press dukaan wali gali) | 'dukaan' (press dukaan interior — counter/dher/bhaap).
 // ENV: morning (subah) | day (din) | evening (shaam — narangi) | sunset (ant — gehra narangi).
 // Palette: natural muted — dhool-mitti sadak, halki cream deewaar, halka neela aasmaan + garam horizon.
@@ -18,7 +18,7 @@ import * as FX from './fx.js';
 import * as T from './toon.js';
 import { idle, blinkAt, q, M, clamp } from './motion.js';
 import { tex, planks, plaster, stone, dirt, wetConcrete, tiles, tinRoof } from './paint.js';
-import { TOTAL, shotAt, camFor, FLASH } from './story.js';
+import { TOTAL, shotAt, camFor, FLASH, BEAT_OF, beatU } from './story.js';
 
 const W = 1080, H = 1920;
 const canvas = document.getElementById('c');
@@ -54,6 +54,9 @@ scene.add(bounce); scene.add(bounce.target);
 // dukaan counter ke latakte bulb ki garam roshni (sirf dukaan set me ON)
 const bulbLight = new THREE.PointLight(0xffc27a, 0, 7, 1.6);
 bulbLight.position.set(0.3, 2.5, -2.4); scene.add(bulbLight);
+// gali deewaar wala lamp (shaam/sunset me ON — World V2; intensity applyEnv me)
+const lampLight = new THREE.PointLight(0xffc27a, 0, 8, 1.6);
+lampLight.position.set(-0.2, 2.4, -3.9); scene.add(lampLight);
 
 // ---------- helpers ----------
 function textBoard(w, h, draw) {
@@ -65,6 +68,14 @@ function textBoard(w, h, draw) {
 const boardMesh = (w, h, texB, basic = false) => new THREE.Mesh(new THREE.PlaneGeometry(w, h), basic ? bas({ map: texB }) : lam({ map: texB }));
 const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
 const cyl = (rt, rb, h, mat, seg = 12) => new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+// 2D bar (x0,y0)->(x1,y1) plane z par — taar, cycle frame, thela handle ke liye (World V2)
+function bar2D(x0, y0, x1, y1, z, mat, r = 0.02) {
+  const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy);
+  const m = cyl(r, r, len, mat, 6);
+  m.position.set((x0 + x1) / 2, (y0 + y1) / 2, z);
+  m.rotation.z = -Math.atan2(dx, dy);
+  return m;
+}
 function starTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d'); g.translate(64, 64);
@@ -79,6 +90,46 @@ const starTex = starTexture();
 function mkGlint(x, y, z, s = 0.5) {
   const m = new THREE.SpriteMaterial({ map: starTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   const sp = new THREE.Sprite(m); sp.position.set(x, y, z); sp.scale.setScalar(s); scene.add(sp); return sp;
+}
+
+// V2 deewaar texture — NAYA canvas (paint.plaster NAHI): garam cream + soft patches,
+// baarish ke lambe daag, 4 hairline dararein, neeche nami/grime, upar halki teal patti.
+function wallV2Tex() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#e6d6b4'; g.fillRect(0, 0, 512, 256);
+  for (let i = 0; i < 26; i++) {
+    const x = (i * 97) % 512, y = (i * 61) % 256, rx = 22 + (i * 13) % 46, ry = 12 + (i * 7) % 22;
+    g.fillStyle = i % 2 ? 'rgba(190,160,115,0.35)' : 'rgba(245,235,205,0.4)';
+    g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 7); g.fill();
+  }
+  g.fillStyle = 'rgba(15,118,110,0.55)'; g.fillRect(0, 14, 512, 10);
+  g.fillStyle = 'rgba(15,118,110,0.3)'; g.fillRect(0, 26, 512, 4);
+  for (let i = 0; i < 8; i++) {
+    const x = 30 + (i * 67) % 460, w = 4 + (i % 3) * 3, y0 = 20 + (i * 11) % 60, len = 60 + (i * 29) % 120;
+    const gr = g.createLinearGradient(0, y0, 0, y0 + len);
+    gr.addColorStop(0, 'rgba(110,84,50,0.30)'); gr.addColorStop(1, 'rgba(110,84,50,0)');
+    g.fillStyle = gr; g.fillRect(x, y0, w, len);
+  }
+  g.strokeStyle = 'rgba(90,64,38,0.45)'; g.lineWidth = 1.2;
+  [[60, 30, 5], [300, 60, 4], [430, 20, 6], [180, 90, 5]].forEach(([x0, y0, n]) => {
+    let x = x0, y = y0; g.beginPath(); g.moveTo(x, y);
+    for (let k = 0; k < n; k++) { x += (k % 2 ? 7 : -6); y += 12 + (k * 3) % 10; g.lineTo(x, y); }
+    g.stroke();
+  });
+  for (let i = 0; i < 900; i++) {
+    g.fillStyle = i % 2 ? 'rgba(120,90,55,0.10)' : 'rgba(255,252,240,0.10)';
+    g.fillRect((i * 53) % 512, (i * 97) % 256, 1.5, 1.5);
+  }
+  const gr = g.createLinearGradient(0, 170, 0, 256);
+  gr.addColorStop(0, 'rgba(96,70,40,0)'); gr.addColorStop(1, 'rgba(96,70,40,0.5)');
+  g.fillStyle = gr; g.fillRect(0, 170, 512, 86);
+  for (let i = 0; i < 9; i++) {
+    g.fillStyle = `rgba(90,64,36,${0.12 + (i % 4) * 0.04})`;
+    g.beginPath(); g.ellipse((i * 61) % 512, 256 - (i * 7) % 24, 10 + (i % 3) * 9, 4 + (i % 2) * 4, 0, 0, 7); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return t;
 }
 
 // =====================================================================
@@ -253,11 +304,20 @@ function mgrMouth(f) {
 // ENVS — subah ki roshni (natural, muted; koi single wash NAHI)
 // =====================================================================
 const ENVS = {
-  morning: { bg: 0xd8e8ee, fogC: 0xd8e4e0, fogNear: 10, fogFar: 42, hemi: 1.06, hemiC: 0xdfe8f0, hemiG: 0x8a7a5a, sun: 1.35, sunC: 0xffe9b8, sunPos: [-8, 7, 6], bounce: 0.3, bounceC: 0xe8e0d0, expo: 1.1, sky: 'morning' },
-  day: { bg: 0xc8dcec, fogC: 0xd0dde6, fogNear: 12, fogFar: 48, hemi: 1.0, hemiC: 0xdfe8f0, hemiG: 0x8a7a5a, sun: 1.42, sunC: 0xfff6e0, sunPos: [-7, 10, 5], bounce: 0.3, bounceC: 0xe8e0d0, expo: 1.13, sky: 'day' },
-  evening: { bg: 0xe8b078, fogC: 0xe8c098, fogNear: 10, fogFar: 42, hemi: 0.95, hemiC: 0xffe0b8, hemiG: 0x8a6a4a, sun: 1.15, sunC: 0xff9a50, sunPos: [-9, 4, 4], bounce: 0.25, bounceC: 0xffd9a0, expo: 1.08, sky: 'evening' },
-  sunset: { bg: 0xd88a5a, fogC: 0xdd9a68, fogNear: 10, fogFar: 45, hemi: 0.9, hemiC: 0xffc890, hemiG: 0x6a4a3a, sun: 1.0, sunC: 0xff7a30, sunPos: [-9, 3, 2], bounce: 0.2, bounceC: 0xffb070, expo: 1.06, sky: 'sunset' },
+  // World V2 roshni: NEECHA garam suraj (lambi chhaon) + thanda bounce (har frame garam+thanda).
+  morning: { bg: 0xd8e8ee, fogC: 0xd8e4e0, fogNear: 10, fogFar: 46, hemi: 1.05, hemiC: 0xffe8c8, hemiG: 0x8a7a5a, sun: 1.7, sunC: 0xffd9a0, sunPos: [-10, 4.5, 6], bounce: 0.4, bounceC: 0x9db8d9, expo: 1.12, sky: 'morning', lamp: 0, sunDisc: [-16, 7, -27], sunDiscC: 0xfff3c8, sunDiscR: 1.6, winC: 0x9db8c4, litWinC: 0x7a8a80 },
+  day: { bg: 0xc8dcec, fogC: 0xd0dde6, fogNear: 12, fogFar: 48, hemi: 1.0, hemiC: 0xffe8c8, hemiG: 0x8a7a5a, sun: 1.6, sunC: 0xfff0c8, sunPos: [-9, 6, 5], bounce: 0.35, bounceC: 0x9db8d9, expo: 1.13, sky: 'day', lamp: 0, sunDisc: [-16, 9, -27], sunDiscC: 0xfff3c8, sunDiscR: 1.4, winC: 0x9db8c4, litWinC: 0x7a8a80 },
+  evening: { bg: 0xe8b078, fogC: 0xe8c098, fogNear: 10, fogFar: 44, hemi: 0.95, hemiC: 0xffe0b8, hemiG: 0x8a6a4a, sun: 1.25, sunC: 0xff9a50, sunPos: [-10, 3, 4], bounce: 0.25, bounceC: 0xffd9a0, expo: 1.08, sky: 'evening', lamp: 3.5, sunDisc: [-16, 4, -27], sunDiscC: 0xffb060, sunDiscR: 2.0, winC: 0xffd9a0, litWinC: 0xffd98a },
+  sunset: { bg: 0xd88a5a, fogC: 0xdd9a68, fogNear: 10, fogFar: 48, hemi: 0.9, hemiC: 0xffc890, hemiG: 0x6a4a3a, sun: 1.0, sunC: 0xff7a30, sunPos: [-10, 2, 2], bounce: 0.2, bounceC: 0xffb070, expo: 1.06, sky: 'sunset', lamp: 5, sunDisc: [-16, 2.2, -27], sunDiscC: 0xff8a3c, sunDiscR: 2.6, winC: 0xffb070, litWinC: 0xffd98a },
 };
+const winGlassMat = bas({ color: 0x9db8c4, fog: false });
+const litWinMat = bas({ color: 0x7a8a80, fog: false });
+const lampBulbMat = bas({ color: 0xfff7cc, fog: false });
+const lampGlow = mkGlint(-0.2, 2.42, -3.95, 1.1);
+const sunDiscMat = bas({ color: 0xfff3c8, fog: false });
+const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(1.6, 24), sunDiscMat);
+sunDisc.position.set(-16, 7, -27); scene.add(sunDisc);
+const sunGlow = mkGlint(-16, 7, -26.5, 6);
 const applyEnv = (name) => {
   const e = ENVS[name] || ENVS.morning;
   scene.background = new THREE.Color(e.bg);
@@ -267,6 +327,16 @@ const applyEnv = (name) => {
   sun.target.position.set(0, 0, 0); sun.target.updateMatrixWorld();
   bounce.intensity = e.bounce; bounce.color.set(e.bounceC);
   renderer.toneMappingExposure = e.expo;
+  lampLight.intensity = e.lamp || 0;
+  lampBulbMat.color.set((e.lamp || 0) > 0 ? 0xffe9a8 : 0xcfd8dc);
+  lampGlow.material.opacity = (e.lamp || 0) > 0 ? 0.55 : 0;
+  winGlassMat.color.set(e.winC);
+  litWinMat.color.set(e.litWinC);
+  sunDisc.position.set(...e.sunDisc); sunDiscMat.color.set(e.sunDiscC);
+  sunDisc.scale.setScalar(e.sunDiscR / 1.6);
+  sunGlow.position.set(e.sunDisc[0], e.sunDisc[1], e.sunDisc[2] + 0.5);
+  sunGlow.scale.setScalar(e.sunDiscR * 3);
+  sunGlow.material.opacity = 0.5;
   return e;
 };
 
@@ -294,6 +364,14 @@ for (let i = 0; i < 7; i++) {
   sp.scale.set(7 + (i % 3) * 2.5, 2.6 + (i % 2) * 0.8, 1);
   scene.add(sp); clouds.push(sp);
 }
+const farCloudMat = new THREE.SpriteMaterial({ map: FX.puffTexture([[0, 'rgba(255,235,210,0.7)'], [1, 'rgba(255,235,210,0)']]), transparent: true, opacity: 0.45, depthWrite: false, fog: false });
+const farClouds = [];
+for (let i = 0; i < 4; i++) {
+  const sp = new THREE.Sprite(farCloudMat);
+  sp.position.set(-18 + i * 12, 9.5 + (i % 2) * 1.5, -28);
+  sp.scale.set(12 + (i % 2) * 4, 3.2, 1);
+  scene.add(sp); farClouds.push(sp);
+}
 // ---------- DISTANT SKYLINE (background depth): hazy buildings peeche, har shot me ----------
 const skylineG = new THREE.Group(); scene.add(skylineG);
 {
@@ -303,10 +381,37 @@ const skylineG = new THREE.Group(); scene.add(skylineG);
     const b = box(5.5, sh, 1.2, lam({ color: skyCols[i % skyCols.length] }));
     b.position.set(sx, sh / 2, -19); skylineG.add(b);
     for (let r = 0; r < Math.floor(sh / 1.6); r++) for (let cix = 0; cix < 3; cix++) {
-      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.6), bas({ color: 0x6b7a72 }));
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.6), litWinMat);
       win.position.set(sx - 1.2 + cix * 1.2, 1.2 + r * 1.6, -18.35); skylineG.add(win);
     }
   });
+  // 2nd silhouette row — door, bina khidki, fog+haze me (World V2: depth ki dusri parat)
+  const silCols = [0x8a6f7a, 0x7a5f6e, 0x9a7f72, 0x6e5a6a];
+  [[-24, 11], [-15, 8.5], [-6, 12], [3, 9], [12, 11.5], [21, 9.5]].forEach(([sx, sh], i) => {
+    const b = box(6.5, sh, 1.0, lam({ color: silCols[i % silCols.length] }));
+    b.position.set(sx, sh / 2, -27); skylineG.add(b);
+  });
+}
+// L2 beech: makaan row z=-8 — tank + antenna + khidki (shaam/sunset me jalti hain) — World V2
+const midG = new THREE.Group(); scene.add(midG);
+{
+  [[-7.5, 4.0, 0xb8a888], [0.5, 3.6, 0xc4b49a], [7.0, 4.6, 0xa8a49a]].forEach(([mx, mh, mcol]) => {
+    const m = box(3.2, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -8); midG.add(m);
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), litWinMat);
+    mw.position.set(mx + 0.7, 2.0, -7.72); midG.add(mw);
+    const mw2 = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), litWinMat);
+    mw2.position.set(mx - 0.7, 1.3, -7.72); midG.add(mw2);
+    const par = box(3.3, 0.18, 0.55, lam({ color: 0x8a7a5a })); par.position.set(mx, mh + 0.09, -8); midG.add(par);
+  });
+  const tank = cyl(0.5, 0.5, 0.9, lam({ color: 0x374151 }), 14); tank.position.set(0.5, 4.05, -8); midG.add(tank);
+  const tankTop = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), lam({ color: 0x4b5563 }));
+  tankTop.position.set(0.5, 4.5, -8); midG.add(tankTop);
+  for (const lx of [-0.1, 1.1]) {
+    const leg = cyl(0.04, 0.04, 0.5, lam({ color: 0x4b5563 }), 6); leg.position.set(lx, 3.6, -8); midG.add(leg);
+  }
+  const ant = cyl(0.02, 0.02, 1.6, lam({ color: 0x39434c }), 6); ant.position.set(-7.5, 4.8, -8); midG.add(ant);
+  const antBar = cyl(0.015, 0.015, 0.9, lam({ color: 0x39434c }), 6); antBar.rotation.z = Math.PI / 2; antBar.position.set(-7.5, 5.3, -8); midG.add(antBar);
+  const antBar2 = cyl(0.015, 0.015, 0.6, lam({ color: 0x39434c }), 6); antBar2.rotation.z = Math.PI / 2; antBar2.position.set(-7.5, 5.0, -8); midG.add(antBar2);
 }
 function mkTree(x, z, s = 1) {
   const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s);
@@ -323,6 +428,7 @@ function mkTree(x, z, s = 1) {
 // SETS — GALI (press dukaan wali gali) aur DUKAAN (interior — counter/dher/bhaap)
 // =====================================================================
 const galiG = new THREE.Group(); scene.add(galiG);
+let motes = []; // dhoop me tairte dust motes (World V2 — sirf gali set me dikhte hain)
 const dukaanG = new THREE.Group(); scene.add(dukaanG);
 let lakhBoard = null; // s01 board — s07 me viral board se badalta hai (z-fight se bachne ke liye toggle)
 let galiTrees = [], dukaanTrees = [];
@@ -372,7 +478,32 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
 {
   const S = galiG;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(dirt(17), 8, 8), color: 0x9c8a70 }));
-  ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
+  ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); ground.receiveShadow = true; S.add(ground);
+  // ---- ZAMEEN V2: 14 layered patches + geele daag + 20 kankar (World V2) ----
+  const PATCHES = [
+    [-2.5, 0.5, 1.2, 0.7, 0x6b543a, 0.35], [1.0, 2.0, 1.5, 0.8, 0x7a6547, 0.3], [-4.0, -1.0, 1.0, 0.6, 0x5a4630, 0.4],
+    [3.0, -2.0, 1.3, 0.7, 0x8a7a5a, 0.3], [0.2, -0.5, 0.9, 0.5, 0x4a3a28, 0.35], [-1.0, 3.0, 1.6, 0.9, 0x9a8a68, 0.25],
+    [4.5, 0.5, 1.1, 0.6, 0x6b543a, 0.3], [-5.5, 1.5, 1.2, 0.7, 0x7a6547, 0.3], [2.0, 3.5, 1.4, 0.8, 0x5a4630, 0.3],
+    [-0.5, -2.5, 1.0, 0.6, 0x8a7a5a, 0.35], [5.5, -1.5, 1.0, 0.6, 0x6b543a, 0.3], [-3.0, 2.5, 1.3, 0.7, 0x4a3a28, 0.3],
+    [1.5, -3.0, 0.9, 0.5, 0x9a8a68, 0.25], [-6.0, -2.5, 1.1, 0.6, 0x7a6547, 0.3],
+  ];
+  PATCHES.forEach(([px, pz, rx, rz, col, op], i) => {
+    const p = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false }));
+    p.rotation.x = -Math.PI / 2; p.scale.set(rx, rz, 1); p.position.set(px, 0.005 + i * 0.0004, pz); S.add(p);
+  });
+  [[-3.9, -2.3, 0.55, 0.4], [1.9, -0.2, 0.45, 0.32]].forEach(([px, pz, rx, rz]) => {
+    const p = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: 0x2e3a48, transparent: true, opacity: 0.45, depthWrite: false }));
+    p.rotation.x = -Math.PI / 2; p.scale.set(rx, rz, 1); p.position.set(px, 0.012, pz); S.add(p);
+  });
+  {
+    let seed = 12345; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const pebCols = [0x8a7a68, 0x6b5a44, 0x9a8a72, 0x5a4a38];
+    for (let i = 0; i < 20; i++) {
+      const px = -6 + rnd() * 12, pz = -3.5 + rnd() * 7.5;
+      const peb = box(0.06 + rnd() * 0.07, 0.03 + rnd() * 0.02, 0.05 + rnd() * 0.05, lam({ color: pebCols[i % 4] }));
+      peb.position.set(px, 0.02, pz); peb.rotation.y = rnd() * 3; S.add(peb);
+    }
+  }
   // sadak (asphalt) + dashes + dhool kinare
   const road = new THREE.Mesh(new THREE.PlaneGeometry(40, 3.4), lam({ color: 0x4a4640 }));
   road.rotation.x = -Math.PI / 2; road.position.set(0, 0, 1.8); S.add(road);
@@ -380,27 +511,61 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
     const dash = box(1.1, 0.012, 0.14, bas({ color: 0xe2e8f0 }));
     dash.position.set(-14 + i * 4, 0.008, 1.8); S.add(dash);
   }
+  [1.15, 2.45].forEach((tz) => { // tyre-track — 2 gehri lakeerein (World V2)
+    const tr = new THREE.Mesh(new THREE.PlaneGeometry(40, 0.35), new THREE.MeshBasicMaterial({ color: 0x2e2a26, transparent: true, opacity: 0.55, depthWrite: false }));
+    tr.rotation.x = -Math.PI / 2; tr.position.set(0, 0.004, tz); S.add(tr);
+  });
   [[0, 0.35, 9, 0.5], [0, 3.25, 9, 0.5]].forEach(([px, pz, pw, pd]) => {
     const dust = new THREE.Mesh(new THREE.PlaneGeometry(pw, pd), new THREE.MeshBasicMaterial({ color: 0xb8a888, transparent: true, opacity: 0.4, depthWrite: false }));
     dust.rotation.x = -Math.PI / 2; dust.position.set(px, 0.006, pz); S.add(dust);
   });
   // press dukaan building — halki cream deewaar, terracotta chhat
-  const dwall = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 3.2), lam({ map: tex(plaster(41, 38), 2, 1), color: 0xe8dcc0 }));
-  dwall.position.set(-1.5, 1.6, -4.3); S.add(dwall);
+  const dwall = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 3.2), lam({ map: wallV2Tex(), color: 0xffffff }));
+  dwall.position.set(-1.5, 1.6, -4.3); dwall.receiveShadow = true; S.add(dwall);
   for (const px of [-4.6, 1.6]) {
     const pil = box(0.28, 3.2, 0.28, lam({ color: 0xd8c49a })); pil.position.set(px, 1.6, -4.15); S.add(pil);
   }
   const roof = box(7.0, 0.14, 2.4, lam({ map: tex(tinRoof(53), 2, 1), color: 0x9a3412 })); roof.position.set(-1.5, 3.28, -3.6); S.add(roof);
   const roofEdge = box(7.0, 0.1, 0.08, lam({ color: 0x7c2d12 })); roofEdge.position.set(-1.5, 3.22, -2.42); S.add(roofEdge);
+  // chhat par paani ki tanki + gamle — chhat bhi khaali nahi (World V2)
+  const roofTank = cyl(0.35, 0.35, 0.6, lam({ color: 0x1f2937 }), 12); roofTank.position.set(-3.6, 3.65, -4.0); S.add(roofTank);
+  const roofPot = cyl(0.12, 0.09, 0.22, lam({ color: 0x9a5a34 }), 10); roofPot.position.set(0.9, 3.45, -4.0); S.add(roofPot);
+  const roofPlant = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), lam({ color: 0x4a6b2f })); roofPlant.position.set(0.9, 3.62, -4.0); S.add(roofPlant);
   const door = box(1.0, 2.0, 0.1, lam({ color: 0x7c2d12 })); door.position.set(-1.2, 1.0, -4.2); S.add(door);
+  [[-1.2, 1.45], [-1.2, 0.65]].forEach(([dx, dy]) => {
+    const pan = box(0.7, 0.55, 0.03, lam({ color: 0x5f2110 })); pan.position.set(dx, dy, -4.14); S.add(pan);
+  });
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), lam({ color: 0xfacc15 })); knob.position.set(-0.85, 1.0, -4.12); S.add(knob);
-  const win = box(1.0, 1.0, 0.1, lam({ color: 0x9db8c4 })); win.position.set(0.3, 1.9, -4.22); S.add(win);
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), winGlassMat); win.position.set(0.3, 1.9, -4.22); S.add(win);
   const winBar = box(0.06, 1.0, 0.12, lam({ color: 0x2f4a4a })); winBar.position.set(0.3, 1.9, -4.2); S.add(winBar);
+  const winBar2 = box(1.0, 0.06, 0.12, lam({ color: 0x2f4a4a })); winBar2.position.set(0.3, 1.9, -4.2); S.add(winBar2);
   // signs + boards (deewaar par)
   const pressSign = boardMesh(2.2, 0.45, pressSignTex, true); pressSign.position.set(-1.5, 2.95, -4.24); S.add(pressSign);
   const lakhBoardMesh = boardMesh(1.8, 1.08, lakhTex, true); lakhBoardMesh.position.set(-2.7, 1.85, -4.22); S.add(lakhBoardMesh); lakhBoard = lakhBoardMesh;
   // kapdon ki kataar — dukaan ke saamne rassi par (Raju ke peeche; BOARD se door — line kabhi board ke upar se na guzre)
   mkClothesLine(S, -1.6, 1.2, 2.3, -3.5, [0xf8fafc, 0x93c5fd, 0xfca5a5, 0x86efac, 0xfde68a]);
+  // ---- POSTERS (World V2 — deewaar khaali nahi) ----
+  const chaiTex = textBoard(256, 320, (g, w, h) => {
+    g.fillStyle = '#fef3c7'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#dc2626'; g.lineWidth = 10; g.strokeRect(8, 8, w - 16, h - 16);
+    g.textAlign = 'center'; g.fillStyle = '#dc2626';
+    g.font = 'bold 72px Arial'; g.fillText('CHAI', w / 2, 100);
+    g.fillStyle = '#1e293b'; g.font = 'bold 88px Arial'; g.fillText('₹5', w / 2, 210);
+    g.fillStyle = '#92400e'; g.fillRect(w / 2 - 40, 240, 80, 44);
+    g.fillStyle = '#f8fafc'; g.fillRect(w / 2 - 40, 240, 80, 10);
+  });
+  const chaiPoster = boardMesh(0.55, 0.7, chaiTex, true); chaiPoster.position.set(0.9, 1.6, -4.24); S.add(chaiPoster);
+  const p10Tex = textBoard(256, 320, (g, w, h) => {
+    g.fillStyle = '#134e4a'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#facc15'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
+    g.textAlign = 'center'; g.fillStyle = '#fde047';
+    g.font = 'bold 56px Arial'; g.fillText('PRESS', w / 2, 96);
+    g.fillStyle = '#f8fafc'; g.font = 'bold 80px Arial'; g.fillText('₹10', w / 2, 200);
+    g.font = 'bold 30px Arial'; g.fillText('HAR KAPDA', w / 2, 260);
+  });
+  const p10Poster = boardMesh(0.6, 0.75, p10Tex, true); p10Poster.position.set(-4.0, 1.5, -4.24); S.add(p10Poster);
+  // dusri kapdon ki line (left — BOARD se door, x -4.6..-3.7)
+  mkClothesLine(S, -4.6, -3.7, 2.45, -3.9, [0xfca5a5, 0x86efac, 0xf8fafc], 0.30, 0.45);
   // aangan: kapdon ki tokri (foreground right) + ghada (foreground left)
   const basket = cyl(0.32, 0.26, 0.45, lam({ color: 0x8a6844 }), 14); basket.position.set(2.4, 0.22, -0.8); S.add(basket);
   const fold1 = box(0.4, 0.09, 0.3, lam({ color: 0xf8fafc })); fold1.position.set(2.4, 0.48, -0.8); fold1.rotation.y = 0.2; S.add(fold1);
@@ -416,23 +581,126 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
   }
   const kirDoor = box(1.0, 1.9, 0.1, lam({ color: 0x475569 })); kirDoor.position.set(4.6, 0.95, -3.98); S.add(kirDoor);
   const kirSign = boardMesh(1.9, 0.5, kiranaTex, true); kirSign.position.set(4.6, 3.15, -3.95); S.add(kirSign);
+  // kirana ke saamne bori + dabba (aur depth)
+  const sack2 = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), lam({ color: 0xd6c9a8 }));
+  sack2.scale.set(1, 0.8, 0.9); sack2.position.set(3.4, 0.22, -3.9); S.add(sack2);
+  const kbox = box(0.4, 0.35, 0.4, lam({ color: 0x8a6844 })); kbox.position.set(5.9, 0.17, -3.9); S.add(kbox);
   // peeche ki kataar (midground) — dukaanon ke peeche, duniya gehri lage
   [[-7.5, 4.0, 0xb8a888], [7.0, 4.6, 0xa8a49a], [0.5, 3.6, 0xc4b49a]].forEach(([mx, mh, mcol]) => {
     const m = box(3.2, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -7); S.add(m);
-    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), bas({ color: 0x6b7a72 }));
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), litWinMat);
     mw.position.set(mx + 0.7, 2.0, -6.72); S.add(mw);
   });
   const t1 = mkTree(-6.2, -3.6, 1.05); S.add(t1); galiTrees.push(t1);
   const t2 = mkTree(6.4, -3.4, 0.9); S.add(t2); galiTrees.push(t2);
   const t3 = mkTree(-5.0, -6.5, 1.3); S.add(t3); galiTrees.push(t3);
+  const bush = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), lam({ color: 0x3d5c2a }));
+  bush.scale.set(1.3, 0.7, 1); bush.position.set(5.8, 0.3, -3.2); S.add(bush);
   // khambe + taar (sag) — gali ke upar
   const wireMat = lam({ color: 0x2c343c });
   const wirePole1 = cyl(0.04, 0.05, 4.2, lam({ color: 0x39434c })); wirePole1.position.set(-6.5, 2.1, -3.6); S.add(wirePole1);
   const wirePole2 = cyl(0.04, 0.05, 4.2, lam({ color: 0x39434c })); wirePole2.position.set(6.5, 2.1, -3.6); S.add(wirePole2);
-  [[3.9, -3.5], [3.55, -3.9]].forEach(([wy, wz]) => {
-    const segL = cyl(0.015, 0.015, 6.8, wireMat, 6); segL.rotation.z = Math.PI / 2 + 0.06; segL.position.set(-3.3, wy - 0.12, wz); S.add(segL);
-    const segR = cyl(0.015, 0.015, 6.8, wireMat, 6); segR.rotation.z = Math.PI / 2 - 0.06; segR.position.set(3.3, wy - 0.12, wz); S.add(segR);
+  [-6.5, 6.5].forEach((px) => { // khambe ki baahein (cross-arms)
+    const arm = box(0.9, 0.05, 0.05, lam({ color: 0x39434c })); arm.position.set(px, 3.9, -3.6); S.add(arm);
   });
+  [[3.9, -3.5], [3.55, -3.9], [3.2, -3.2]].forEach(([wy, wz]) => { // 3 taar, sag wale
+    S.add(bar2D(-6.5, wy, 0, wy - 0.35, wz, wireMat, 0.015));
+    S.add(bar2D(0, wy - 0.35, 6.5, wy, wz, wireMat, 0.015));
+  });
+  // ---- THELA (haath-gaadi, kapdon ke saath) ----
+  const thela = new THREE.Group(); thela.position.set(2.7, 0, -1.0); thela.rotation.y = 0.5; S.add(thela);
+  {
+    const bed = box(1.4, 0.1, 0.8, lam({ color: 0x8a6844 })); bed.position.y = 0.55; thela.add(bed);
+    [-0.38, 0.38].forEach((rz) => {
+      const rail = box(1.4, 0.12, 0.04, lam({ color: 0x6d5136 })); rail.position.set(0, 0.64, rz); thela.add(rail);
+    });
+    [-0.42, 0.42].forEach((rz) => {
+      const wh = cyl(0.32, 0.32, 0.06, lam({ color: 0x1f2937 }), 16); wh.rotation.x = Math.PI / 2; wh.position.set(0, 0.32, rz); thela.add(wh);
+      const hub = cyl(0.08, 0.08, 0.08, lam({ color: 0x9ca3af }), 10); hub.rotation.x = Math.PI / 2; hub.position.set(0, 0.32, rz); thela.add(hub);
+    });
+    thela.add(bar2D(-0.7, 0.55, -1.25, 0.12, 0.3, lam({ color: 0x6d5136 }), 0.03));
+    thela.add(bar2D(-0.7, 0.55, -1.25, 0.12, -0.3, lam({ color: 0x6d5136 }), 0.03));
+    const f1 = box(0.5, 0.09, 0.4, lam({ color: 0xf8fafc })); f1.position.set(0.2, 0.65, 0); f1.rotation.y = 0.15; thela.add(f1);
+    const f2 = box(0.46, 0.09, 0.38, lam({ color: 0x93c5fd })); f2.position.set(0.2, 0.73, 0); f2.rotation.y = -0.1; thela.add(f2);
+    const f3 = box(0.4, 0.09, 0.34, lam({ color: 0xfca5a5 })); f3.position.set(-0.3, 0.65, 0.1); f3.rotation.y = 0.3; thela.add(f3);
+  }
+  // ---- CRATES (dabbe, stack) + bori ----
+  {
+    const c1 = box(0.55, 0.45, 0.55, lam({ color: 0x8a6844 })); c1.position.set(-4.3, 0.22, -2.2); S.add(c1);
+    const c1e = box(0.57, 0.06, 0.57, lam({ color: 0x6d5136 })); c1e.position.set(-4.3, 0.45, -2.2); S.add(c1e);
+    const c2 = box(0.45, 0.4, 0.45, lam({ color: 0x9a7a52 })); c2.position.set(-4.28, 0.67, -2.2); c2.rotation.y = 0.3; S.add(c2);
+    const c3 = box(0.35, 0.3, 0.35, lam({ color: 0x7a5f3e })); c3.position.set(-4.3, 1.02, -2.2); c3.rotation.y = -0.2; S.add(c3);
+    const sack = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), lam({ color: 0xc2b280 }));
+    sack.scale.set(1, 0.75, 0.9); sack.position.set(-3.6, 0.22, -2.3); S.add(sack);
+  }
+  // ---- BALTI + mug ----
+  {
+    const b = cyl(0.16, 0.13, 0.3, lam({ color: 0x64748b }), 14); b.position.set(1.9, 0.15, -0.6); S.add(b);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.015, 8, 16), lam({ color: 0x475569 }));
+    rim.rotation.x = Math.PI / 2; rim.position.set(1.9, 0.3, -0.6); S.add(rim);
+    const mug = cyl(0.06, 0.05, 0.12, lam({ color: 0xdc2626 }), 10); mug.position.set(2.15, 0.06, -0.35); S.add(mug);
+  }
+  // ---- CYCLE (deewaar se lagi) ----
+  {
+    const cy = new THREE.Group(); cy.position.set(1.7, 0, -3.85); cy.rotation.y = -0.35; cy.rotation.z = 0.1; S.add(cy);
+    const wheelMat = lam({ color: 0x1f2937 });
+    [-0.55, 0.55].forEach((wx) => {
+      const wh = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.03, 8, 20), wheelMat);
+      wh.position.set(wx, 0.34, 0); cy.add(wh);
+      for (let s2 = 0; s2 < 3; s2++) {
+        const sp = box(0.02, 0.62, 0.015, lam({ color: 0x9ca3af }));
+        sp.position.set(wx, 0.34, 0); sp.rotation.z = s2 * Math.PI / 3; cy.add(sp);
+      }
+    });
+    const fr = lam({ color: 0x166534 });
+    cy.add(bar2D(-0.55, 0.34, 0.05, 0.72, 0, fr, 0.025));
+    cy.add(bar2D(0.55, 0.34, 0.05, 0.72, 0, fr, 0.025));
+    cy.add(bar2D(-0.55, 0.34, 0.55, 0.34, 0, fr, 0.025));
+    cy.add(bar2D(0.05, 0.72, 0.55, 0.34, 0, fr, 0.025));
+    cy.add(bar2D(0.05, 0.72, -0.15, 0.72, 0, fr, 0.025));
+    const seat = box(0.22, 0.04, 0.1, lam({ color: 0x451a03 })); seat.position.set(-0.15, 0.76, 0); cy.add(seat);
+    const hb = box(0.08, 0.04, 0.4, lam({ color: 0x9ca3af })); hb.position.set(0.58, 0.78, 0); cy.add(hb);
+  }
+  // ---- NALKA (hand pump) + geela farsh ----
+  {
+    const base = box(0.3, 0.15, 0.3, lam({ color: 0x6b7280 })); base.position.set(-3.9, 0.07, -2.8); S.add(base);
+    const pipe = cyl(0.05, 0.05, 1.1, lam({ color: 0x374151 }), 10); pipe.position.set(-3.9, 0.7, -2.8); S.add(pipe);
+    S.add(bar2D(-3.9, 1.15, -3.55, 1.38, -2.8, lam({ color: 0x4b5563 }), 0.03));
+    const spout = cyl(0.035, 0.035, 0.28, lam({ color: 0x4b5563 }), 8); spout.rotation.z = Math.PI / 2; spout.position.set(-3.72, 0.95, -2.8); S.add(spout);
+    const spoutTip = cyl(0.05, 0.035, 0.12, lam({ color: 0x4b5563 }), 8); spoutTip.position.set(-3.58, 0.9, -2.8); S.add(spoutTip);
+  }
+  // ---- gamle wala paudha + stool + folded stack (dukaan ke paas) ----
+  {
+    const pp = cyl(0.18, 0.14, 0.3, lam({ color: 0x9a5a34 }), 12); pp.position.set(1.3, 0.15, -3.8); S.add(pp);
+    [[0, 0.45, 0, 0.16], [-0.1, 0.38, 0.08, 0.12], [0.1, 0.4, -0.06, 0.13]].forEach(([px, py, pz, r]) => {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), lam({ color: 0x4a6b2f }));
+      leaf.position.set(1.3 + px, py, -3.8 + pz); S.add(leaf);
+    });
+    const stool = cyl(0.28, 0.32, 0.42, lam({ color: 0x6d4a2c }), 12); stool.position.set(0.9, 0.21, -3.55); S.add(stool);
+    const sf1 = box(0.4, 0.08, 0.3, lam({ color: 0xfca5a5 })); sf1.position.set(0.9, 0.46, -3.55); sf1.rotation.y = 0.1; S.add(sf1);
+    const sf2 = box(0.38, 0.08, 0.28, lam({ color: 0x86efac })); sf2.position.set(0.9, 0.53, -3.55); sf2.rotation.y = -0.15; S.add(sf2);
+  }
+  // ---- LAMP (deewaar par, darwaze ke paas) — shaam/sunset me jalta hai ----
+  {
+    const bracket = box(0.06, 0.06, 0.25, lam({ color: 0x1f2937 })); bracket.position.set(-0.2, 2.62, -4.05); S.add(bracket);
+    const shade = cyl(0.08, 0.22, 0.18, lam({ color: 0x166534 }), 12); shade.position.set(-0.2, 2.52, -3.95); S.add(shade);
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), lampBulbMat); bulb.position.set(-0.2, 2.42, -3.95); S.add(bulb);
+  }
+  // ---- SHELF (khidki ke neeche, deewaar par) — bottle + dibba + folded kapda ----
+  {
+    const plank = box(0.9, 0.05, 0.25, lam({ color: 0x8a6844 })); plank.position.set(0.3, 1.15, -4.1); S.add(plank);
+    const bA = cyl(0.055, 0.055, 0.2, lam({ color: 0x166534 }), 10); bA.position.set(0.05, 1.28, -4.1); S.add(bA);
+    const bB = cyl(0.05, 0.05, 0.18, lam({ color: 0x1d4ed8 }), 10); bB.position.set(0.3, 1.27, -4.1); S.add(bB);
+    const dib = box(0.16, 0.12, 0.16, lam({ color: 0xb45309 })); dib.position.set(0.55, 1.24, -4.1); S.add(dib);
+    const sCloth = box(0.2, 0.07, 0.18, lam({ color: 0xfef3c7 })); sCloth.position.set(0.78, 1.21, -4.1); sCloth.rotation.y = 0.2; S.add(sCloth);
+  }
+  // dhoop me tairte dust motes (World V2 — roshni dikhti hai)
+  for (let i = 0; i < 8; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, transparent: true, opacity: 0.18, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffe9b0 }));
+    sp.position.set(-3 + (i * 0.9) % 4.5, 1.2 + (i % 3) * 0.7, -3 + (i % 2) * 1.2);
+    sp.scale.setScalar(0.12 + (i % 3) * 0.05);
+    scene.add(sp); motes.push(sp);
+  }
 }
 
 // ---------- DUKAAN: counter/dher/bhaap (kapdon ka dher + press + latakta bulb) ----------
@@ -440,6 +708,22 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
   const S = dukaanG;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 34), lam({ map: tex(dirt(23), 8, 8), color: 0x9c8a70 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.02, 3); S.add(ground);
+  // ---- ZAMEEN V2 (dukaan): 8 patches + 10 kankar ----
+  [[-2.0, 0.5, 1.1, 0.6, 0x6b543a, 0.35], [1.5, 1.5, 1.2, 0.7, 0x7a6547, 0.3], [-3.5, -1.5, 1.0, 0.6, 0x5a4630, 0.4],
+   [3.5, -2.0, 1.1, 0.6, 0x8a7a5a, 0.3], [0.0, -1.0, 0.9, 0.5, 0x4a3a28, 0.35], [-1.0, 3.0, 1.3, 0.7, 0x9a8a68, 0.25],
+   [4.5, 1.0, 1.0, 0.6, 0x6b543a, 0.3], [-5.0, 2.0, 1.1, 0.6, 0x7a6547, 0.3]].forEach(([px, pz, rx, rz, col, op], i) => {
+    const p = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false }));
+    p.rotation.x = -Math.PI / 2; p.scale.set(rx, rz, 1); p.position.set(px, 0.005 + i * 0.0004, pz); S.add(p);
+  });
+  {
+    let seed = 777; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const pebCols = [0x8a7a68, 0x6b5a44, 0x9a8a72, 0x5a4a38];
+    for (let i = 0; i < 10; i++) {
+      const px = -5 + rnd() * 10, pz = -3 + rnd() * 6;
+      const peb = box(0.06 + rnd() * 0.07, 0.03 + rnd() * 0.02, 0.05 + rnd() * 0.05, lam({ color: pebCols[i % 4] }));
+      peb.position.set(px, 0.02, pz); peb.rotation.y = rnd() * 3; S.add(peb);
+    }
+  }
   // peeche ki deewaar — NEECHI (2.8) taaki upar aasmaan + skyline dikhe
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(7.0, 2.8), lam({ map: tex(plaster(43, 40), 2, 1), color: 0xe8dcc0 }));
   wall.position.set(0, 1.4, -3.8); S.add(wall);
@@ -466,10 +750,28 @@ function mkClothesLine(S, x0, x1, y, z, cols) {
   const stool = cyl(0.3, 0.34, 0.45, lam({ color: 0x6d4a2c }), 12); stool.position.set(2.4, 0.22, -2.0); S.add(stool);
   const st1 = box(0.42, 0.09, 0.32, lam({ color: 0xfca5a5 })); st1.position.set(2.4, 0.5, -2.0); st1.rotation.y = 0.1; S.add(st1);
   const st2 = box(0.4, 0.09, 0.3, lam({ color: 0x86efac })); st2.position.set(2.4, 0.58, -2.0); st2.rotation.y = -0.2; S.add(st2);
+  // ---- SHELF (deewaar par, counter board se door — x 1.85..2.75) + POSTER + BALTI (World V2) ----
+  {
+    const plank = box(0.9, 0.05, 0.25, lam({ color: 0x8a6844 })); plank.position.set(2.3, 1.3, -3.7); S.add(plank);
+    const bA = cyl(0.055, 0.055, 0.2, lam({ color: 0x166534 }), 10); bA.position.set(2.05, 1.43, -3.7); S.add(bA);
+    const bB = cyl(0.05, 0.05, 0.18, lam({ color: 0x1d4ed8 }), 10); bB.position.set(2.3, 1.42, -3.7); S.add(bB);
+    const dib = box(0.16, 0.12, 0.16, lam({ color: 0xb45309 })); dib.position.set(2.55, 1.39, -3.7); S.add(dib);
+    const sCloth = box(0.2, 0.07, 0.18, lam({ color: 0xfef3c7 })); sCloth.position.set(2.72, 1.36, -3.7); sCloth.rotation.y = 0.2; S.add(sCloth);
+  }
+  const dPosterTex = textBoard(256, 320, (g, w, h) => {
+    g.fillStyle = '#fef3c7'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#166534'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
+    g.textAlign = 'center'; g.fillStyle = '#166534';
+    g.font = 'bold 52px Arial'; g.fillText('SUIT', w / 2, 96);
+    g.fillStyle = '#1e293b'; g.font = 'bold 76px Arial'; g.fillText('₹350', w / 2, 200);
+    g.font = 'bold 30px Arial'; g.fillText('SHAADI WALA', w / 2, 260);
+  });
+  const dPoster = boardMesh(0.55, 0.68, dPosterTex, true); dPoster.position.set(2.2, 2.0, -3.72); S.add(dPoster);
+  const dBalti = cyl(0.16, 0.13, 0.3, lam({ color: 0x64748b }), 14); dBalti.position.set(-2.2, 0.15, -1.2); S.add(dBalti);
   // peeche ki kataar + ped (depth)
   [[-5.5, 4.2, 0xb8a888], [5.0, 3.8, 0xa8a49a]].forEach(([mx, mh, mcol]) => {
     const m = box(3.2, mh, 0.5, lam({ color: mcol })); m.position.set(mx, mh / 2, -8); S.add(m);
-    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), bas({ color: 0x6b7a72 }));
+    const mw = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.7), litWinMat);
     mw.position.set(mx + 0.7, 2.0, -7.72); S.add(mw);
   });
   const ht = mkTree(-4.5, -3.0, 1.4); S.add(ht); dukaanTrees.push(ht);
@@ -778,7 +1080,14 @@ window.renderFrame = (f) => {
   clouds.forEach((sp, i) => {
     sp.position.x = -22 + i * 7.5 + Math.sin(f * 0.004 + i) * 0.6;
   });
+  farClouds.forEach((sp, i) => { sp.position.x = -18 + i * 12 + Math.sin(f * 0.002 + i * 2) * 0.8; });
+  motes.forEach((sp, i) => {
+    sp.visible = (shot.set === 'gali');
+    sp.position.y += Math.sin(f * 0.05 + i * 2.1) * 0.0012;
+    sp.position.x += Math.cos(f * 0.02 + i) * 0.0009;
+  });
   skylineG.visible = true;
+  midG.visible = true;
   ALL_CARDS.forEach((c) => c.hide());
   const cp = cam.pos;
   // ---- set visibility ----
@@ -825,45 +1134,47 @@ window.renderFrame = (f) => {
     });
   }
 
-  switch (id) {
-    case 's01': { // HOOK (2.76s): aerial wide → tez push-in dukaan par; board bada; Raju board ke BAGAL me (board ko kabhi cover na kare)
+  // ---- beat dispatch (v3: 52 shots, 22 beats) ----
+  // u = shot ke andar 0..1; bu = poori beat par 0..1 (beat-spanning actions: counter, lid, pile, phone counts).
+  // sub = beat ke andar shot ka index (0-based). Har sub-shot me alag angle (story.js CAMS) + alag action-step.
+  const beat = BEAT_OF[id], bu = beatU(f), sub = shot.sub;
+  switch (beat) {
+    case 'b01': { // HOOK: aerial → push-in → board close; Raju board ke BAGAL me; padosi gali paar karta hai
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -1.0, 0, -1.6, 1.05, 0, 0.35, 0, mouthFor(f), true);
-      // padosi chhote kadmon se gali paar karta hai (background movement; daudna nahi)
-      const nx = 3.5 - 2.0 * u;
+      const nx = 3.5 - 2.0 * bu;
       drawChar(neighCard, 63, NEIGH, 'neutral', 'hang', 'hang', f, cp, nx, 0, -3.2, 0.85, 0.5 + 0.08 * Math.sin(f * 0.15), null, 0, null, false);
       glintBoard.position.set(-2.7, 2.05, -4.0);
       glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       break;
     }
-    case 's02': { // Raju CLOSE-UP, sly smile (squint + smirk), sar halka tilt; peeli pencil saaf dikhe
+    case 'b02': { // Raju CLOSE-UP, sly smile; peeli pencil saaf; chidiya aasmaan se (sub0)
       drawChar(rajuCard, 61, RAJU, 'squint', 'hang', 'hang', f, cp, -1.5, 0, -1.6, 2.1, 0, null, 2, mouthFor(f), true);
-      // chidiya aasmaan se guzarti hai + kapde hilte (peeche)
-      bird.visible = true;
-      bird.position.set(-4 + 8 * u, 5.5 + Math.sin(f * 0.1) * 0.2, -12);
-      bird.rotation.z = Math.sin(f * 0.2) * 0.2;
+      if (sub === 0) {
+        bird.visible = true;
+        bird.position.set(-4 + 8 * bu, 5.5 + Math.sin(f * 0.1) * 0.2, -12);
+        bird.rotation.z = Math.sin(f * 0.2) * 0.2;
+      }
       break;
     }
-    case 's03': { // Raju intro MEDIUM — board + kataar peeche; press uthata hai (lift + loha haath me)
+    case 'b03': { // Raju intro MEDIUM — press uthata hai (lift frame-based, v2 jaisa)
       const lift = 0.15 + 0.45 * M.surge(clamp((f - 130) / 30));
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -0.9, 0, -2.0, 1.05, 0, lift, 0, mouthFor(f), true);
-      // loha Raju ke dahine haath ke paas (card-right, lift ke saath upar)
       ironG.visible = true;
       ironG.position.set(-0.34, 1.28 + 0.28 * lift, -1.85);
       ironG.rotation.y = 0.3; ironG.rotation.z = -0.08;
       break;
     }
-    case 's04': { // Process CLOSE-UP — dher + bhaap; Raju press chala raha hai (haath upar-neeche, ~0.5s cycle)
+    case 'b04': { // Process CLOSE-UP — dher + bhaap; Raju press chala raha hai (~0.5s cycle)
       const ph = f * 0.42;
       const lift = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(ph));
       drawChar(rajuCard, 61, RAJU, 'neutral', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, lift, 0, mouthFor(f), true);
-      // loha dher par upar-neeche — haath ke saath sync
       ironG.visible = true;
       ironG.position.set(0.3, 1.58 + 0.10 * (0.5 + 0.5 * Math.sin(ph)), -2.6);
       ironG.rotation.y = 0.1;
       break;
     }
-    case 's05': { // ₹10 TAG EXTREME CLOSE-UP — laal tag bada, dher ke SAAMNE (pile front z=-2.4 se aage), peeche bhaap halki
-      const pop = clamp(u * 4, 0, 1);
+    case 'b05': { // ₹10 TAG ECU — sub0 pop-in, sub1 hold bada
+      const pop = sub === 0 ? clamp(u * 4, 0, 1) : 1;
       tag10.visible = true;
       tag10.position.set(0.3, 1.35, -2.3);
       tag10.scale.setScalar(Math.max(0.01, pop));
@@ -874,39 +1185,39 @@ window.renderFrame = (f) => {
       tagString.material.opacity = pop;
       break;
     }
-    case 's06': { // PHONE — Raju phone side me dikhata hai (chehra khula); screen par "₹2,37,500" saaf; like/share badhte hain
+    case 'b06': { // PHONE — like/share beat bhar badhte hain (bu)
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -1.5, 0, -1.6, 1.0, 0, 0.3, 0, mouthFor(f), true);
       phoneG.visible = true;
       phoneG.rotation.z = Math.sin(f * 0.05) * 0.03;
-      drawPhoneCounts(8.4 + 4.0 * u, 5.1 + 3.1 * u);
+      drawPhoneCounts(8.4 + 4.0 * bu, 5.1 + 3.1 * bu);
       glintBoard.position.set(-0.75, 2.2, -1.25);
       glintBoard.material.opacity = 0.25 + 0.25 * Math.sin(f * 0.3);
       break;
     }
-    case 's07': { // ₹2,37,500 BOARD slow push-in — bada board; peeche Raju ki aankhein badi (board ko cover na kare)
+    case 'b07': { // ₹2,37,500 BOARD — sub0 wide, sub1 push-in, sub2 Raju eyes (camera); Raju board ko cover na kare
       viralBoard.visible = true;
       drawChar(rajuCard, 61, RAJU, 'wonder', 'hang', 'hang', f, cp, -1.35, 0, -3.6, 0.95, 0, null, 0, mouthFor(f), true);
       glintBoard.position.set(-2.7, 2.1, -4.0);
       glintBoard.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       break;
     }
-    case 's08': { // MOHALLA SHOCK — 3 chehre ek frame me, sab "O" munh; beech wale ke maathe par paseene ki boond tapakti hai
+    case 'b08': { // MOHALLA SHOCK — sub0 3 faces wide, sub1 beech wala "O", sub2 aunty + paseena
       drawChar(neighCard, 63, NEIGH, 'shock', 'hang', 'hang', f, cp, -1.85, 0, -2.2, 1.0, 0, null, 0, null, false);
       drawChar(neigh2Card, 65, NEIGH2, 'shock', 'hang', 'hang', f, cp, -0.9, 0, -2.2, 1.0, 0, null, 0, null, false);
       drawChar(neigh3Card, 69, NEIGH3, 'shock', 'hang', 'hang', f, cp, 0.05, 0, -2.2, 1.0, 0, null, 0, null, false);
       sweatDrop.visible = true;
-      sweatDrop.position.set(-0.72, 1.6 - 0.12 * u, -2.1);
+      sweatDrop.position.set(-0.72, 1.6 - 0.12 * bu, -2.1);
       break;
     }
-    case 's09': { // SHAAM: Raju galla kholta hai — dhakkan shot ke andar khulta hai; notebook chhoti counter par (jhalak)
+    case 'b09': { // SHAAM: galla beat bhar khulta hai (lid bu se); notebook chhoti counter par (jhalak)
       drawChar(rajuCard, 61, RAJU, 'neutral', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, 0.25, 0, mouthFor(f), true);
       gallaG.visible = true;
-      if (gallaLid) gallaLid.rotation.x = -1.9 * M.surge(u);
+      if (gallaLid) gallaLid.rotation.x = -1.9 * M.surge(bu);
       notebookSmall.visible = true;
       notebookSmall.position.set(1.3, 1.09, -2.6); notebookSmall.rotation.set(0, 0.2, 0);
       break;
     }
-    case 's10': { // NOTE GINNA CLOSE-UP — ek-ek note upar-neeche (ginna); galla khula, note kam
+    case 'b10': { // NOTE GINNA CLOSE-UP — ek-ek note upar-neeche
       const lift = 0.3 + 0.15 * Math.sin(f * 0.5);
       drawChar(rajuCard, 61, RAJU, 'neutral', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, lift, 0, null, true);
       gallaG.visible = true;
@@ -916,7 +1227,7 @@ window.renderFrame = (f) => {
       countNote.rotation.set(-0.5, 0, Math.sin(f * 0.5) * 0.15);
       break;
     }
-    case 's11': { // DEFLATION — Raju khaali galle me jhaankta hai, haath gaal par, chehra dheela
+    case 'b11': { // DEFLATION — khaali galle me jhaankta hai; sub1 galla close
       drawChar(rajuCard, 61, RAJU, 'stern', 'hang', 'cheek', f, cp, -0.35, 0, -3.0, 1.0, 0, null, 0, null, true);
       gallaG.visible = true;
       if (gallaLid) gallaLid.rotation.x = -1.9;
@@ -924,7 +1235,7 @@ window.renderFrame = (f) => {
       notebookSmall.position.set(1.3, 1.09, -2.6); notebookSmall.rotation.set(0, 0.2, 0);
       break;
     }
-    case 's12': { // ₹3,500 CHHOTA — chhota dher + chhota muted tag; Raju ka haath dher par
+    case 'b12': { // ₹3,500 CHHOTA — sub0 dher+tag, sub1 tag close; Raju ka haath dher par
       drawChar(rajuCard, 61, RAJU, 'stern', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, 0.15, 0, mouthFor(f), true);
       gallaG.visible = true;
       if (gallaLid) gallaLid.rotation.x = -1.9;
@@ -933,13 +1244,13 @@ window.renderFrame = (f) => {
       tag3500.rotation.z = 0.1 + Math.sin(f * 0.05) * 0.03;
       break;
     }
-    case 's13': { // SAWAL CLOSEUP push-in — Raju ka chehra bada (s 1.5), bhaavein upar, munh halka khula
+    case 'b13': { // SAWAL CLOSEUP — sub0 medium, sub1 tighter push-in
       drawChar(rajuCard, 61, RAJU, 'wonder', 'hang', 'hang', f, cp, -0.35, 0, -3.0, 1.5, 0, null, 0, mouthFor(f), true);
-      gallaG.visible = true; // foreground depth — counter par khula galla
+      gallaG.visible = true;
       if (gallaLid) gallaLid.rotation.x = -1.9;
       break;
     }
-    case 's14': { // SUIT AATA HAI — graahak darwaze se suit latkaye aata hai (chhote kadam + bob); Raju dekhta hai
+    case 'b14': { // SUIT AATA HAI — graahak darwaze se (chhote kadam + bob); Raju dekhta hai
       drawChar(rajuCard, 61, RAJU, 'wonder', 'hang', 'hang', f, cp, -1.5, 0, -1.6, 1.0, 0, null, 0, null, true);
       const cx = -1.2 + 0.6 * u, cz = -4.0 + 1.4 * u;
       drawChar(custCard, 67, CUST, 'smile', 'reach', 'hang', f, cp, cx, 0, cz, 1.0, (f * 0.12) % 1, 0.3, 0, null, false);
@@ -950,7 +1261,7 @@ window.renderFrame = (f) => {
       suitGlowLight.position.set(cx + 0.25, 1.3, cz + 0.3);
       break;
     }
-    case 's15': { // SUIT REVEAL GLOW — suit par sunehri roshni badhti hai + "₹350" tag bada; peeche Raju ki smile
+    case 'b15': { // SUIT REVEAL GLOW — sub0 suit haath me, sub1 glow+tag, sub2 Raju smile hold; glow bu se badhta hai
       drawChar(custCard, 67, CUST, 'smile', 'reach', 'hang', f, cp, -0.6, 0, -2.6, 1.0, 0, 0.45, 0, null, false);
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, 0.05, 0, -2.6, 0.85, 0, 0.4, 0, mouthFor(f), true);
       suitG.visible = true;
@@ -958,46 +1269,44 @@ window.renderFrame = (f) => {
       suitG.rotation.z = 0;
       tag350.visible = true;
       tag350.rotation.z = Math.sin(f * 0.05) * 0.05;
-      suitGlowLight.intensity = 1.5 + 2.5 * u;
+      suitGlowLight.intensity = 1.5 + 2.5 * bu;
       suitGlowLight.position.set(-0.6, 1.6, -2.0);
       glintSuit.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       glintSuit.position.set(-0.6, 1.5, -1.95);
       break;
     }
-    case 's16': { // 20 SUIT KA DHER — BINA CUT dher badhta dikhe (ek-ek suit aata hai); Raju dher ke peeche
+    case 'b16': { // 20 SUIT KA DHER — beat bhar ek-ek suit badhta hai (n bu se)
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -0.9, 0, -3.3, 1.0, 0, 0.3, 0, mouthFor(f), true);
-      const n = 1 + Math.floor(u * 19);
+      const n = 1 + Math.floor(bu * 19);
       pileSuits.forEach((m, i) => { m.visible = i < n; });
       break;
     }
-    case 's17': { // RAJU PROUD MEDIUM — seena chauda, halki smirk, haath kamar par; peeche poora dher
+    case 'b17': { // RAJU PROUD MEDIUM — poora dher peeche
       drawChar(rajuCard, 61, RAJU, 'smile', 'hang', 'hip', f, cp, -0.6, 0, -2.6, 1.05, 0, null, 0, mouthFor(f), true);
       pileSuits.forEach((m) => { m.visible = true; });
       break;
     }
-    case 's18': { // MANAGER KI HANSI (loop) — mota manager hansta hai (munh ~0.5 s cycle), haath upar + pet par; Raju side me shaant
+    case 'b18': { // MANAGER KI HANSI (loop) — sub0 wide, sub1 manager CU, sub2 Raju calm + manager
       drawChar(mgrCard, 71, MANAGER, 'laugh', 'up', 'belly', f, cp, 2.9, 0, -2.6, 1.25, 0, null, Math.sin(f * 0.25) * 2, mgrMouth(f), 'manager');
       drawChar(rajuCard, 61, RAJU, 'neutral', 'hang', 'hang', f, cp, 1.4, 0, -2.4, 0.85, 0, null, 0, null, true);
       break;
     }
-    case 's19': { // COUNTER ₹2,83,500 + SUIT KA PAHAAD (pull-back) — counter gin kar badhta hai → pull-back: peeche rack-pahaad, Raju chhota
+    case 'b19': { // COUNTER ₹2,83,500 + SUIT PAHAAD — counter BEAT progress se: bu=0.75 par full, phir HOLD.
+      // FIX run 2 bachaya: clamp(bu/0.75) smoothstep + 500-step (v2 me shot-u tha; v3 me 4 shots hain isliye BEAT-u).
       drawChar(rajuCard, 61, RAJU, 'smile', 'reach', 'hang', f, cp, -0.35, 0, -3.0, 1.0, 0, 0.3, 0, mouthFor(f), true);
       counterBoard.visible = true;
-      // FIX run 2: tez gino — u=0.75 (f~997) par ₹2,83,500 par pahuncho, phir ~0.83 s HOLD.
-      // Pehle smoothstep(u) poore shot me chalta tha: shot end (u=1) par hi full hota, aur woh frame
-      // s20 ka hota hai — isliye run #186 me counter kabhi ₹2,83,500 par ruka hi nahi.
-      const cp19 = clamp(u / 0.75, 0, 1);
+      const cp19 = clamp(bu / 0.75, 0, 1);
       drawCounter(283500 * (cp19 * cp19 * (3 - 2 * cp19)));
-      rackG.visible = true;
-      gallaG.visible = true; // mahine ka galla — counter par khula, note bhara
+      if (sub >= 2) rackG.visible = true; // sub2 (HOLD) se pull-back wide: peeche suit pahaad
+      gallaG.visible = true;
       if (gallaLid) gallaLid.rotation.x = -1.9;
       break;
     }
-    case 's20': { // NOTEBOOK ZOOM+PAN (withheld reveal) — page hi hero hai; Raju is insert shot me frame se bahar (s05 jaisa) taaki page poora + bada dikhe, chehra aadha kata na dikhe
+    case 'b20': { // NOTEBOOK (withheld reveal) — page hi hero; sub0 line 1, sub1 line 2 pan, sub2 hold
       notebookPage.visible = true;
       break;
     }
-    case 's21': { // TWO-SHOT KHUD-CHECK — Raju suit ki taraf ishaara karta hai; graahak haath me suit pakde
+    case 'b21': { // TWO-SHOT KHUD-CHECK — sub0 two-shot, sub1 Raju point, sub2 graahak + suit
       drawChar(rajuCard, 61, RAJU, 'smile', 'point', 'hang', f, cp, -1.5, 0, -1.8, 1.0, 0, null, 0, mouthFor(f), true);
       drawChar(custCard, 67, CUST, 'wonder', 'reach', 'hang', f, cp, 0.2, 0, -2.0, 1.0, 0, 0.2, 0, null, false);
       suitG.visible = true;
@@ -1005,12 +1314,10 @@ window.renderFrame = (f) => {
       suitG.rotation.z = 0;
       break;
     }
-    case 's22': { // ENDING TRAVELLING — Raju suit uthata hai (upar), muskura kar camera ki taraf dekhta hai → FREEZE sabse badi smile par. Loop — koi CTA nahi.
+    case 'b22': { // ENDING TRAVELLING → push-in → FREEZE. Hero suit Raju ke BAGAL me (x=-0.55), chehra khula.
       drawChar(rajuCard, 61, RAJU, 'relief', 'up', 'hang', f, cp, -1.2, 0, -1.8, 1.05, 0, null, 0, mouthFor(f), true);
-      // FIX run 2: suit Raju ke CHEHRE ke BAGAL me (screen-right, x=-0.55) — pehle x=-0.95 par chehre ke
-      // SAAMNE tha aur freeze frame me chehra poora dhak gaya tha (f1210). Hero suit: lapel/shirt/tie saaf.
       suitEndG.visible = true;
-      suitEndG.position.set(-0.55, 1.25 + 0.4 * u, -1.7);
+      suitEndG.position.set(-0.55, 1.25 + 0.4 * bu, -1.7);
       suitEndG.rotation.z = Math.sin(f * 0.04) * 0.03;
       break;
     }
