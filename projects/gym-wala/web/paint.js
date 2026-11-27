@@ -5,7 +5,7 @@ export const rng = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 
 const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
 export const tex = (c, rx = 1, ry = 1) => {
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry);
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 };
 const hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
 const speckle = (g, w, h, r, n, cols, rad = [1, 3]) => { for (let i = 0; i < n; i++) { g.fillStyle = cols[(r() * cols.length) | 0]; g.beginPath(); g.ellipse(r() * w, r() * h, rad[0] + r() * rad[1], rad[0] + r() * rad[1] * 0.7, r() * 3, 0, 7); g.fill(); } };
