@@ -568,6 +568,17 @@ const FACE = {
         ],
         mouth: "smile"
     },
+    wink: {
+        eye: [
+            "dot",
+            "happy"
+        ],
+        brow: [
+            0,
+            -3
+        ],
+        mouth: "smirk"
+    },
     lick: {
         eye: [
             "dot",
@@ -2575,7 +2586,7 @@ export const romanFront = (p, key, opts = {}) => {
   // ---- legs ----
   const dress = !!O.dress;
   for (const side of [-1, 1]) {
-    const up = Math.max(0, Math.sin(Math.PI * 2 * (step + (side > 0 ? 0.5 : 0)))) * 30 * (step ? 1 : 0);
+    const up = Math.max(0, Math.sin(Math.PI * 2 * (step + (side > 0 ? 0.5 : 0)))) * 55 * (step ? 1 : 0); // STILLS FIX (27 Nov, f1503): 30 bahut halka tha — park walk still me khada lagta tha; 55 = ~10cm kadam, still me bhi chalna padhta hai
     const hx = cx + side * 16 * u, fx = cx + side * 22 * u, fy = sole - 4 * u - up;
     p.stroke(curve([hx, hipY], [(hx + fx) / 2 + side * 2 * u, (hipY + fy) / 2], [fx, fy]), 5.8 * u, legCol);
     const sandal = O.helmet ? LEATHER : "#5a3b2a";
