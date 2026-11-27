@@ -121,7 +121,7 @@ export const CAMS = {
   s05a: [[-1.2, 1.5, -1.0], [-2.3, 1.0, -3.85], 50, 0, [-1.3, 1.5, -1.1], [-2.3, 1.0, -3.85], 48, 0], // register MACRO — naam likhna = kaam
   s05b: [[-3.4, 1.5, -1.0], [-2.3, 1.0, -3.85], 50, 0, [-3.3, 1.5, -1.1], [-2.3, 1.0, -3.85], 48, 0], // register macro other side — PEN dikhe
   s06a: [[-1.0, 1.5, -0.4], [-2.3, 1.2, -3.85], 52, 0, [-1.1, 1.5, -0.5], [-2.3, 1.2, -3.85], 50, 0], // mez saaf — medium, haath + BELL dikhe
-  s06b: [[-3.6, 1.5, -0.8], [-2.2, 1.2, -3.85], 52, 0, [-3.5, 1.5, -0.9], [-2.2, 1.2, -3.85], 50, 0], // mez saaf other side — lone box on shelf
+  s06b: [[-3.6, 1.5, -0.8], [-2.1, 1.2, -3.78], 56, 0, [-3.5, 1.5, -0.9], [-2.1, 1.2, -3.78], 54, 0], // mez saaf other side — lone box on shelf — v3.1 FIX 27 Nov: look +0.1 screen-right, fov 52->56/50->54 (Salim ka sir right edge se kata tha, f240)
   s07a: [[-2.2, 1.7, 2.2], [-2.2, 1.6, -3.8], 55, 0, [-2.2, 1.7, 2.0], [-2.2, 1.6, -3.8], 54, 0], // shutter band — static, lamp ON
   s07b: [[-1.6, 1.6, 1.4], [-2.4, 1.4, -3.6], 50, 0, [-1.7, 1.6, 1.3], [-2.4, 1.4, -3.6], 49, 0], // LIGHT-CONE — Salim akela lamp cone me
   s08a: [[-1.2, 1.35, -0.8], [-2.5, 1.25, -3.8], 56, 0, [-1.3, 1.35, -0.9], [-2.5, 1.25, -3.8], 55, 0], // shutter-gap CU — Salim ka chehra + khula galla
@@ -129,7 +129,7 @@ export const CAMS = {
   s09a: [[-2.2, 1.6, 1.2], [-2.2, 1.4, -2.6], 52, 0, [-2.2, 1.6, 1.0], [-2.2, 1.4, -2.6], 51, 0], // Salim intro medium
   s09b: [[-0.8, 1.6, 0.6], [-2.3, 1.3, -3.4], 52, 0, [-0.9, 1.6, 0.5], [-2.3, 1.3, -3.4], 51, 0], // Salim medium right side, khaali almari behind
   s10a: [[-1.2, 1.6, 0.2], [-2.05, 0.65, -3.8], 55, 0, [-1.3, 1.6, 0.1], [-2.05, 0.65, -3.8], 54, 0], // point — look neeche taaki kata top sign upar se bahar rahe
-  s10b: [[-0.4, 1.5, 0.8], [-1.7, 1.1, -4.0], 58, 0, [-0.5, 1.5, 0.7], [-1.7, 1.1, -4.0], 56, 0], // MIRROR hero — mirror + Salim + shelf ek frame me
+  s10b: [[-0.4, 1.5, 0.8], [-1.85, 1.1, -4.0], 62, 0, [-0.5, 1.5, 0.7], [-1.85, 1.1, -4.0], 60, 0], // MIRROR hero — mirror + Salim + shelf ek frame me — v3.1 FIX 27 Nov: look -0.15 Salim ki taraf, fov 58->62/56->60 (chehra left edge se kata tha, f420; sheesha margin check karna)
   s11a: [[-0.6, 1.6, 1.4], [-1.8, 1.3, -2.8], 56, 0, [-0.7, 1.6, 1.3], [-1.8, 1.3, -2.8], 55, 0], // two-shot — aunty ka sawal
   s11b: [[0.2, 1.7, 0.4], [-2.0, 1.4, -2.6], 52, 0, [0.1, 1.7, 0.3], [-2.0, 1.4, -2.6], 51, 0], // two-shot behind aunty — Salim's face big
   s12a: [[-2.2, 1.7, 2.6], [-2.2, 1.6, -2.4], 54, 0, [-2.2, 1.7, 2.0], [-2.2, 1.6, -2.4], 50, 0], // PUSH-IN grin CU — joke ka punchline chehre par
@@ -141,7 +141,7 @@ export const CAMS = {
   s15a: [[-0.5, 2.8, 8.0], [0.2, 0.9, -1.8], 62, 0, [-0.5, 2.7, 7.6], [0.2, 0.9, -1.8], 60, 0], // unload WIDE high angle — dher badhta dikhe
   s15b: [[-2.6, 1.8, 2.6], [-1.4, 0.9, -1.8], 54, 0, [-2.5, 1.8, 2.4], [-1.4, 0.9, -1.8], 53, 0], // unload medium — man hands parcel to Salim
   s16a: [[-2.2, 1.6, 0.8], [-2.2, 1.5, -2.8], 50, 0, [-2.2, 1.6, 0.7], [-2.2, 1.5, -2.8], 49, 0], // phone bajta — Salim medium, phone haath me
-  s16b: [[-1.6, 1.6, 0.4], [-2.2, 1.5, -2.6], 48, 0, [-1.7, 1.6, 0.3], [-2.2, 1.5, -2.6], 47, 0], // Salim picks up phone, closer
+  s16b: [[-1.6, 1.6, 0.4], [-2.0, 1.5, -2.6], 52, 0, [-1.7, 1.6, 0.3], [-2.0, 1.5, -2.6], 51, 0], // Salim picks up phone, closer — v3.1 FIX 27 Nov: look +0.2, fov 48->52/47->51 (ghadi right edge se kati thi, f720)
   s17a: [[-1.2, 1.7, 0.9], [-2.0, 1.5, -2.3], 52, 0, [-1.3, 1.7, 0.8], [-2.0, 1.5, -2.3], 51, 0], // phone + Salim — medium, screen chhoti, chehra bada
   s17b: [[-1.8, 1.7, 0.6], [-1.9, 1.4, -2.2], 50, 0, [-1.8, 1.7, 0.5], [-1.9, 1.4, -2.2], 49, 0], // phone screen + pile 14 behind
   s18a: [[0.5, 2.4, 5.5], [-1.0, 1.1, -2.4], 60, 0, [0.4, 2.3, 5.2], [-1.0, 1.1, -2.4], 59, 0], // crowd wide — bheed aati hui

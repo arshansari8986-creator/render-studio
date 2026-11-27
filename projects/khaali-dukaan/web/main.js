@@ -953,7 +953,7 @@ let clockHour = null, clockMin = null;
   clockHour = new THREE.Mesh(hourGeo, lam({ color: 0x1e293b })); clockHour.position.z = 0.01; clockG.add(clockHour);
   const minGeo = new THREE.BoxGeometry(0.02, 0.22, 0.01); minGeo.translate(0, 0.1, 0);
   clockMin = new THREE.Mesh(minGeo, lam({ color: 0x1e293b })); clockMin.position.z = 0.015; clockG.add(clockMin);
-  clockG.position.set(-1.5, 2.45, -4.22);
+  clockG.position.set(-1.5, 2.45, -4.22); // v3.1 NOTE 27 Nov: y 2.15 try kiya tha (s19b ke liye) par neeche ghadi shelf ke peeche dhak gayi (f240/f420/f720) — wapas 2.45; s19b ka fix shutter override se hai (b08 sub 3)
 // ---- DEEWAAR SHEESHA (mirror) — Salim shop back wall, reference ka mirror look ----
 // MIRROR FIX v2 (defect 2): x -1.35 -> -0.85 — almari shift ke baad deewaar ka dayein hissa
 // poora khaali hai; sheesha ab kisi upright/shelf ke peeche NAHI, poora saaf dikhega.
@@ -1192,6 +1192,7 @@ window.renderFrame = (f) => {
         drawChar(kidCard, 89, CUST_KID, 'smile', 'hang', 'hang', f, cp, -2.4, 0, -1.1, 0.7, 0, null, 0, null, false);
       } else { // sub 3 = s19b SCALE SHIFT — mountain replaces the normal pile
         parcelMountain.visible = true;
+        shutterSlats.scale.y = 0; // v3.1 FIX 27 Nov: is high-angle shot me khula shutter strip (y 2.58-2.8, z -3.38) ghadi (y 2.2-2.7) ke beech me aa raha tha — ghadi aadhi dhaki thi (f828). s19b me shutter poora upar (roll abhi bhi dikhega), ghadi poori dikhegi. Sirf s19b — s19a aur baaki shots me strip waise hi rahegi.
         drawChar(salimCard, 81, SALIM, 'wonder', 'up', 'hang', f, cp, -1.0, 0, -1.2, 0.8, 0, null, 0, mouthFor(f), false);
       }
       break;
