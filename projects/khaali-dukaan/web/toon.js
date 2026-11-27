@@ -2617,12 +2617,14 @@ export const romanFront = (p, key, opts = {}) => {
     }
   };
   const arms = [arm(-1, L), arm(1, R)];
+  // BAANH FIX (defect 4, v2): 5.2u = patli taar jaisi baanh — ab 8.6u (moti, asli jaisi);
+  // haath ka dot 5.5u -> 8u, ungli/angootha 2.6u -> 4u. Taangein patli hi rehti hain (toon style).
   const drawArm = (a) => {
-    p.stroke(curve(a.pts[0], a.pts[1], a.pts[2]), 5.2 * u, armCol);
+    p.stroke(curve(a.pts[0], a.pts[1], a.pts[2]), 8.6 * u, armCol);
     const [hx, hy] = a.pts[2];
-    p.dot(hx, hy, 5.5 * u);
-    if (a.finger) { const dx = a.pts[2][0] - a.pts[1][0], dy = a.pts[2][1] - a.pts[1][1], l = Math.hypot(dx, dy); p.stroke([[hx, hy], [hx + dx / l * 14 * u, hy + dy / l * 14 * u]], 2.6 * u); }
-    if (a.thumb) p.stroke([[hx, hy], [hx + Math.sign(hx - cx) * 6 * u, hy - 12 * u]], 2.6 * u);
+    p.dot(hx, hy, 8 * u);
+    if (a.finger) { const dx = a.pts[2][0] - a.pts[1][0], dy = a.pts[2][1] - a.pts[1][1], l = Math.hypot(dx, dy); p.stroke([[hx, hy], [hx + dx / l * 14 * u, hy + dy / l * 14 * u]], 4 * u); }
+    if (a.thumb) p.stroke([[hx, hy], [hx + Math.sign(hx - cx) * 6 * u, hy - 12 * u]], 4 * u);
   };
   // spear behind
   if (O.spear && R === "spear") {
@@ -2769,6 +2771,11 @@ export const romanFront = (p, key, opts = {}) => {
     p.inkRing(bd, ow * 0.8, thick);
   }
   faceFront(p, cx, hc, W, expr, facing, look, lid, helmet, skin, O.beard ? O.beard : O.moustache, !!O.stout, mouthOv);
+  if (opts.sweat) { // PASEENA — pakda gaya (Gullak: sweat = caught); temple par neeli boond + chamak
+    const sx = cx + 0.95 * H.a, sy = hc - 0.35 * H.b;
+    p.ell(sx, sy, 4.5 * u, 6.5 * u, '#7dd3fc', 1.6 * u);
+    p.dot(sx - 1.2 * u, sy - 2 * u, 1.4 * u, '#ffffff');
+  }
   if (O.tilak && !helmet) { // maathe par tilak — safed kinara, laal beech
     const tx = cx + 7 * u * facing;
     p.stroke([[tx, hc - 23.5 * u], [tx, hc - 11 * u]], 5.4 * u, "#fff6e8");

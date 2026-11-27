@@ -1,4 +1,4 @@
-// "Khaali Dukaan" — WORLD V3 FULL VIDEO (45.98 s, 1379 frames @30fps, 29 shots).
+// "Khaali Dukaan" — WORLD V3 FULL VIDEO (45.98 s, 1379 frames @30fps, 58 shots v2 re-cut).
 // Title: "Dukaan Me Kuch Nahi Bikta, Phir Bhi ₹40,000! 😱" — Hero: Salim.
 // World (fresh, sirf is video ke liye): gali + Salim ki KHAALI dukaan (shutter, khaali almari,
 // ek mez, register, galla) + bagal wali BHARI kirana dukaan + tempo + parcels (20 → 50 → 100).
@@ -164,16 +164,16 @@ class Card {
   }
   hide() { this.mesh.visible = this.blob.visible = false; }
 }
-function drawChar(card, seed, outfit, expr, R, L, f, camPos, x, y, z, s = 1.03, step = 0, lift = null, tilt = 0, mouth = null, props = false) {
+function drawChar(card, seed, outfit, expr, R, L, f, camPos, x, y, z, s = 1.03, step = 0, lift = null, tilt = 0, mouth = null, props = false, sweat = false) {
   const idl = idle(f, seed), blink = blinkAt(f, seed);
   const liftQ = lift === null ? '' : q(lift, 1);
   const tiltBody = Math.round(idl.tilt + tilt * 3);
   const tiltHead = Math.round(idle(f, seed + 2).headTilt + tilt * 6);
-  const key = `${seed}|${expr}|${R}|${L}|${blink}|${q(idl.bob, 2)}|${tiltBody}|${q(step, 2)}|${liftQ}|${mouth || ''}`;
+  const key = `${seed}|${expr}|${R}|${L}|${blink}|${q(idl.bob, 2)}|${tiltBody}|${q(step, 2)}|${liftQ}|${mouth || ''}|${sweat ? 'sw' : ''}`;
   card.draw(key, (p) => {
     T.romanFront(p, outfit, {
       seed, expr, R, L, blink, bob: q(idl.bob, 2), tilt: tiltBody,
-      headTilt: tiltHead, wv: f * 0.18, step, lift: lift === null ? 0 : lift, mouth,
+      headTilt: tiltHead, wv: f * 0.18, step, lift: lift === null ? 0 : lift, mouth, sweat,
     });
   });
   card.place(x, y, z, camPos, s);
@@ -279,6 +279,8 @@ puddle.rotation.x = -Math.PI / 2; puddle.position.set(2.5, 0.012, 0.5); scene.ad
   const fgCrate = box(0.5, 0.4, 0.5, lam({ map: tex(planks(47), 1, 1) })); fgCrate.position.set(4.1, 0.2, 2.4); fgCrate.rotation.y = 0.4; scene.add(fgCrate);
   const fgPot = cyl(0.22, 0.16, 0.35, lam({ color: 0xb45309 }), 10); fgPot.position.set(-4.8, 0.17, 1.8); scene.add(fgPot);
   const fgPlant = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), lam({ color: 0x4a6b2f })); fgPlant.position.set(-4.8, 0.5, 1.8); scene.add(fgPlant);
+  // FOREGROUND CRATES v2 (defect 1): wide shots ka neeche hissa khaali sadak na lage —
+  // do bade crate camera ke kareeb (z 0.9-1.0), neeche ke kone bhare rahein.
 }
 // ---------- DISTANT SKYLINE (background depth): hazy buildings peeche, har shot me ----------
 const skylineG = new THREE.Group(); scene.add(skylineG);
@@ -286,7 +288,9 @@ const skylineG = new THREE.Group(); scene.add(skylineG);
   // BACKGROUND FIX (defect 5): buildings ek jaise beige dabbe NAHI — har building alag rang/
   // unchai, chhat par tank + antenna + AC box, khidkiyan alag size/rang (kuch jalti, kuch band).
   const skyCols = [0xb8a888, 0x8a9aaa, 0x9a8f7a, 0x7a9a8a, 0xb08a7a, 0x8a7f6e];
-  const skySpots = [[-22.5, 7], [-17.5, 9], [-12.5, 6], [-7.5, 8], [-2.5, 10], [2.5, 7], [7.5, 9], [12.5, 6], [17.5, 8], [22.5, 7]];
+  // BACKGROUND FIX v2 (defect 1): skyline AUR uncha — 10-13 m (pehle 6-10 m) taaki
+  // wide shots me upar khaali aasmaan na dikhe; peeche ki silhouette bhi 11-15 m.
+  const skySpots = [[-22.5, 10], [-17.5, 12], [-12.5, 9], [-7.5, 11], [-2.5, 13], [2.5, 10], [7.5, 12], [12.5, 9], [17.5, 11], [22.5, 10]];
   skySpots.forEach(([sx, sh], i) => {
     const b = box(5.5, sh, 1.2, lam({ map: tex(plaster(71, 36), 1, 2), color: skyCols[i % skyCols.length] }));
     b.position.set(sx, sh / 2, -19); skylineG.add(b);
@@ -309,7 +313,7 @@ const skylineG = new THREE.Group(); scene.add(skylineG);
     }
   });
   const silCols = [0x8a6f7a, 0x7a5f6e, 0x9a7f72, 0x6e5a6a];
-  [[-24, 11], [-15, 8.5], [-6, 12], [3, 9], [12, 11.5], [21, 9.5]].forEach(([sx, sh], i) => {
+  [[-24, 13], [-15, 11], [-6, 15], [3, 12], [12, 14], [21, 12]].forEach(([sx, sh], i) => {
     const b = box(6.5, sh, 1.0, lam({ color: silCols[i % silCols.length] }));
     b.position.set(sx, sh / 2, -27); skylineG.add(b);
   });
@@ -365,6 +369,8 @@ function mkTree(x, z, s = 1) {
 const galiG = new THREE.Group(); scene.add(galiG);
 let motes = [];
 let galiTrees = [];
+let dogTail = null; // street dog ki poonchh — renderFrame me wag (zinda background)
+let lightCone = null; // lamp ka roshni-cone (shaam me ON) — salimShop block me banega
 
 // ---- shared board textures ----
 const salimSignTex = textBoard(1024, 200, (g, w, h) => {
@@ -395,6 +401,13 @@ const shutterTex = (() => {
     g.fillStyle = '#64748b'; g.fillRect(0, y, 256, 4);
     g.fillStyle = 'rgba(255,255,255,0.25)'; g.fillRect(0, y + 4, 256, 3);
   }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+// CHECKERBOARD doormat texture (Gullak: checkerboard/perspective farsh) — dono dukaan ke darwaze par
+const checkerTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) { g.fillStyle = (x + y) % 2 ? '#0f766e' : '#fef3c7'; g.fillRect(x * 32, y * 32, 32, 32); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 })();
 
@@ -446,6 +459,11 @@ const shutterTex = (() => {
     g.fillText('LE AAO', w / 2, 230);
   });
   const parcelPoster = boardMesh(0.55, 0.7, parcelPosterTex); parcelPoster.position.set(0.2, 1.6, -4.24); S.add(parcelPoster);
+  // CHECKERBOARD DOORMATS — dono dukaan ke darwaze ke saamne (z -2.9, sadak ki mitti par)
+  [-2.2, 2.6].forEach((mx) => {
+    const mat = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.6), lam({ map: checkerTex }));
+    mat.rotation.x = -Math.PI / 2; mat.position.set(mx, 0.012, -2.9); mat.receiveShadow = true; S.add(mat);
+  });
   // ---- SALIM KI DUKAAN (LEFT, centre x=-2.2) ----
   const salimShop = new THREE.Group(); S.add(salimShop);
   {
@@ -458,23 +476,44 @@ const shutterTex = (() => {
     const roof = box(3.6, 0.08, 1.3, lam({ map: tex(tinRoof(53), 2, 1), color: 0x9a3412 })); roof.position.set(-2.2, 3.35, -3.9); salimShop.add(roof);
     const floor = box(3.4, 0.06, 0.95, lam({ map: tex(planks(41), 2, 1) })); floor.position.set(-2.2, 0.0, -3.85); salimShop.add(floor);
     const sign = boardMesh(2.6, 0.5, salimSignTex); sign.position.set(-2.2, 3.05, -3.48); salimShop.add(sign);
-    // KHAALI ALMARI — 2 bare shelf, peeche deewaar par (kuch nahi rakha — yahi kahani hai)
-    [-3.05, -1.35].forEach((ux) => {
+    // KHAALI ALMARI v2 (MIRROR FIX defect 2): almari ka centre -2.2 -> -2.5 (uprights -3.55/-1.45,
+    // shelf 2.2 chaudi) taaki deewaar ka dayein hissa (x -0.85) SHEESHE ke liye poora khaali rahe —
+    // na upright, na shelf board sheeshe ke upar se guzre. Khaali-pan abhi bhi wahi hai.
+    [-3.55, -1.45].forEach((ux) => {
       const up = box(0.06, 1.6, 0.32, lam({ color: 0x6d4a2c })); up.position.set(ux, 1.3, -4.1); salimShop.add(up);
     });
     [1.0, 1.7].forEach((sy) => {
-      const shelf = box(1.8, 0.06, 0.35, lam({ map: tex(planks(42), 2, 1) })); shelf.position.set(-2.2, sy, -4.1); salimShop.add(shelf);
+      const shelf = box(2.2, 0.06, 0.35, lam({ map: tex(planks(42), 2, 1) })); shelf.position.set(-2.5, sy, -4.1); salimShop.add(shelf);
     });
-    const shelfTop = box(1.8, 0.06, 0.35, lam({ map: tex(planks(42), 2, 1) })); shelfTop.position.set(-2.2, 2.1, -4.1); salimShop.add(shelfTop);
+    const shelfTop = box(2.2, 0.06, 0.35, lam({ map: tex(planks(42), 2, 1) })); shelfTop.position.set(-2.5, 2.1, -4.1); salimShop.add(shelfTop);
     // ek khaali dabba (shelf par akela, khaali-pan dikhaye) — sirf ek, bheed nahi
     const loneBox = box(0.22, 0.18, 0.2, lam({ color: 0xb8a888 })); loneBox.position.set(-2.9, 1.12, -4.1); salimShop.add(loneBox);
+    // COBWEB (beeta samay = visual metaphor + pehle 11 s ka visual gag): almari ke upar-bayein
+    // kone par makdi ka jaala — khaali dukaan me waqt guzra hai, bina ek shabd bole.
+    {
+      const webMat = lam({ color: 0xe8e8e8 });
+      const WC = [-3.55, 2.08, -4.06];
+      salimShop.add(bar2D(WC[0], WC[1], WC[0] + 0.28, WC[1] - 0.02, WC[2], webMat, 0.006));
+      salimShop.add(bar2D(WC[0], WC[1], WC[0] + 0.02, WC[1] - 0.28, WC[2], webMat, 0.006));
+      salimShop.add(bar2D(WC[0], WC[1], WC[0] + 0.2, WC[1] - 0.2, WC[2], webMat, 0.006));
+      salimShop.add(bar2D(WC[0] + 0.14, WC[1] - 0.01, WC[0] + 0.13, WC[1] - 0.14, WC[2], webMat, 0.005));
+      salimShop.add(bar2D(WC[0] + 0.01, WC[1] - 0.14, WC[0] + 0.13, WC[1] - 0.14, WC[2], webMat, 0.005));
+    }
     // MEZ (counter) — lakdi, register + galla upar
     const mez = box(1.6, 0.8, 0.7, lam({ map: tex(planks(43), 1, 1) })); mez.position.set(-2.2, 0.42, -3.85); salimShop.add(mez);
     const mezTop = box(1.9, 0.06, 0.8, lam({ color: 0x8a6844 })); mezTop.position.set(-2.2, 0.85, -3.85); salimShop.add(mezTop);
+    // PEETAL KI GHANTI (brass bell) — mez par, Salim ki dukaan ki pehchan (har interior shot me)
+    const bellBase = cyl(0.06, 0.07, 0.02, lam({ color: 0x8a6d2b }), 12); bellBase.position.set(-1.6, 0.89, -3.7); salimShop.add(bellBase);
+    const bellDome = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), lam({ color: 0xc9a227 })); bellDome.position.set(-1.6, 0.9, -3.7); salimShop.add(bellDome);
+    const bellBtn = new THREE.Mesh(new THREE.SphereGeometry(0.015, 8, 6), lam({ color: 0x78350f })); bellBtn.position.set(-1.6, 0.965, -3.7); salimShop.add(bellBtn);
     // lamp — deewaar par, shaam ON (bracket deewaar se juda) — x -3.0→-2.85 (s04 me kinare par kata tha)
     const bracket = box(0.06, 0.06, 0.25, lam({ color: 0x1f2937 })); bracket.position.set(-2.85, 2.62, -4.05); salimShop.add(bracket);
     const shade = cyl(0.08, 0.22, 0.18, lam({ color: 0x166534 }), 12); shade.position.set(-2.85, 2.52, -3.95); salimShop.add(shade);
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), lampBulbMat); bulb.position.set(-2.85, 2.42, -3.95); salimShop.add(bulb);
+    // LIGHT CONE (Gullak: akele character par ek light cone) — lamp se mez tak garam roshni ka
+    // shankhu; shaam me ON (renderFrame me env=evening par visible). Additive, halka (opacity 0.10).
+    lightCone = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.6, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xffc27a, transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    lightCone.position.set(-2.85, 1.7, -3.9); lightCone.visible = false; salimShop.add(lightCone);
   }
   // ---- KIRANA DUKAAN (RIGHT, centre x=+2.6) — BHARI HUI ----
   const kiranaShop = new THREE.Group(); S.add(kiranaShop);
@@ -565,7 +604,7 @@ const shutterTex = (() => {
     const dogBody = box(0.55, 0.25, 0.22, lam({ color: 0x8a5a34 })); dogBody.position.y = 0.16; dog.add(dogBody);
     const dogHead = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), lam({ color: 0x8a5a34 })); dogHead.position.set(0.32, 0.32, 0); dog.add(dogHead);
     const dogEar = box(0.05, 0.1, 0.03, lam({ color: 0x5a3a20 })); dogEar.position.set(0.3, 0.42, 0.08); dog.add(dogEar);
-    const dogTail = cyl(0.02, 0.01, 0.22, lam({ color: 0x8a5a34 }), 6); dogTail.rotation.z = -0.9; dogTail.position.set(-0.32, 0.28, 0); dog.add(dogTail);
+    dogTail = cyl(0.02, 0.01, 0.22, lam({ color: 0x8a5a34 }), 6); dogTail.rotation.z = -0.9; dogTail.position.set(-0.32, 0.28, 0); dog.add(dogTail);
     const scoot = new THREE.Group(); scoot.position.set(4.6, 0, 0.6); scoot.rotation.y = 0.4; S.add(scoot);
     [-0.5, 0.5].forEach((wx) => {
       const sw = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.04, 8, 18), lam({ color: 0x1f2937 }));
@@ -620,7 +659,7 @@ const shutterGeo = new THREE.PlaneGeometry(3.2, 2.8); shutterGeo.translate(0, -1
 const shutterSlats = new THREE.Mesh(shutterGeo, lam({ map: shutterTex }));
 shutterG.add(shutterSlats);
 const shutterRoll = cyl(0.09, 0.09, 3.2, lam({ color: 0x64748b }), 12);
-shutterRoll.rotation.z = Math.PI / 2; shutterRoll.position.set(-2.2, 2.78, -3.38); scene.add(shutterRoll);
+shutterRoll.rotation.z = Math.PI / 2; shutterRoll.position.set(-2.2, 2.95, -3.38); // up — PARCEL POINT text roll ke peeche na dhake (f0362) scene.add(shutterRoll);
 
 // ---- TEMPO (asli mini-truck) — s14 me aata, phir parked ----
 // TEMPO REBUILD (defect 2): pehle dabba-pe-pahiye tha — side window nahi, driver nahi,
@@ -639,7 +678,7 @@ const tempoWheels = [];
   // dheeli windshield (aage jhuki) + glint
   const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.5, 0.98), new THREE.MeshPhongMaterial({ color: 0x8fb8d9, shininess: 160, specular: 0xcfeaff, transparent: true, opacity: 0.85 }));
   windshield.rotation.z = -0.3; windshield.position.set(1.42, 1.36, 0); tempoG.add(windshield);
-  const wsGlintMat = new THREE.SpriteMaterial({ map: starTex, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending }); const wsGlint = new THREE.Sprite(wsGlintMat); wsGlint.position.set(1.46, 1.45, 0.25); wsGlint.scale.setScalar(0.3); tempoG.add(wsGlint);
+  const wsGlintMat = new THREE.SpriteMaterial({ map: starTex, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending }); const wsGlint = new THREE.Sprite(wsGlintMat); wsGlint.position.set(1.46, 1.45, 0.25); wsGlint.scale.setScalar(0.18); tempoG.add(wsGlint); // glint 0.3 -> 0.18 (bada safed dhabba nahi)
   // side windows (halke sheeshe — andar driver dikhe)
   const sideGlassMat = new THREE.MeshPhongMaterial({ color: 0x8fb8d9, shininess: 140, specular: 0xcfeaff, transparent: true, opacity: 0.5 });
   [1, -1].forEach((s) => {
@@ -684,6 +723,16 @@ const tempoWheels = [];
   });
   const bodySign = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.22), lam({ map: bodySignTex }));
   bodySign.position.set(-0.45, 1.38, 0.57); tempoG.add(bodySign);
+  // FENDERS v2 (tempo = REAL mini-truck, toy-box nahi): har pahiye par mudguard arch +
+  // cab ke neeche side step + peeche vertical exhaust pipe.
+  [[-0.85, -0.56], [-0.85, 0.56], [0.85, -0.56], [0.85, 0.56]].forEach(([wx, wz]) => {
+    const fender = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.05, 8, 14, Math.PI), lam({ color: 0x374151 }));
+    fender.position.set(wx, 0.32, wz); tempoG.add(fender);
+  });
+  [1, -1].forEach((s) => {
+    const step = box(0.3, 0.05, 0.25, lam({ color: 0x374151 })); step.position.set(1.05, 0.28, s * 0.56); tempoG.add(step);
+  });
+  const exhaust = cyl(0.03, 0.03, 0.7, lam({ color: 0x374151 }), 8); exhaust.position.set(0.55, 1.0, -0.5); tempoG.add(exhaust);
   [[-0.85, -0.56], [-0.85, 0.56], [0.85, -0.56], [0.85, 0.56]].forEach(([wx, wz]) => {
     const wh = cyl(0.32, 0.32, 0.1, lam({ color: 0x1f2937 }), 16); wh.rotation.x = Math.PI / 2; wh.position.set(wx, 0.32, wz); tempoG.add(wh);
     const rim = cyl(0.2, 0.2, 0.11, lam({ color: 0xd1d5db }), 16); rim.rotation.x = Math.PI / 2; rim.position.set(wx, 0.32, wz); tempoG.add(rim); // steel rim
@@ -691,10 +740,10 @@ const tempoWheels = [];
     tempoWheels.push(wh);
   });
   // load: CARDBOARD parcel — asli delivery parcel (tape + label), lakdi nahi
-  const crateMat = lam({ color: 0xb98a5a });
-  const tapeMat = lam({ color: 0xfacc15 });
-  [[-1.0, 0.75, 0], [-0.55, 0.75, 0], [-0.8, 1.12, 0], [-1.0, 0.75, 0.35], [-0.55, 0.75, -0.35]].forEach(([cx, cy, cz]) => {
-    const cr = box(0.42, 0.36, 0.42, crateMat); cr.position.set(cx, cy, cz); tempoG.add(cr);
+  const crateMats = [lam({ color: 0xb98a5a }), lam({ color: 0xa87a4e }), lam({ color: 0xc99a62 })]; // cardboard tones vary — real parcels
+  const tapeMat = lam({ color: 0xc8a165 });
+  [[-1.0, 0.75, 0], [-0.55, 0.75, 0], [-0.8, 1.12, 0], [-1.0, 0.75, 0.35], [-0.55, 0.75, -0.35]].forEach(([cx, cy, cz], ci) => {
+    const cr = box(0.42, 0.36, 0.42, crateMats[ci % 3]); cr.position.set(cx, cy, cz); tempoG.add(cr);
     const tp = box(0.44, 0.05, 0.1, tapeMat); tp.position.set(cx, cy + 0.16, cz); tempoG.add(tp);
     const lb = box(0.2, 0.12, 0.01, lam({ color: 0xf8fafc })); lb.position.set(cx, cy, cz + 0.215); tempoG.add(lb); // shipping label
   });
@@ -705,8 +754,8 @@ const tempoWheels = [];
 // ---- PARCEL PILES (street, Salim shop ke saamne) — 20 crates, neeche se upar badhte ----
 const parcelCrates = [];
 {
-  const crateMat = lam({ color: 0xb98a5a }); // cardboard parcel
-  const tapeMat = lam({ color: 0xfacc15 });
+  const crateMats = [lam({ color: 0xb98a5a }), lam({ color: 0xa87a4e }), lam({ color: 0xc99a62 })]; // cardboard parcel — tones vary
+  const tapeMat = lam({ color: 0xc8a165 });
   const spots = [];
   [-1.5, -1.06, -0.62, -0.18].forEach((x) => [-2.4, -1.9].forEach((z) => spots.push([x, 0.18, z])));
   [-1.4, -0.96, -0.52].forEach((x) => [-2.35, -1.95].forEach((z) => spots.push([x, 0.54, z])));
@@ -714,18 +763,45 @@ const parcelCrates = [];
   [-1.0].forEach((x) => [-2.3, -1.95].forEach((z) => spots.push([x, 1.26, z])));
   spots.forEach(([x, y, z], i) => {
     const g = new THREE.Group();
-    const cr = box(0.42, 0.36, 0.42, crateMat); g.add(cr);
+    const cr = box(0.42, 0.36, 0.42, crateMats[i % 3]); g.add(cr);
     const tp = box(0.44, 0.05, 0.1, tapeMat); tp.position.y = 0.16; g.add(tp);
     const lb = box(0.2, 0.12, 0.01, lam({ color: 0xf8fafc })); lb.position.set(0, -0.02, 0.215); g.add(lb); // shipping label
     g.position.set(x, y, z); g.rotation.y = (i % 3) * 0.08 - 0.08;
     g.visible = false; scene.add(g); parcelCrates.push(g);
   });
 }
+// ---- PARCEL MOUNTAIN (b08 s19b SCALE SHIFT) — 2.2 m uncha parcel ka pahaad; chhota Salim
+// uske paas khada = "chhota aadmi + bada number" scale shift. Sirf s19b me dikhe. ----
+const parcelMountain = new THREE.Group(); scene.add(parcelMountain);
+{
+  const crateMats = [lam({ color: 0xb98a5a }), lam({ color: 0xa87a4e }), lam({ color: 0xc99a62 })];
+  const tapeMat = lam({ color: 0xc8a165 });
+  let mi = 0;
+  const layers = [
+    { y: 0.18, xs: [-1.42, -1.0, -0.58], zs: [-2.57, -2.15, -1.73] },
+    { y: 0.54, xs: [-1.21, -0.79], zs: [-2.36, -1.94] },
+    { y: 0.90, xs: [-1.21, -0.79], zs: [-2.36, -1.94] },
+    { y: 1.26, xs: [-1.0], zs: [-2.15] },
+    { y: 1.62, xs: [-1.0], zs: [-2.15] },
+    { y: 1.98, xs: [-1.0], zs: [-2.15] },
+  ];
+  layers.forEach(({ y, xs, zs }, li) => {
+    xs.forEach((x) => zs.forEach((z) => {
+      const g = new THREE.Group();
+      const cr = box(0.42, 0.36, 0.42, crateMats[mi++ % 3]); g.add(cr);
+      const tp = box(0.44, 0.05, 0.1, tapeMat); tp.position.y = 0.16; g.add(tp);
+      const lb = box(0.2, 0.12, 0.01, lam({ color: 0xf8fafc })); lb.position.set(0, -0.02, 0.215); g.add(lb);
+      g.position.set(x, y, z); g.rotation.y = (li % 2 ? 0.06 : -0.05);
+      parcelMountain.add(g);
+    }));
+  });
+  parcelMountain.visible = false;
+}
 // ---- EK PARCEL (aunty ke haath me, joke beat) ----
 const parcelSingleG = new THREE.Group(); scene.add(parcelSingleG);
 {
   const cr = box(0.42, 0.36, 0.42, lam({ color: 0xb98a5a })); parcelSingleG.add(cr); // cardboard
-  const tp = box(0.44, 0.05, 0.1, lam({ color: 0xfacc15 })); tp.position.y = 0.16; parcelSingleG.add(tp);
+  const tp = box(0.44, 0.05, 0.1, lam({ color: 0xc8a165 })); tp.position.y = 0.16; parcelSingleG.add(tp);
   const lb = box(0.2, 0.12, 0.01, lam({ color: 0xf8fafc })); lb.position.set(0, -0.02, 0.215); parcelSingleG.add(lb); // shipping label
   parcelSingleG.visible = false;
 }
@@ -772,7 +848,7 @@ const notesHeapSalim = new THREE.Group(); scene.add(notesHeapSalim);
   // NOTE-DHER FIX (defect 9): pehle 6 patle pale note the — paper lagte the, dikhte nahi.
   // Ab 10 moti HARI gaddi (band ke saath) + galle ke andar khade note + mez par bikhre note.
   for (let i = 0; i < 10; i++) {
-    const n = box(0.34, 0.016, 0.18, lam({ color: i % 2 ? 0x4ade80 : 0x86efac }));
+    const n = box(0.34, 0.016, 0.18, lam({ color: i % 2 ? 0x3f9e4d : 0x6fbf73 }));
     n.position.set(-1.45 + (i % 3 - 1) * 0.09, 0.89 + i * 0.016, -3.7 + (Math.floor(i / 3) - 1) * 0.09);
     n.rotation.y = (i % 4 - 1.5) * 0.35; notesHeapSalim.add(n);
   }
@@ -783,7 +859,7 @@ const notesHeapSalim = new THREE.Group(); scene.add(notesHeapSalim);
 const notesInsideSalim = new THREE.Group(); scene.add(notesInsideSalim);
 {
   for (let i = 0; i < 5; i++) {
-    const n = box(0.3, 0.28, 0.012, lam({ color: i % 2 ? 0x4ade80 : 0x86efac }));
+    const n = box(0.3, 0.28, 0.012, lam({ color: i % 2 ? 0x3f9e4d : 0x6fbf73 }));
     n.position.set(-2.05 + (i - 2) * 0.05, 1.12, -3.85 + (i - 2) * 0.02); n.rotation.z = (i - 2) * 0.12; notesInsideSalim.add(n);
   }
   notesInsideSalim.visible = false;
@@ -792,7 +868,7 @@ const notesInsideSalim = new THREE.Group(); scene.add(notesInsideSalim);
 const notesSpill = new THREE.Group(); scene.add(notesSpill);
 {
   for (let i = 0; i < 4; i++) {
-    const n = box(0.3, 0.012, 0.15, lam({ color: i % 2 ? 0x4ade80 : 0x86efac }));
+    const n = box(0.3, 0.012, 0.15, lam({ color: i % 2 ? 0x3f9e4d : 0x6fbf73 }));
     n.position.set(-2.35 + (i % 2) * 0.28, 0.89 + (i > 1 ? 0.012 : 0), -3.55 + (Math.floor(i / 2) - 0.5) * 0.2);
     n.rotation.y = (i - 1.5) * 0.5; notesSpill.add(n);
   }
@@ -811,8 +887,8 @@ const sethCoins = [];
   sethLid = new THREE.Mesh(lidGeo, lam({ map: tex(planks(46), 1, 1) }));
   sethLid.position.set(2.9, 1.14, -4.05); sethGallaG.add(sethLid);
   for (let i = 0; i < 3; i++) {
-    const c = cyl(0.05, 0.05, 0.02, lam({ color: 0xfacc15 }), 10);
-    c.position.set(2.85 + i * 0.07, 1.11, -3.85); sethGallaG.add(c); sethCoins.push(c);
+    const c = cyl(0.07, 0.07, 0.025, lam({ color: 0xfacc15 }), 10);
+    c.position.set(2.83 + i * 0.09, 1.15, -3.85); sethGallaG.add(c); sethCoins.push(c); // upar — galla ke kinare se dikhe (f1007/f1036)
   }
 }
 // ---- REGISTER (mez par khuli kitab) — hamesha dikhe (set ka hissa) ----
@@ -879,10 +955,11 @@ let clockHour = null, clockMin = null;
   clockMin = new THREE.Mesh(minGeo, lam({ color: 0x1e293b })); clockMin.position.z = 0.015; clockG.add(clockMin);
   clockG.position.set(-1.5, 2.45, -4.22);
 // ---- DEEWAAR SHEESHA (mirror) — Salim shop back wall, reference ka mirror look ----
-// MIRROR FIX round-2: x -1.15 → -1.35 — s10/s24 me dayein kinare par kata tha.
-const mirrorFrame = box(0.56, 0.76, 0.03, lam({ color: 0x5b3a1e })); mirrorFrame.position.set(-1.35, 1.6, -4.24); scene.add(mirrorFrame);
-const mirrorFace = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.68), new THREE.MeshPhongMaterial({ color: 0xbfd9e2, shininess: 120, specular: 0xffffff })); mirrorFace.position.set(-1.35, 1.6, -4.22); scene.add(mirrorFace);
-const mirrorGlint = mkGlint(-1.35, 1.78, -4.2, 0.35); mirrorGlint.material.opacity = 0.5;
+// MIRROR FIX v2 (defect 2): x -1.35 -> -0.85 — almari shift ke baad deewaar ka dayein hissa
+// poora khaali hai; sheesha ab kisi upright/shelf ke peeche NAHI, poora saaf dikhega.
+const mirrorFrame = box(0.56, 0.76, 0.03, lam({ color: 0x5b3a1e })); mirrorFrame.position.set(-0.85, 1.6, -4.24); scene.add(mirrorFrame);
+const mirrorFace = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.68), new THREE.MeshPhongMaterial({ color: 0xbfd9e2, shininess: 120, specular: 0xffffff })); mirrorFace.position.set(-0.85, 1.6, -4.22); scene.add(mirrorFace);
+const mirrorGlint = mkGlint(-0.85, 1.78, -4.2, 0.35); mirrorGlint.material.opacity = 0.5;
 }
 // ---- CHIDIYA (b05 joke — background movement) ----
 const bird = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.07), bas({ color: 0x1f2937, side: THREE.DoubleSide }));
@@ -944,12 +1021,19 @@ window.renderFrame = (f) => {
   shutterSlats.scale.y = 0.08; // default: dukaan khuli
   tempoG.visible = false;
   parcelCrates.forEach((m) => { m.visible = false; });
+  parcelMountain.visible = false;
+  if (lightCone) lightCone.visible = (shot.env === 'evening'); // lamp cone sirf shaam me
+  if (dogTail) dogTail.rotation.z = -0.9 + Math.sin(f * 0.15) * 0.25; // kutte ki poonchh hilti rahe
   parcelSingleG.visible = false;
   phoneG.visible = false; phoneG.scale.setScalar(1); phoneG.rotation.set(0, -0.15, 0);
   if (salimLid) salimLid.rotation.x = 0;
   if (sethLid) sethLid.rotation.x = 0;
   sethCoins.forEach((m) => { m.visible = true; });
   notesHeapSalim.visible = false;
+  // CONTINUITY FIX v2 (v1 bug): notesInside/notesSpill kabhi reset nahi hote the — b03 ke baad
+  // band galle ke upar se note jhaankte rehte the. Ab har frame band, sirf apne beat me khulte.
+  notesInsideSalim.visible = false;
+  notesSpill.visible = false;
   counterBoard.visible = false;
   tag40.visible = false; tag40String.visible = false;
   bird.visible = false;
@@ -962,53 +1046,57 @@ window.renderFrame = (f) => {
     clockMin.rotation.z = 0;
   }
 
-  // ---- beat dispatch (29 shots, 13 beats) ----
+  // ---- beat dispatch (58 shots, 13 beats) — v2 re-cut ----
+  // Animation continuity: walk / tag-pop / shutter / tempo / bird / lids BEAT-based
+  // (frame f se), NOT shot-u based — taaki sub-shot cut par pose teleport na ho.
   const beat = BEAT_OF[id], bu = beatU(f), sub = shot.sub;
   switch (beat) {
-    case 'b01': { // HOOK — sub0 gali wide (Salim chalta), sub1 Salim CU + ₹40,000 tag, sub2 shutter khulta
-      if (sub === 0) {
+    case 'b01': { // HOOK — s01a/s01b walk-in, s02a/s02b tag, s03a/s03b shutter opens
+      const wx = -4.0 + 2.0 * clamp(f / 40, 0, 1); // walk beat-based: f0 -4.0 -> f40 -2.0
+      if (sub === 0 || sub === 1) {
         shutterSlats.scale.y = 1; // band shutter
-        const wx = -4.0 + 2.0 * u;
         drawChar(salimCard, 81, SALIM, 'dazed', 'hang', 'hang', f, cp, wx, 0, -1.2, 1.0, (f * 0.12) % 1, null, 0, mouthFor(f), false); // bore hua dukaanwala — kuch nahi bikta
-      } else if (sub === 1) {
+      } else if (sub === 2 || sub === 3) {
         shutterSlats.scale.y = 1;
-        const pop = clamp(u * 4, 0, 1);
-        tag40.visible = true;
+        const pop = clamp(((f - 40) / 35) * 4, 0, 1);
+        tag40.visible = true; tag40String.visible = true;
         tag40.scale.setScalar(Math.max(0.01, pop)); tag40.material.opacity = pop;
-
         drawChar(salimCard, 81, SALIM, 'wonder', 'hang', 'hang', f, cp, -2.2, 0, -2.0, 1.2, 0, null, 0, mouthFor(f), false);
         glintSign.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
       } else {
-        shutterSlats.scale.y = 1 - Math.min(u * 2.2, 1) * 0.92; // shutter upar uthta
+        const sp = clamp((f - 75) / 36, 0, 1);
+        shutterSlats.scale.y = 1 - Math.min(sp * 4, 1) * 0.92; // FAST open — fully open by f84
         drawChar(salimCard, 81, SALIM, 'smile', 'up', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, null, 0, mouthFor(f), false);
       }
       break;
     }
-    case 'b02': { // SUBAH KHAALI — sub0 interior wide, sub1 register close, sub2 mez saaf
-      if (sub === 0) {
+    case 'b02': { // SUBAH KHAALI — s04a wide (+cobweb), s04b MIRROR hero, s05a/s05b register, s06a/s06b mez saaf (+bell)
+      if (sub === 0 || sub === 1) {
         drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.2, 0, -3.0, 1.0, 0, 0.3, 0, mouthFor(f), false);
-      } else if (sub === 1) {
+      } else if (sub === 2 || sub === 3) {
         // register me naam likhta — baaya haath register ki taraf, pen mez par
         drawChar(salimCard, 81, SALIM, 'smile', 'hang', 'reach', f, cp, -2.4, 0, -3.0, 1.0, 0, 0.3, 0, mouthFor(f), false);
         penMesh.visible = true;
       } else {
-        // mez saaf karta — kapda haath me, mez par ragda
+        // mez saaf karta — kapda haath me, mez par ragda (s06b me ulta phase)
         drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.2, 0, -3.0, 1.0, 0, null, 2, mouthFor(f), false);
         wipeCloth.visible = true;
-        wipeCloth.position.x = -1.95 + Math.sin(f * 0.25) * 0.12;
+        wipeCloth.position.x = -1.95 + Math.sin(f * 0.25 + (sub === 5 ? 2 : 0)) * 0.12;
       }
       break;
     }
-    case 'b03': { // SHAAM GALLA — sub0 shutter band, sub1 galla khulta (note bhare)
-      if (sub === 0) {
-        shutterSlats.scale.y = 0.08 + u * 0.92; // shutter neeche
+    case 'b03': { // SHAAM GALLA — s07a/s07b shutter closing (+light cone), s08a/s08b galla (withheld #1)
+      if (sub === 0 || sub === 1) {
+        const sp = clamp((f - 251) / 39, 0, 1);
+        shutterSlats.scale.y = 0.08 + sp * 0.92; // shutter neeche
         drawChar(salimCard, 81, SALIM, 'neutral', 'hang', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, null, 0, mouthFor(f), false);
       } else {
         shutterSlats.scale.y = 0.35; // shutter aadha band — gap se Salim + galla dikhe
         // FACE FIX (defect 4): Salim dayein + aage (-2.65, -3.55) — chehra galle ke peeche
         // nahi, poora dikhe; dhakkan aadha khula (-1.2) taaki note andar se dikhe.
         drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.65, 0, -3.55, 0.95, 0, 0.3, 0, mouthFor(f), false);
-        if (salimLid) salimLid.rotation.x = -1.2 * M.surge(clamp(u * 2, 0, 1));
+        const lb = clamp((f - 290) / 35, 0, 1);
+        if (salimLid) salimLid.rotation.x = -1.2 * M.surge(lb);
         notesInsideSalim.visible = true;
         notesHeapSalim.visible = true;
         notesSpill.visible = true;
@@ -1016,35 +1104,36 @@ window.renderFrame = (f) => {
       }
       break;
     }
-    case 'b04': { // SALIM INTRO — sub0 medium, sub1 khaali almari ki taraf point
-      if (sub === 0) {
+    case 'b04': { // SALIM INTRO — s09a/s09b medium, s10a/s10b point (+ MIRROR hero s10b)
+      if (sub === 0 || sub === 1) {
         drawChar(salimCard, 81, SALIM, 'smile', 'hang', 'hang', f, cp, -2.2, 0, -2.2, 1.05, 0, null, 0, mouthFor(f), false);
       } else {
         drawChar(salimCard, 81, SALIM, 'smile', 'point', 'hang', f, cp, -2.2, 0, -2.6, 1.0, 0, null, 0, mouthFor(f), false);
       }
       break;
     }
-    case 'b05': { // JOKE — sub0 aunty poochti, sub1 Salim grin CU, sub2 aunty parcel le kar hasti
-      if (sub === 0) {
+    case 'b05': { // JOKE — s11a/s11b two-shot, s12a/s12b grin CU + bird, s13a/s13b aunty laughs
+      if (sub === 0 || sub === 1) {
         drawChar(salimCard, 81, SALIM, 'neutral', 'hang', 'hang', f, cp, -2.2, 0, -2.4, 1.0, 0, null, 0, mouthFor(f), false);
         drawChar(auntyCard, 85, CUST_AUNTY, 'wonder', 'point', 'hang', f, cp, -0.9, 0, -1.8, 0.95, 0, null, 0, null, false);
-      } else if (sub === 1) {
+      } else if (sub === 2 || sub === 3) {
         drawChar(salimCard, 81, SALIM, 'grin', 'hang', 'hang', f, cp, -2.2, 0, -2.2, 1.2, 0, null, 0, mouthFor(f), false);
         bird.visible = true;
-        bird.position.set(-4 + 8 * u, 5.5 + Math.sin(f * 0.1) * 0.2, -12);
+        bird.position.set(-5 + 5.5 * clamp((f - 480) / 60, 0, 1), 4.5 + Math.sin(f * 0.1) * 0.2, -8); // frame ke andar se ude
         bird.rotation.z = Math.sin(f * 0.2) * 0.2;
       } else {
         drawChar(salimCard, 81, SALIM, 'laugh', 'hang', 'hang', f, cp, -2.2, 0, -2.4, 1.0, 0, null, 0, null, false);
         drawChar(auntyCard, 85, CUST_AUNTY, 'laugh', 'reach', 'hang', f, cp, -0.7, 0, -1.8, 0.95, 0, 0.3, 0, null, false);
         parcelSingleG.visible = true;
-        parcelSingleG.position.set(-0.7, 1.0, -1.7);
+        parcelSingleG.position.set(-0.7, 0.85, -1.7); // pet par — chehra saaf (f0554/f0581)
       }
       break;
     }
-    case 'b06': { // TEMPO 20 — sub0 tempo aata, sub1 20 parcel utarte
-      if (sub === 0) {
+    case 'b06': { // TEMPO 20 — s14a/s14b tempo drives in, s15a/s15b unload (pile 1->12)
+      const tp = clamp((f - 595) / 45, 0, 1); // tempo drive beat-based
+      if (sub === 0 || sub === 1) {
         tempoG.visible = true;
-        tempoG.position.set(-8 + 8.3 * M.easeOut(u), 0, -0.9);
+        tempoG.position.set(-8 + 8.3 * M.easeOut(tp), 0, -0.9);
         tempoG.rotation.z = Math.sin(f * 0.3) * 0.008; // gaadi chalti hui halki hile
         drawChar(salimCard, 81, SALIM, 'wonder', 'hang', 'hang', f, cp, -1.5, 0, -1.8, 1.0, 0, null, 0, mouthFor(f), false);
       } else {
@@ -1059,72 +1148,82 @@ window.renderFrame = (f) => {
       }
       break;
     }
-    case 'b07': { // PHONE 50 — sub0 phone bajta, sub1 Salim phone pakde
-      // PHONE FIX round-2: scale 0.5 bhi bada card lagta tha — ab 0.3, Salim ke haath ke paas.
+    case 'b07': { // PHONE 50 — s16a rings, s16b picks up, s17a ECU, s17b phone + pile 14
+      // PHONE scale 0.3, Salim ke haath ke paas.
+      phoneG.visible = true;
+      phoneG.scale.setScalar(0.3);
       if (sub === 0) {
-        phoneG.visible = true;
         phoneG.position.set(-1.9, 1.35, -2.05);
-        phoneG.scale.setScalar(0.3);
         phoneG.rotation.set(0, -0.15, Math.sin(f * 0.6) * 0.08);
         drawChar(salimCard, 81, SALIM, 'wonder', 'reach', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, 0.3, 0, mouthFor(f), false);
         parcelCrates.forEach((m, i) => { m.visible = i < 12; });
-      } else {
-        phoneG.visible = true;
+      } else if (sub === 1) {
         phoneG.position.set(-1.85, 1.4, -2.0);
-        phoneG.scale.setScalar(0.3);
+        phoneG.rotation.set(0, -0.15, 0);
+        drawChar(salimCard, 81, SALIM, 'wonder', 'reach', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, 0.3, 0, mouthFor(f), false);
+        parcelCrates.forEach((m, i) => { m.visible = i < 12; });
+      } else {
+        phoneG.position.set(-1.85, 1.4, -2.0);
         phoneG.rotation.set(0, -0.15, 0);
         drawChar(salimCard, 81, SALIM, 'wonder', 'reach', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, 0.3, 0, mouthFor(f), false);
         parcelCrates.forEach((m, i) => { m.visible = i < 14; });
       }
       break;
     }
-    case 'b08': { // CROWD 100 — sub0 log parcel le jate, sub1 bheed parcel le jati
+    case 'b08': { // CROWD 100 — s18a/s18b walk-in, s19a settled crowd, s19b SCALE-SHIFT mountain
       tempoG.visible = true;
       tempoG.position.set(2.8, 0, -0.5); // tempo side me — bheed dikhe, tempo block na kare
-      if (sub === 0) {
+      if (sub === 0 || sub === 1) {
+        // WALK-IN beat-based (f759-800): log chalte hue aate hain — khade hoke nahi
+        const wp = clamp((f - 759) / 41, 0, 1), wk = (f * 0.12) % 1;
+        const ax = 0.6 - 0.8 * wp, mx = -0.3 - 0.6 * wp, kx = -2.8 + 0.4 * wp;
         parcelCrates.forEach((m, i) => { m.visible = i < 16; });
-        // WALK-IN: log chalte hue aate hain (chhote kadam + bob) — khade hoke nahi
-        const ax = 0.6 - 0.8 * u, mx = -0.3 - 0.6 * u, kx = -2.8 + 0.4 * u, wk = (f * 0.12) % 1;
         drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.0, 0, -1.6, 1.0, 0, 0.3, 0, mouthFor(f), false);
         drawChar(auntyCard, 85, CUST_AUNTY, 'smile', 'reach', 'hang', f, cp, ax, 0, -1.3, 0.95, 0, 0.3, wk, null, false);
         drawChar(manCard, 87, CUST_MAN, 'smile', 'reach', 'hang', f, cp, mx, 0, -1.2, 1.0, 0, 0.35, wk, null, false);
         parcelSingleG.visible = true; parcelSingleG.position.set(mx, 0.85, -1.1); // aadmi parcel le ja raha hai — uske saath chale
         drawChar(kidCard, 89, CUST_KID, 'smile', 'hang', 'hang', f, cp, kx, 0, -1.1, 0.7, 0, null, wk, null, false);
-      } else {
+      } else if (sub === 2) {
         parcelCrates.forEach((m, i) => { m.visible = i < 20; });
         drawChar(salimCard, 81, SALIM, 'laugh', 'up', 'hang', f, cp, -2.0, 0, -1.6, 1.0, 0, null, 0, null, false);
         drawChar(auntyCard, 85, CUST_AUNTY, 'smile', 'reach', 'hang', f, cp, -0.3, 0, -1.5, 0.95, 0, 0.3, 0, null, false);
         parcelSingleG.visible = true; parcelSingleG.position.set(-0.3, 0.85, -1.4); // aunty parcel le ja rahi hai — pet par, chehra saaf
         drawChar(manCard, 87, CUST_MAN, 'smile', 'reach', 'hang', f, cp, -0.9, 0, -1.2, 1.0, 0, 0.35, 0, null, false);
         drawChar(kidCard, 89, CUST_KID, 'smile', 'hang', 'hang', f, cp, -2.4, 0, -1.1, 0.7, 0, null, 0, null, false);
+      } else { // sub 3 = s19b SCALE SHIFT — mountain replaces the normal pile
+        parcelMountain.visible = true;
+        drawChar(salimCard, 81, SALIM, 'wonder', 'up', 'hang', f, cp, -1.0, 0, -1.2, 0.8, 0, null, 0, mouthFor(f), false);
       }
       break;
     }
-    case 'b09': { // DO DUKAAN — sub0 side-by-side wide, sub1 Seth sikke ginta
-      if (sub === 0) {
-        tempoG.visible = false; // TEMPO HIDE round-2 — tempo beech me khada dono dukaan block kar raha tha (f0885)
+    case 'b09': { // DO DUKAAN — s20a/s20b two-shop wide, s21a/s21b Seth counts (lid PARTWAY — withheld)
+      if (sub === 0 || sub === 1) {
+        tempoG.visible = false; // tempo nahi — dono dukaan saaf dikhe
         drawChar(salimCard, 81, SALIM, 'neutral', 'hang', 'hang', f, cp, -2.2, 0, -2.4, 1.0, 0, null, 0, mouthFor(f), false);
         drawChar(sethCard, 83, SETH, 'smile', 'hip', 'hang', f, cp, 2.6, 0, -2.4, 1.0, 0, null, 0, null, false);
       } else {
         drawChar(sethCard, 83, SETH, 'smile', 'reach', 'hang', f, cp, 2.6, 0, -3.0, 1.0, 0, 0.3, 0, null, false);
-        if (sethLid) sethLid.rotation.x = -1.9 * M.surge(clamp(u * 2, 0, 1));
+        const lb9 = clamp((f - 890) / 45, 0, 1);
+        if (sethLid) sethLid.rotation.x = -0.9 * M.surge(lb9); // PARTWAY only — poora sach abhi nahi
       }
       break;
     }
-    case 'b10': { // TWIST — sub0 dono galle khulte, sub1 Seth ka halka, sub2 Salim ka bhari
-      if (sub === 0) {
-        tempoG.visible = false; // tempo nahi — dono galle + dono dukaan saaf dikhe (f0968: Seth tempo ke peeche dhaka tha)
-        // TWIST FIX round-2: Salim + Seth BADE (scale 1.15) aur beech ki taraf (-2.45 / 2.05),
+    case 'b10': { // TWIST — s22a/s22b both gallas open, s23a/s23b Seth pained+sweat+slump, s24a/s24b/s24c Salim grin
+      if (sub === 0 || sub === 1) {
+        tempoG.visible = false; // tempo nahi — dono galle + dono dukaan saaf dikhe
+        // TWIST: Salim + Seth BADE (scale 1.15) aur beech ki taraf (-2.45 / 2.05),
         // taaki wide camera me dono chehre + dono galle saaf dikhe, kinare na katein.
         drawChar(salimCard, 81, SALIM, 'wonder', 'reach', 'hang', f, cp, -2.45, 0, -3.0, 1.15, 0, 0.3, 0, mouthFor(f), false);
         drawChar(sethCard, 83, SETH, 'wonder', 'reach', 'hang', f, cp, 2.05, 0, -3.0, 1.15, 0, 0.3, 0, null, false);
-        if (salimLid) salimLid.rotation.x = -1.9 * M.surge(clamp(u * 2, 0, 1));
-        if (sethLid) sethLid.rotation.x = -1.9 * M.surge(clamp(u * 2, 0, 1));
+        const lb = clamp((f - 943) / 50, 0, 1);
+        if (salimLid) salimLid.rotation.x = -1.9 * M.surge(lb);
+        if (sethLid) sethLid.rotation.x = -1.9 * M.surge(lb);
         notesInsideSalim.visible = true;
         notesHeapSalim.visible = true;
         notesSpill.visible = true;
-      } else if (sub === 1) {
-        drawChar(sethCard, 83, SETH, 'pained', 'hang', 'hang', f, cp, 2.6, 0, -3.0, 1.1, 0, null, 0, null, false);
+      } else if (sub === 2 || sub === 3) {
+        // SETH PAKDA GAYA: pained + PASEENA (sweat=true) + SLUMP (tilt=-1) — rival bhaav-graph ka ant
+        drawChar(sethCard, 83, SETH, 'pained', 'hang', 'hang', f, cp, 2.6, 0, -3.0, 1.1, 0, null, -1, null, false, true);
         if (sethLid) sethLid.rotation.x = -1.9;
         sethCoins.forEach((m, i) => { m.visible = i < 3; });
       } else {
@@ -1137,7 +1236,7 @@ window.renderFrame = (f) => {
       }
       break;
     }
-    case 'b11': { // GALLA ₹40,000 — sub0 board gin kar badhe, sub1 HOLD wide
+    case 'b11': { // GALLA ₹40,000 — s25a board gin kar badhe, s26a HOLD wide (counter beat-based)
       drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.2, 0, -2.6, 1.0, 0, 0.3, 0, mouthFor(f), false);
       if (salimLid) salimLid.rotation.x = -1.9;
       counterBoard.visible = true;
@@ -1147,21 +1246,22 @@ window.renderFrame = (f) => {
       if (sub === 1) { notesHeapSalim.visible = true; notesInsideSalim.visible = true; notesSpill.visible = true; }
       break;
     }
-    case 'b12': { // SUBAH PHIR — shutter phir khulta
-      shutterSlats.scale.y = 1 - Math.min(u * 2.2, 1) * 0.92;
+    case 'b12': { // SUBAH PHIR — s27a shutter FAST opens, s27b open (clock fully visible)
+      const sp = clamp((f - 1179) / 53, 0, 1);
+      shutterSlats.scale.y = 1 - Math.min(sp * 4, 1) * 0.92; // fully open by f1192 — ghadi kabhi aadhi dhaki nahi
       drawChar(salimCard, 81, SALIM, 'smile', 'up', 'hang', f, cp, -2.2, 0, -2.2, 1.0, 0, null, 0, mouthFor(f), false);
       break;
     }
-    case 'b13': { // LOOP — sub0 Salim + parcel dher, sub1 FREEZE pull-back
-      tempoG.visible = true;
-      tempoG.position.set(1.2, 0, -1.0); // TEMPO round-2: 1.8→1.2 — poora truck frame me (cab kinare par kata tha)
+    case 'b13': { // LOOP — s28a/s28b Salim+dher, s29a loop medium, s29b aerial pull-back, s29c push-in FREEZE
+      tempoG.visible = (sub !== 2); // s29a (sub 2) me tempo right edge par kata dikhta tha (f1313) — hide karo; s29b aerial me poora dikhta hai
+      tempoG.position.set(1.85, 0, -1.0); // right — s28a me box kata hua na dikhe (f1256); s29b aerial me tempo andar rahe
       parcelCrates.forEach((m, i) => { m.visible = i < 20; });
-      if (sub === 0) {
-        drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.3, 0, -1.4, 1.0, 0, 0.3, 0, mouthFor(f), false);
-        drawChar(manCard, 87, CUST_MAN, 'smile', 'reach', 'hang', f, cp, -1.7, 0, -1.2, 1.0, 0, 0.35, 0, null, false);
-      } else {
+      if (sub === 4) {
         drawChar(salimCard, 81, SALIM, 'relief', 'up', 'hang', f, cp, -2.3, 0, -1.4, 1.05, 0, null, 0, null, false);
         glintSign.material.opacity = 0.3 + 0.3 * Math.sin(f * 0.3);
+      } else {
+        drawChar(salimCard, 81, SALIM, 'smile', 'reach', 'hang', f, cp, -2.3, 0, -1.4, 1.0, 0, 0.3, 0, mouthFor(f), false);
+        drawChar(manCard, 87, CUST_MAN, 'smile', 'reach', 'hang', f, cp, -1.7, 0, -1.2, 1.0, 0, 0.35, 0, null, false);
       }
       break;
     }
