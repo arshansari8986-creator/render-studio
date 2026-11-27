@@ -2618,9 +2618,9 @@ export const romanFront = (p, key, opts = {}) => {
   };
   const arms = [arm(-1, L), arm(1, R)];
   const drawArm = (a) => {
-    p.stroke(curve(a.pts[0], a.pts[1], a.pts[2]), 7.5 * u, armCol); // FIX 27 Nov: taar jaisi patli baahen nahi — moti, haath dikhe
+    p.stroke(curve(a.pts[0], a.pts[1], a.pts[2]), 11 * u, armCol); // FIX 27 Nov v2: 7.5→11 — uthe haath taar jaise lagte the, ab moti baahen + bada haath
     const [hx, hy] = a.pts[2];
-    p.dot(hx, hy, 8 * u);
+    p.dot(hx, hy, 10.5 * u);
     if (a.finger) { const dx = a.pts[2][0] - a.pts[1][0], dy = a.pts[2][1] - a.pts[1][1], l = Math.hypot(dx, dy); p.stroke([[hx, hy], [hx + dx / l * 14 * u, hy + dy / l * 14 * u]], 3.2 * u); }
     if (a.thumb) p.stroke([[hx, hy], [hx + Math.sign(hx - cx) * 6 * u, hy - 12 * u]], 3.2 * u);
   };
